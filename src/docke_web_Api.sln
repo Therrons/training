@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{40555FDF-AF2F-4673-B84D-EF5F4831D612}"
+	ProjectSection(SolutionItems) = preProject
+		..\docker-compose.yml = ..\docker-compose.yml
+		..\Dockerfile = ..\Dockerfile
+		..\nginx.conf = ..\nginx.conf
+		..\nuget-config\NuGet.config = ..\nuget-config\NuGet.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "docke_web_Api", "docke_web_Api.csproj", "{1D49155F-6922-6959-38D9-666292D785FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D49155F-6922-6959-38D9-666292D785FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D49155F-6922-6959-38D9-666292D785FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D49155F-6922-6959-38D9-666292D785FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D49155F-6922-6959-38D9-666292D785FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C80A3F97-0960-4DA9-97DA-A297A5DBDCD0}
+	EndGlobalSection
+EndGlobal
