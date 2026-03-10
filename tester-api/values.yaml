@@ -1,0 +1,68 @@
+# Namespace handling
+namespace:
+  create: true
+  name: tester-api
+
+# Container image
+image:
+  # Replace with your registry/repository if pushing to a registry
+  repository: therrons982/docke_web_api
+  tag: latest
+  pullPolicy: IfNotPresent
+  pullSecrets: []   # e.g., ["my-regcred"] if your registry needs auth
+
+replicaCount: 1
+
+# Pod resources (tune as needed)
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Service (cluster-internal)
+service:
+  type: ClusterIP
+  port: 8080
+
+# Container port
+containerPort: 8080
+
+# App environment variables
+env:
+  ASPNETCORE_URLS: "http://0.0.0.0:8080"
+  ASPNETCORE_ENVIRONMENT: "LOC"
+  BUILD_DATE: ""
+  BUILD_VERSION: ""
+
+# Probes (you can change paths to e.g. /health if you add one)
+probes:
+  readiness:
+    path: /swagger/index.html
+    initialDelaySeconds: 5
+    periodSeconds: 5
+  liveness:
+    path: /swagger/index.html
+    initialDelaySeconds: 15
+    periodSeconds: 10
+
+# Ingress
+ingress:
+  enabled: true
+  className: traefik        # "traefik" for Rancher Desktop, or "nginx" if using NGINX Ingress
+  host: api.localtest.me
+  tls:
+    enabled: false
+    secretName: ""          # set if tls.enabled=true
+
+  # Controller-specific knobs (used only when className matches)
+  nginx:
+    proxyBodySize: "50m"
+    proxyConnectTimeout: "5"
+    proxyReadTimeout: "60"
+    proxySendTimeout: "60"
+    proxyHTTPVersion: "1.1"
+  traefik:
+    entrypoints: "web"      # change to "websecure" if you enable TLS with Traefik
