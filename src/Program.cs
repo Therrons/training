@@ -1,5 +1,7 @@
 using docke_web_Api.Controllers;
+using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,6 +73,8 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
 
+        builder.Services.AddHealthChecks(); // Add basic health checks (no custom checks here, just the endpoint)
+
         builder.Services.AddSwaggerGen(c =>
         {
             // Common, expressive metadata
@@ -94,17 +98,19 @@ public class Program
             }
         });
 
+
+        builder.Services.Configure<HostFilteringOptions>(options =>
+        {
+            options.AllowedHosts = new[] { "*" };
+        });
+
         var app = builder.Build();
 
         // Resolve logger from DI so it's wired to Serilog
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
         logger.LogInformation("Docker Build Data: {time_docker_build}\r\nDocker Build Version: {version_docker_build}", time_docker_build, version_docker_build);
 
-        // required for swagger exploration
-        // ================================
-        app.MapControllers();
-        app.UseSwagger();
-        // ================================
+        
 
         //---------Forwarded Headers for reverse proxies (Nginx) ----------
         //This ensures Request.Scheme / Host are correct when Nginx terminates TLS or rewrites host.
@@ -123,7 +129,17 @@ public class Program
         //fwdOptions.KnownNetworks.Clear();
         //fwdOptions.KnownProxies.Clear();
 
+        // order below is important: ForwardedHeaders must come before HostFiltering, and both must come before any middleware that relies on Request.Scheme/Host (like Swagger pre-serialization filter).
         app.UseForwardedHeaders(fwdOptions); // Must be before any middleware that uses Request.Scheme/Host, including Swagger pre-serialization filter.
+
+        app.UseHostFiltering(); // Apply Host Filtering based on the configured allowed hosts (currently set to allow all with "*", which is fine for this testing scenario but should be tightened in production).
+
+        // required for swagger exploration
+        // ================================
+        app.MapControllers();
+        app.UseSwagger();
+        // ================================
+
         // ------------------------------------------------------------------
 
         // OPTIONAL: Only enable HTTPS redirection if you run TLS at Kestrel.
@@ -156,6 +172,8 @@ public class Program
                 };
             });
         });
+
+        app.ConfigureHealthChecks(); // Map health check endpoints
 
         if (!isLocal)
         {

@@ -1,0 +1,83 @@
+{{- if and .Values.persistence.enabled (eq .Values.persistence.perReplica false) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docke-web-api.fullname" . }}
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "docke-web-api.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "docke-web-api.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "docke-web-api.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+              name: http
+          env:
+            - name: ASPNETCORE_URLS
+              value: {{ .Values.env.ASPNETCORE_URLS | quote }}
+            - name: ASPNETCORE_ENVIRONMENT
+              value: {{ .Values.env.ASPNETCORE_ENVIRONMENT | quote }}
+            {{- if .Values.env.BUILD_DATE }}
+            - name: BUILD_DATE
+              value: {{ .Values.env.BUILD_DATE | quote }}
+            {{- end }}
+            {{- if .Values.env.BUILD_VERSION }}
+            - name: BUILD_VERSION
+              value: {{ .Values.env.BUILD_VERSION | quote }}
+            {{- end }}
+            {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.k8sSecretName }}
+            - name: CEW_Id
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalSecrets.k8sSecretName }}
+                  key: CEW_Id
+            - name: CEW_Secret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalSecrets.k8sSecretName }}
+                  key: CEW_Secret
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readinessPath | quote }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.probes.readinessInitialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readinessPeriodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.livenessPath | quote }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.probes.livenessInitialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.livenessPeriodSeconds }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- end }}
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        {{- if .Values.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+        {{- else }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "docke-web-api.fullname" . }}-pvc
+        {{- end }}
+        {{- end }}
+{{- end }}

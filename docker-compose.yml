@@ -5,7 +5,7 @@
       dockerfile: Dockerfile
       args:
         dll: "docke_web_Api.dll"
-    image: docke_web_api:offline
+    image: docke_web_api
     container_name: docke_web_api
     environment:
       ASPNETCORE_URLS: "http://0.0.0.0:8080"
@@ -27,9 +27,9 @@
     depends_on:
       - api    # simplified, no health condition
     ports:
-      - "8085:8085" # Map host port 8085 to container port 8085
+      - "8085:8085" # this says that docker-compose port 8085 maps to nginx port 8085 of the server property
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx.conf/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - edge
     logging: 

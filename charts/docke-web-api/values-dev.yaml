@@ -1,0 +1,104 @@
+# Namespace handling
+namespace:
+  create: true
+  name: docke-web-api
+
+image:
+  # You are using offline images loaded into the cluster (containerd).
+  # Keep these as-is if you've loaded docke_web_api:offline with nerdctl.
+  repository: docke_web_api
+  tag: offline
+  pullPolicy: IfNotPresent
+
+replicaCount: 1   # default; overridden per environment below
+
+env:
+  ASPNETCORE_URLS: "http://0.0.0.0:8080"
+  ASPNETCORE_ENVIRONMENT: "Development"   # or "LOC" if you prefer
+  ASPNETCORE_ALLOWEDHOSTS: "*"
+  BUILD_DATE: ""
+  BUILD_VERSION: ""
+
+containerPort: 8080
+service:
+  type: ClusterIP
+  port: 8080
+
+# Probes – you've added readiness & liveness in code; set the paths you expose
+probes:
+  readinessPath: /health/readiness     # change to your actual readiness path
+  livenessPath: /health/liveness       # change to your actual liveness path
+  readinessInitialDelaySeconds: 5
+  readinessPeriodSeconds: 5
+  livenessInitialDelaySeconds: 15
+  livenessPeriodSeconds: 10
+
+# Persistence: your container writes to /repo/data and must survive restarts
+persistence:
+  enabled: true
+  mountPath: /repo/data
+  # If you need ONE shared volume across multiple replicas, you need an RWX StorageClass.
+  # Otherwise, set perReplica: true to get a PVC per Pod (uses a StatefulSet).
+  perReplica: false
+  existingClaim: ""         # leave empty to create a new PVC
+  accessModes: [ "ReadWriteOnce" ]
+  size: 1Gi
+  storageClassName: ""      # set to your cluster's RWX/RWO class if needed
+
+ingress:
+  enabled: true
+  className: traefik
+  host: api.localtest.me
+
+  tls:
+    enabled: false
+    secretName: ""
+
+cors:
+  enabled: true
+  allowCredentials: true
+  allowOrigins:
+    - "*"
+    # Production example:
+    # - https://app.example.com
+    # - https://admin.example.com
+
+  allowMethods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+    - OPTIONS
+  allowHeaders:
+    - Authorization
+    - Content-Type
+    - X-Requested-With
+    - Accept
+    - Origin
+
+# AWS External Secrets (optional): create a K8s Secret from AWS Secrets Manager/SSM
+externalSecrets:
+  enabled: false
+  # You must create a (Cluster)SecretStore named below, with AWS auth details (IRSA, access key, etc.)
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secrets
+  # The K8s Secret to be created by ExternalSecrets, later used by the Deployment
+  k8sSecretName: docke_web_api-secrets
+  # Map of keys to pull from AWS; change "remoteKey" to the actual AWS secret name or SSM path.
+  data:
+    - secretKey: CEW_Id
+      remoteRef:
+        key: /myapp/cew/id
+    - secretKey: CEW_Secret
+      remoteRef:
+        key: /myapp/cew/secret
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

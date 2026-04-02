@@ -4,5 +4,5 @@ kind: Namespace
 metadata:
   name: {{ .Values.namespace.name }}
   labels:
-    {{- include "tester-api.labels" . | nindent 4 }}
+    {{- include "docke-web-api.labels" . | nindent 4 }}
 {{- end }}

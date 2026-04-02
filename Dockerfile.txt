@@ -26,7 +26,7 @@ RUN update-ca-certificates || true
 EXPOSE 8080
 
 ENV ASPNETCORE_URLS="http://0.0.0.0:8080" \
-    ASPNETCORE_ENVIRONMENT="Production"
+    ASPNETCORE_ENVIRONMENT="LOC"
                                   
 
 ###############################################
@@ -68,17 +68,34 @@ RUN dotnet publish /repo/src/docke_web_Api.csproj \
 # 4. Final Runtime Image
 ###############################################
 FROM base AS final
+
+
+# Install curl in the final runtime image
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+
 # Bring in a copy of the DLL name to the final stage scope
 ARG dll="docke_web_Api.dll"
 
 WORKDIR /repo
 
-ARG DEFAULT_WRITE_DIR="/repo/data"
-ENV WRITE_DIR="${DEFAULT_WRITE_DIR}"
+# Set environment variables with LITERAL values for the application to use at runtime
+ENV WRITE_DIR="/repo/data"
+ENV DLL_PATH="/repo/${dll}"
+ENV Build_Version="1.0.0"
 
-# Ensure the default exists (safe even if mounted later)
+# Create a directory, specify -p in case the parent directories 
+# don't exist. if it does exist, it won't throw an error and will just continue.
 RUN mkdir -p "${WRITE_DIR}"
 
+# Change ownership of WRITE_DIR to the first non-root user (1000)
+RUN chown -R 1000:1000 "${WRITE_DIR}"
+
+# Declare the volume for the write directory (can be overridden at runtime) 
+# this will overwrite the above directory if it exists but the permission has been set,
+VOLUME ["/repo/data"]
 
 COPY --from=publish /repo/publish .
 
@@ -89,10 +106,9 @@ RUN if [ ! -f "/repo/${dll}" ]; then \
       exit 1; \
     fi
 
-# Keep ENV here if you want to reference it elsewhere
-ENV DLL_PATH="/repo/${dll}"
-
 # Run the app
-# supply default command-line args that can be overridden
 ENTRYPOINT ["dotnet", "/repo/docke_web_Api.dll"]
-CMD ["--write-dir", "/app/data"]
+
+# supply arg with LITERAL values to the the program.cs Main method
+# CMD ["--arg1", "value1", "--arg2", "value2"]
+CMD ["--write-dir", "/repo/data"] 
