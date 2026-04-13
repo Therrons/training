@@ -7,8 +7,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "LOC",
         "DockerVersion": "0.0",
-        "aws_access_key_id": "AKIAYJPDUBS22ZBRGWO5",
-        "aws_secret_access_key": "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",
+        "aws_access_key_id": "",
+        "aws_secret_access_key": "",
         "AWSSecretName": "docke_web_api_k8s"
       },
       "dotnetRunMessages": true,
