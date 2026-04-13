@@ -41,14 +41,14 @@ WORKDIR /src
 # Copy everything (use .dockerignore to keep this lean)
 COPY . .
 
-# Restore & build
-RUN dotnet restore ./src/docke_web_Api.csproj \
-    --configfile ./nuget-config/NuGet.config
+#RUN echo "printing app image tree structure" && ls -la /app
+#RUN echo "printing src image tree structure" && ls -la /app/src
+#RUN echo "printing nuget-config image tree structure" && ls -la /app/nuget-config
 
-RUN dotnet publish ./src/docke_web_Api.csproj \
-    -c Release \
-    -o /app/publish \
-    /p:UseAppHost=false
+# Restore & build
+RUN dotnet restore ./src/docke_web_Api.csproj --configfile ./nuget-config/NuGet.config
+
+RUN dotnet publish ./src/docke_web_Api.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 ############################################################
 # 3. Final runtime image
