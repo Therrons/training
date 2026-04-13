@@ -11,7 +11,7 @@ ARG location="."              # Not needed in this flow, but kept for compatibil
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /repo
 
-#COPY . .  // Don't copy everything in the base image, just the certs if needed. The rest will be copied in the build stage.
+COPY . .
 
 RUN rm -rf /repo/.vs
 RUN rm -rf /repo/src/.vs
