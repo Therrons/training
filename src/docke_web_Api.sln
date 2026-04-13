@@ -13,6 +13,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "docke_web_Api", "docke_web_Api.csproj", "{1D49155F-6922-6959-38D9-666292D785FC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bussiness_Tier", "Bussiness_Tier", "{945F613A-1431-4C59-9D93-100D5A331CE2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Repository_Tier", "Repository_Tier", "{5A2BED68-F09B-4EEB-8893-F8F834EDA49C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI_Tier", "UI_Tier", "{3F468BD2-D061-4249-807E-AE492040C15A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "docke_web_Api_models", "..\docke_web_Api_models\docke_web_Api_models.csproj", "{B74938BB-EF63-4620-3445-D037924739B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,9 +31,17 @@ Global
 		{1D49155F-6922-6959-38D9-666292D785FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D49155F-6922-6959-38D9-666292D785FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D49155F-6922-6959-38D9-666292D785FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B74938BB-EF63-4620-3445-D037924739B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B74938BB-EF63-4620-3445-D037924739B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B74938BB-EF63-4620-3445-D037924739B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B74938BB-EF63-4620-3445-D037924739B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1D49155F-6922-6959-38D9-666292D785FC} = {3F468BD2-D061-4249-807E-AE492040C15A}
+		{B74938BB-EF63-4620-3445-D037924739B0} = {945F613A-1431-4C59-9D93-100D5A331CE2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C80A3F97-0960-4DA9-97DA-A297A5DBDCD0}

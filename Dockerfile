@@ -85,6 +85,8 @@ WORKDIR /repo
 ENV WRITE_DIR="/repo/data"
 ENV DLL_PATH="/repo/${dll}"
 ENV Build_Version="1.0.0"
+ENV AWSSecretName="docke_web_api_k8s"
+ENV AWSRegion="us-east-1"
 
 # Create a directory, specify -p in case the parent directories 
 # don't exist. if it does exist, it won't throw an error and will just continue.
@@ -111,4 +113,4 @@ ENTRYPOINT ["dotnet", "/repo/docke_web_Api.dll"]
 
 # supply arg with LITERAL values to the the program.cs Main method
 # CMD ["--arg1", "value1", "--arg2", "value2"]
-CMD ["--write-dir", "/repo/data"] 
+CMD ["--write-dir", "/repo/data","--AWSSecretName", "docke_web_api_k8s","--AWSRegion", "us-east-1"] 
