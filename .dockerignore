@@ -1,0 +1,20 @@
+# Ignore Git and IDE metadata
+.git
+.gitignore
+.vs
+.vscode
+
+# Ignore build outputs
+bin/
+obj/
+/src/bin/
+/src/obj/
+
+# Ignore local certificates that shouldn't be in the image
+certs/*.cer
+certs/*.crt
+certs/*.pem
+
+# Ignore Docker files
+Dockerfile
+.dockerignore
