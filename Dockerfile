@@ -11,7 +11,7 @@ ARG location="."              # Not needed in this flow, but kept for compatibil
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /repo
 
-COPY . .
+#COPY . .  // Don't copy everything in the base image, just the certs if needed. The rest will be copied in the build stage.
 
 RUN rm -rf /repo/.vs
 RUN rm -rf /repo/src/.vs
@@ -37,8 +37,8 @@ WORKDIR /repo
 
 COPY . .
 #
-RUN rm -rf /repo/.vs
-RUN rm -rf /repo/src/.vs
+#RUN rm -rf /repo/.vs
+#RUN rm -rf /repo/src/.vs
 
 # Make sure CA store is present/updated (useful on corp networks)
 RUN apt-get update && \
