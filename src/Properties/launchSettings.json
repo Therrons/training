@@ -6,10 +6,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "LOC",
-        "DockerVersion": "0.0",
-        "aws_access_key_id": "",
-        "aws_secret_access_key": "",
-        "AWSSecretName": "docke_web_api_k8s"
+        "DockerVersion": "0.0"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5138"
