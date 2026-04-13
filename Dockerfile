@@ -16,7 +16,7 @@ RUN useradd \
     --shell /sbin/nologin \
     appuser
 
-WORKDIR /app
+WORKDIR /repo
 
 # Optional: custom CA certificates (folder may be empty but must exist)
 # If you don't use custom certs, you can delete this block safely
@@ -36,19 +36,20 @@ EXPOSE ${APP_PORT}
 ############################################################
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-WORKDIR /src
+WORKDIR /repo
 
 # Copy everything (use .dockerignore to keep this lean)
 COPY . .
 
-#RUN echo "printing app image tree structure" && ls -la /app
-#RUN echo "printing src image tree structure" && ls -la /app/src
-#RUN echo "printing nuget-config image tree structure" && ls -la /app/nuget-config
+#RUN echo "printing repo image tree structure" && ls -la /repo
+#RUN echo "printing src image tree structure" && ls -la /repo/src
+#RUN echo "printing nuget-config image tree structure" && ls -la /repo/nuget-config
 
 # Restore & build
 RUN dotnet restore ./src/docke_web_Api.csproj --configfile ./nuget-config/NuGet.config
 
-RUN dotnet publish ./src/docke_web_Api.csproj -c Release -o /app/publish /p:UseAppHost=false
+#RUN dotnet publish ./src/docke_web_Api.csproj -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish /repo/src/docke_web_Api.csproj -c Release -o /repo/publish /p:UseAppHost=false
 
 ############################################################
 # 3. Final runtime image
@@ -57,26 +58,26 @@ FROM base AS final
 
 ARG APP_DLL
 
-WORKDIR /app
+WORKDIR /repo
 
 # Writable directory for runtime data
-ENV WRITE_DIR="/app/data" \
+ENV WRITE_DIR="/repo/data" \
     APP_DLL="${APP_DLL}"
 
 RUN mkdir -p ${WRITE_DIR} && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /repo
 
 # Copy published files
-COPY --from=build /app/publish .
+COPY --from=build /repo/publish .
 
 # Safety check: ensure DLL exists
-RUN test -f "/app/${APP_DLL}"
+RUN test -f "/repo/${APP_DLL}"
 
 # Kubernetes-friendly runtime user
 USER appuser
 
 # ENTRYPOINT required for K8s
-ENTRYPOINT ["sh", "-c", "dotnet /app/${APP_DLL}"]
+ENTRYPOINT ["sh", "-c", "dotnet /repo/${APP_DLL}"]
 
 # CMD can be overridden by K8s args
-CMD ["--write-dir", "/app/data", "--AWSSecretName", "docke_web_api_k8s", "--AWSRegion", "us-east-1"]
+CMD ["--write-dir", "/repo/data", "--AWSSecretName", "docke_web_api_k8s", "--AWSRegion", "us-east-1"]
