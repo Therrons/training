@@ -29,4 +29,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/docke_web_api:latest # image name and tag must be lower case
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docke_web_api:latest # image name and tag must be lower case
