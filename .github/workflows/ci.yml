@@ -46,4 +46,3 @@ jobs:
 
       - name: Helm lint (${{ matrix.env }})
         run: helm lint $CHART_PATH
-``
