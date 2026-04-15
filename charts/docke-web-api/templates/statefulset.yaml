@@ -18,6 +18,7 @@ spec:
       labels:
         {{- include "docke_web_api.labels" . | nindent 8 }}
     spec:
+      serviceAccountName: docke-web-api-sa
       containers:
         - name: api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -39,16 +40,16 @@ spec:
               value: {{ .Values.env.BUILD_VERSION | quote }}
             {{- end }}
             {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.k8sSecretName }}
-            - name: CEW_Id
+            - name: DB_Id
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.externalSecrets.k8sSecretName }}
-                  key: CEW_Id
-            - name: CEW_Secret
+                  key: DB_Id
+            - name: DB_Secret
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.externalSecrets.k8sSecretName }}
-                  key: CEW_Secret
+                  key: DB_Secret
             {{- end }}
           readinessProbe:
             httpGet:

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "docke_web_Api_models": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:57052;http://localhost:57053"
+    }
+  }
+}

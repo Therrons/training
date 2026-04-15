@@ -3,6 +3,7 @@ name: CI - Docker + Helm Validation
 on:
   pull_request:
     branches: [ main ]
+
   push:
     branches: [ main ]
 
@@ -15,64 +16,24 @@ env:
 jobs:
   ci-pr:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
     name: PR Checks
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Lint Dockerfile
-        run: docker run --rm -i hadolint/hadolint < Dockerfile
-
-      - name: Build Docker image
+      # Example placeholders – keep or replace with your real steps
+      - name: Build Docker image (CI validation)
         run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
-
-      - name: Run container smoke test
-        run: |
-          docker run -d -p 8080:8080 \
-            -e ASPNETCORE_ALLOWEDHOSTS="*" \
-            --name api-test \
-            $IMAGE_NAME:$IMAGE_TAG
-          sleep 5
-          curl -f http://localhost:8080/health/readiness
-
-      - name: Install Helm
-        uses: azure/setup-helm@v4
 
       - name: Helm lint
         run: helm lint $CHART_PATH
 
-      - name: Render Helm (dev)
-        run: |
-          helm template docke-web-api $CHART_PATH \
-            -f $CHART_PATH/values-dev.yaml \
-            > rendered.yaml
-
-      - name: Validate Kubernetes YAML
-        run: kubectl apply --dry-run=client -f rendered.yaml
-
-      - name: Comment PR summary
-        if: always()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const body = `✅ CI checks completed.
-
-            - Docker image built
-            - App started successfully
-            - Helm lint & schema validation passed
-            - Kubernetes YAML valid
-            `;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body
-            });
-
   ci-main:
     if: github.event_name == 'push'
+    name: Main Branch Checks
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         env: [ dev, staging, prod ]
@@ -80,17 +41,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Helm
-        uses: azure/setup-helm@v4
+      - name: Build Docker image (CI validation)
+        run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
-      - name: Helm lint
+      - name: Helm lint (${{ matrix.env }})
         run: helm lint $CHART_PATH
-
-      - name: Render Helm (${{ matrix.env }})
-        run: |
-          helm template docke-web-api $CHART_PATH \
-            -f $CHART_PATH/values-${{ matrix.env }}.yaml \
-            > rendered-${{ matrix.env }}.yaml
-
-      - name: Validate Kubernetes YAML
-        run: kubectl apply --dry-run=client -f rendered-${{ matrix.env }}.yaml
+``

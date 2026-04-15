@@ -14,7 +14,7 @@ replicaCount: 1   # default; overridden per environment below
 
 env:
   ASPNETCORE_URLS: "http://0.0.0.0:8080"
-  ASPNETCORE_ENVIRONMENT: "Development"   # or "LOC" if you prefer
+  ASPNETCORE_ENVIRONMENT: "LOC"
   ASPNETCORE_ALLOWEDHOSTS: "*"
   BUILD_DATE: ""
   BUILD_VERSION: ""
@@ -88,12 +88,12 @@ externalSecrets:
   k8sSecretName: docke_web_api-secrets
   # Map of keys to pull from AWS; change "remoteKey" to the actual AWS secret name or SSM path.
   data:
-    - secretKey: CEW_Id
+    - secretKey: DB_Id
       remoteRef:
-        key: /myapp/cew/id
-    - secretKey: CEW_Secret
+        key: /docke_web_api/dev/db/id
+    - secretKey: DB_Secret
       remoteRef:
-        key: /myapp/cew/secret
+        key: /docke_web_api/dev/db/secret
 
 resources:
   requests:

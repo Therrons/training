@@ -1,21 +1,22 @@
-using docke_web_Api.Controllers;
+using Amazon.Extensions.NETCore.Setup;
+using Amazon.SecretsManager; // (already present, keep it)
+using docke_web_Api.Configuration;
+using docke_web_Api_models;
 using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Serilog;
-using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using ILogger = Serilog.ILogger;
 
 public class Program
 {
@@ -35,14 +36,30 @@ public class Program
             .MinimumLevel.Information()
             .WriteTo.Console()
             .Enrich.FromLogContext()
-            //.WriteTo.File("/repo/data/logs/app-.log", rollingInterval: RollingInterval.Day) //
+            .WriteTo.File("/repo/data/logs/app-.log", rollingInterval: RollingInterval.Day) //
             .ReadFrom.Configuration(builder.Configuration) // Optional: read additional Serilog settings from configuration 
             .CreateLogger();
 
         builder.Host.UseSerilog(); // Use Serilog for logging instead of the default .NET logger
 
-        // Ensure command-line args are in configuration (CreateBuilder already adds them, this is fine)
-        builder.Configuration.AddCommandLine(args);
+        // check if we're in LOC environment, and if so, add environment variables to configuration (for secrets)   
+        if (builder.Environment.EnvironmentName.Equals("LOC", StringComparison.InvariantCultureIgnoreCase)) 
+            builder.Configuration.AddEnvironmentVariables();
+
+        // order matters - load this after environment variables (for local secrets)
+        if (args != null && args.Length > 0)
+            builder.Configuration.AddCommandLine(args);
+
+
+
+
+        //builder.Services.
+
+        AWSOptions awsOptions = new AWSOptions();
+        awsOptions.Region = Amazon.RegionEndpoint.GetBySystemName(builder.Configuration["AWSRegion"] ?? "us-east-1");   
+
+        builder.Services.AddAWSService<IAmazonSecretsManager>(awsOptions)
+            .AddSingleton<SecretsConfiguration>();
 
         var time_docker_build = DateTime.Now.ToString();
 
@@ -66,8 +83,7 @@ public class Program
         // ---------------------------------------------------
 
         var env = builder.Environment;
-        var isLocal = env.IsDevelopment() ||
-                      env.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
+        var isLocal = env.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
 
         // Controllers + Swagger services
         builder.Services.AddControllers();
@@ -110,7 +126,6 @@ public class Program
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
         logger.LogInformation("Docker Build Data: {time_docker_build}\r\nDocker Build Version: {version_docker_build}", time_docker_build, version_docker_build);
 
-        
 
         //---------Forwarded Headers for reverse proxies (Nginx) ----------
         //This ensures Request.Scheme / Host are correct when Nginx terminates TLS or rewrites host.

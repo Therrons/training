@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using docke_web_Api.Configuration;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -8,6 +12,14 @@ namespace docke_web_Api.Controllers
     [Route("TestFunctions")]
     public class UserInputController: ControllerBase
     {
+        private readonly IServiceProvider _sp;
+        private readonly IConfiguration _config;
+
+        public UserInputController(IServiceProvider sp, IConfiguration config)
+        {
+            _sp = sp;
+            _config = config;
+        }
 
         [HttpGet("Show_Input")]
         public async Task<ActionResult<string>> Show_Input(string input)
@@ -39,6 +51,16 @@ namespace docke_web_Api.Controllers
             {
                 return "File not found.";
             }
+        }
+
+        [HttpGet("Get_AWS_Secrets")]
+        public async Task<ActionResult<string>> Get_AWS_Secrets()
+        {
+            string secretName = string.IsNullOrWhiteSpace(_config["AWSSecretName"])?"": _config["AWSSecretName"].Trim();
+
+            var secretsService = _sp.GetRequiredService<SecretsConfiguration>();
+            var secrets = await secretsService.GetSecretAsync(secretName).ConfigureAwait(false);
+            return JsonConvert.SerializeObject(secrets);
         }
     }
 }

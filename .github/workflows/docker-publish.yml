@@ -1,0 +1,40 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_run:
+    workflows:
+      - CI - Docker + Helm Validation
+    types:
+      - completed
+
+jobs:
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      (
+        github.event.workflow_run.head_branch == 'Docker' ||
+        github.event.workflow_run.head_branch == 'K8s'
+      )
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      # Example placeholders – replace with your real registry logic
+      - name: Log in to container registry
+        run: echo "login step here"
+
+      - name: Build Docker image
+        run: docker build -t my-image:latest .
+
+      - name: Push Docker image
+        run: echo "docker push step here"

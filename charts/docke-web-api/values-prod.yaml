@@ -68,12 +68,12 @@ externalSecrets:
   k8sSecretName: docke_web_api-secrets
   # Map of keys to pull from AWS; change "remoteKey" to the actual AWS secret name or SSM path.
   data:
-    - secretKey: CEW_Id
+    - secretKey: DB_Id
       remoteRef:
-        key: /myapp/cew/id
-    - secretKey: CEW_Secret
+        key: /docke_web_api/prod/db/id
+    - secretKey: DB_Secret
       remoteRef:
-        key: /myapp/cew/secret
+        key: /docke_web_api/prod/db/secret
 
 resources:
   requests:
