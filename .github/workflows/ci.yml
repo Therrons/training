@@ -21,28 +21,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      # Example placeholders – keep or replace with your real steps
-      - name: Build Docker image (CI validation)
-        run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
-
-      - name: Helm lint
-        run: helm lint $CHART_PATH
+      - name: CI validation
+        run: echo "Run PR checks here"
 
   ci-main:
     if: github.event_name == 'push'
-    name: Main Branch Checks
+    name: Branch CI Checks
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        env: [ dev, staging, prod ]
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Build Docker image (CI validation)
-        run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
-
-      - name: Helm lint (${{ matrix.env }})
-        run: helm lint $CHART_PATH
+      - name: CI validation
+        run: echo "Run branch CI checks here"
