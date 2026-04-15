@@ -2,10 +2,10 @@ name: CI - Docker + Helm Validation
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
   push:
-    branches: [ main ]
+    branches: [ "main", "Docker", "K8s" ]
 
 env:
   IMAGE_NAME: docke_web_api
