@@ -8,7 +8,7 @@ on:
 
 env:
   IMAGE_NAME: docke_web_api
-  IMAGE_TAG: ci
+  IMAGE_TAG: cith3rn5@gmail.demo
   CHART_PATH: charts/docke-web-api
   NAMESPACE: docke-web-api
 
