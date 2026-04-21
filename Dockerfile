@@ -1,13 +1,19 @@
 ############################################################
 # 0. Global build arguments
 ############################################################
-ARG APP_DLL=docke_web_Api.dll
-ARG APP_PORT=8080
+# pass default value for argument to avoid build-time errors, can be overridden at runtime
+ARG APP_DLL=docke_web_Api.dll  
+
+# pass default value for argument to avoid build-time errors, can be overridden at runtime
+ARG APP_PORT=8080 
 
 ############################################################
 # 1. Base runtime image
 ############################################################
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+
+# ARG is scope based and must therefore be re-declared in this stage
+ARG APP_PORT  
 
 # Create non-root user (K8s best practice)
 RUN useradd \
@@ -46,17 +52,18 @@ COPY . .
 #RUN echo "printing nuget-config image tree structure" && ls -la /repo/nuget-config
 
 # Restore & build
-RUN dotnet restore ./src/docke_web_Api.csproj --configfile ./nuget-config/NuGet.config
+RUN dotnet restore /repo/src/docke_web_Api.csproj --configfile /repo/nuget-config/NuGet.config
 
-#RUN dotnet publish ./src/docke_web_Api.csproj -c Release -o /app/publish /p:UseAppHost=false
-RUN dotnet publish /repo/src/docke_web_Api.csproj -c Release -o /repo/publish /p:UseAppHost=false
+# explicitly switch off restore otherwise it will try to restore again and fail due to missing credentials (since we won't have access to the secret at build time)
+RUN dotnet publish /repo/src/docke_web_Api.csproj -c Release -o /repo/publish --no-restore /p:UseAppHost=false
 
 ############################################################
 # 3. Final runtime image
 ############################################################
 FROM base AS final
 
-ARG APP_DLL
+# ARG is scope based and must therefore be re-declared in this stage
+ARG APP_DLL 
 
 WORKDIR /repo
 
