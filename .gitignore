@@ -4,6 +4,7 @@
 
 /src/bin/Debug/net8.0
 /src/obj
+/src/bin
 /certs/asgard-afs1.cer
 /certs/asgard-afs1.crt
 /certs/asgard-euw1.cer
@@ -33,3 +34,4 @@
 /src/.vs/docke_web_Api_Docker/DesignTimeBuild
 /src/.vs/docke_web_Api_Docker/FileContentIndex
 /src/.vs/docke_web_Api_Docker/v18
+/docke_web_Api_models/bin

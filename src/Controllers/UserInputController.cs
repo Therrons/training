@@ -58,11 +58,18 @@ namespace docke_web_Api.Controllers
         [HttpGet("Get_AWS_Secrets")]
         public async Task<ActionResult<string>> Get_AWS_Secrets()
         {
-            string secretName = string.IsNullOrWhiteSpace(_config["AWSSecretName"]) ? "" : _config["AWSSecretName"].Trim();
+            try
+            {
+                string secretName = string.IsNullOrWhiteSpace(_config["AWSSecretName"]) ? "" : _config["AWSSecretName"].Trim();
 
-            var secretsService = _sp.GetRequiredService<SecretsConfiguration>();
-            var secrets = await secretsService.GetSecretAsync(secretName).ConfigureAwait(false);
-            return JsonConvert.SerializeObject(secrets);
+                var secretsService = _sp.GetRequiredService<SecretsConfiguration>();
+                var secrets = await secretsService.GetSecretAsync(secretName).ConfigureAwait(false);
+                return JsonConvert.SerializeObject(secrets);
+            }
+            catch (Exception ex)
+            {
+                return JsonConvert.SerializeObject(ex);
+            }
         }
     }
 }

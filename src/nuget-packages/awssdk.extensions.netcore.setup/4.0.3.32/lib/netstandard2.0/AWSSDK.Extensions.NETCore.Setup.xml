@@ -1,0 +1,554 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AWSSDK.Extensions.NETCore.Setup</name>
+    </assembly>
+    <members>
+        <member name="T:Amazon.Extensions.NETCore.Setup.AWSOptions">
+            <summary>
+            The options used to construct AWS service clients like the Amazon.S3.AmazonS3Client.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.Profile">
+            <summary>
+            The profile used to fetch AWS credentials for from the profile manager.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.ProfilesLocation">
+            <summary>
+            The location of the registered profiles. Set if using the non standard locations for profile stores.
+            This is mostly used when running the application outside of an EC2 instance where the preferred 
+            IAM credentials are used and also not running under a logged on user.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.Region">
+            <summary>
+            The AWS region the service client should use when making service operations.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.SessionRoleArn">
+            <summary>
+            If set this role will be assumed using the resolved AWS credentials.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.SessionName">
+            <summary>
+            The session name for the assumed session using the SessionRoleArn.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.ExternalId">
+            <summary>
+            A unique identifier that is used by third parties for the assumed session using the SessionRoleArn.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.Credentials">
+            <summary>
+            AWS Credentials used for creating service clients. If this is set it overrides the Profile property.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.DefaultConfigurationMode">
+            <summary>
+            The default configuration mode set for created service clients.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.DefaultClientConfig">
+            <summary>
+            A default ClientConfig object. When service client is created any values set on the default ClientConfig
+            are copied to the service specific client config.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.Logging">
+            <summary>
+            Logging settings that should be applied to SDK global configuration. This setting is applied while creating
+            the service client through this package.
+            </summary>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.AWSOptions.CreateServiceClient``1">
+            <summary>
+            Create a service client for the specified service interface using the options set in this instance.
+            For example if T is set to IAmazonS3 then the AmazonS3ServiceClient which implements IAmazonS3 is created
+            and returned.
+            </summary>
+            <typeparam name="T">The service interface that a service client will be created for.</typeparam>
+            <returns>The service client that implements the service interface.</returns>
+        </member>
+        <member name="T:Amazon.Extensions.NETCore.Setup.AWSOptions.LoggingSetting">
+            <summary>
+            Container for logging settings of the SDK
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.LoggingSetting.LogTo">
+            <summary>
+            Logging destination.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.LoggingSetting.LogResponses">
+            <summary>
+            When to log responses.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.LoggingSetting.LogResponsesSizeLimit">
+            <summary>
+            Gets or sets the size limit in bytes for logged responses. If logging for response
+                body is enabled, logged response body is limited to this size. The SDK defaults to 1KB if this property is net set.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.AWSOptions.LoggingSetting.LogMetrics">
+            <summary>
+            Whether or not to log SDK metrics.
+            </summary>
+        </member>
+        <member name="T:Amazon.Extensions.NETCore.Setup.ClientFactory`1">
+            <summary>
+            The factory class for creating AWS service clients from the AWS SDK for .NET.
+            </summary>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ClientFactory`1.#ctor(Amazon.Extensions.NETCore.Setup.AWSOptions)">
+            <summary>
+            Constructs an instance of the ClientFactory
+            </summary>
+            <param name="awsOptions">The AWS options used for creating service clients.</param>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ClientFactory`1.CreateServiceClient(System.IServiceProvider)">
+            <summary>
+            Creates the AWS service client that implements the service client interface. The AWSOptions object
+            will be searched for in the IServiceProvider.
+            </summary>
+            <param name="provider">The dependency injection provider.</param>
+            <returns>The AWS service client</returns>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ClientFactory`1.CreateServiceClient(Microsoft.Extensions.Logging.ILogger,Amazon.Extensions.NETCore.Setup.AWSOptions)">
+            <summary>
+            Creates the AWS service client that implements the service client interface. The AWSOptions object
+            will be searched for in the IServiceProvider.
+            </summary>
+            <param name="logger">Logger instance for writing diagnostic logs.</param>
+            <param name="options">The AWS options used for creating the service client.</param>
+            <returns>The AWS service client</returns>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ClientFactory`1.PerformGlobalConfig(Microsoft.Extensions.Logging.ILogger,Amazon.Extensions.NETCore.Setup.AWSOptions)">
+            <summary>
+            Performs all of the global settings that have been specified in AWSOptions.
+            </summary>
+            <param name="logger"></param>
+            <param name="options"></param>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ClientFactory`1.CreateClient(Amazon.Runtime.AWSCredentials,Amazon.Runtime.ClientConfig)">
+            <summary>
+            Creates the service client using the credentials and client config.
+            </summary>
+            <param name="credentials"></param>
+            <param name="config"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ClientFactory`1.CreateCredentials(Microsoft.Extensions.Logging.ILogger,Amazon.Extensions.NETCore.Setup.AWSOptions)">
+            <summary>
+            Creates the AWSCredentials using either the profile indicated from the AWSOptions object
+            of the SDK fallback credentials search.
+            </summary>
+            <param name="logger"></param>
+            <param name="options"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ClientFactory`1.CreateConfig(Amazon.Extensions.NETCore.Setup.AWSOptions)">
+            <summary>
+            Creates the ClientConfig object for the service client.
+            </summary>
+            <param name="options"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Amazon.Extensions.NETCore.Setup.ConfigurationException">
+            <summary>
+            Exception for errors loading AWS options from IConfiguration object.
+            </summary>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ConfigurationException.#ctor(System.String)">
+            <summary>
+            Construct instance of ConfigurationException
+            </summary>
+            <param name="message">The error message.</param>
+        </member>
+        <member name="M:Amazon.Extensions.NETCore.Setup.ConfigurationException.#ctor(System.String,System.Exception)">
+            <summary>
+            Construct instance of ConfigurationException
+            </summary>
+            <param name="message">The error message.</param>
+            <param name="exception">Original exception.</param>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.ConfigurationException.PropertyName">
+            <summary>
+            The property that has an invalid value.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.ConfigurationException.PropertyValue">
+            <summary>
+            The value that was configured for the PropertyName.
+            </summary>
+        </member>
+        <member name="T:Amazon.Extensions.NETCore.Setup.DefaultClientConfig">
+            <summary>
+            Settings that will be applied to service client config objects when service clients are created.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.AllowAutoRedirect">
+            <summary>
+            This flag controls if .NET HTTP infrastructure should follow redirection
+             responses (e.g. HTTP 307 - temporary redirect).
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.AuthenticationRegion">
+            <summary>
+            Gets and sets the AuthenticationRegion property.
+            Used in AWS4 request signing, this is an optional property; 
+            change it only if the region cannot be determined from the 
+            service endpoint.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.AuthSchemePreference">
+            <summary>
+            List of preferred authentication schemes in priority order. 
+            When a service supports multiple authentication schemes, the SDK attempts to use schemes from this list in 
+            the specified order, falling back to default behavior if none of the preferred schemes are available.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.BufferSize">
+            <summary>
+            Gets and Sets the BufferSize property.
+            The BufferSize controls the buffer used to read in from input streams and write 
+            out to the request.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.ClientAppId">
+            <summary>
+            <para>
+            ClientAppId is an optional application specific identifier that can be set. When set it will be appended to the User-Agent header of every request in the form of <c>app/{ClientAppId}</c>. 
+            </para>
+            <para>
+            If the ClientAppId is not set on the object the SDK will search the environment variable <c>AWS_SDK_UA_APP_ID</c> and the shared config profile attribute <c>sdk_ua_app_id</c> for a potential value for the ClientAppId.
+            </para>
+            </summary>
+            <remarks>
+            See <see href="https://docs.aws.amazon.com/sdkref/latest/guide/settings-reference.html"/> for more information on environment variables and shared config settings.
+            </remarks>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.DisableHostPrefixInjection">
+            <summary>
+            Gets and sets the DisableHostPrefixInjection flag. If true, host prefix injection will be disabled for this client, the default value of this flag is false. 
+            Host prefix injection prefixes the service endpoint with request members from APIs which use this feature. 
+            Example: for a hostPrefix of "foo-name." and a endpoint of "service.region.amazonaws.com" the default behavior is to
+            prefix the endpoint with the hostPrefix resulting in a final endpoint of "foo-name.service.region.amazonaws.com". Setting 
+            DisableHostPrefixInjection to true will disable hostPrefix injection resulting in a final endpoint of
+            "service.region.amazonaws.com" regardless of the value of hostPrefix. E.g. You may want to disable host prefix injection for testing against a local mock endpoint.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.DisableLogging">
+            <summary>
+            Gets and sets the DisableLogging. If true logging for this client will be disabled.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.DisableRequestCompression">
+            <summary>
+            Controls whether request payloads are automatically compressed for supported operations.
+            This setting only applies to operations that support compression.
+            The default value is "false". Set to "true" to disable compression.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.EndpointDiscoveryCacheLimit">
+            <summary>
+            Returns the maximum number of discovered endpoints that can be stored within the cache for the client. The default limit is 1000 cache entries.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.EndpointDiscoveryEnabled">
+            <summary>
+            Returns the flag indicating if endpoint discovery should be enabled or disabled for operations that are not required to use endpoint discovery.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.FastFailRequests">
+            <summary>
+            Under Adaptive retry mode, this flag determines if the client should wait for
+            a send token to become available or don't block and fail the request immediately
+            if a send token is not available.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.HttpClientCacheSize">
+            <summary>
+            If CacheHttpClient is set to true then HttpClientCacheSize controls the number of HttpClients cached.
+            <para>
+            The default value is 1 which is suitable for Windows and for all other platforms that have HttpClient
+            implementations using System.Net.Http.SocketsHttpHandler (.NET Core 2.1 and higher).
+            </para>
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.IgnoreConfiguredEndpointUrls">
+            <summary>
+            If set to true the SDK will ignore the configured endpointUrls in the config file or in the environment variables.
+            By default it is set to false.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.LogMetrics">
+            <summary>
+            Flag on whether to log metrics for service calls.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.LogResponse">
+            <summary>
+            Gets and sets the LogResponse property.
+            If this property is set to true, the service response is logged.
+            The size of response being logged is controlled by the AWSConfigs.LoggingConfig.LogResponsesSizeLimit property.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.MaxErrorRetry">
+            <summary>
+            Returns the flag indicating how many retry HTTP requests an SDK should
+            make for a single SDK operation invocation before giving up. For
+            RetryMode values of "Standard" or "Adaptive" this flag will return 2. In 
+            addition to the values returned that are dependent on the RetryMode, the
+            value can be set to a specific value by using the AWS_MAX_ATTEMPTS environment
+            variable, max_attempts in the shared configuration file, or by setting a
+            value directly on this property. When using AWS_MAX_ATTEMPTS or max_attempts
+            the value returned from this property will be one less than the value entered
+            because this flag is the number of retry requests, not total requests. To 
+            learn more about the RetryMode property that affects the values returned by 
+            this flag, see <see cref="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.RetryMode"/>.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.MaxStaleConnectionRetries">
+            <summary>
+            Gets and sets the maximum number of times the SDK will retry requests 
+            that fail due to stale pooled HTTP connections. These retries are 
+            separate from the standard retry count and don't consume the regular retry budget.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.ProgressUpdateInterval">
+            <summary>
+            <para>
+            Gets or sets the interval at which progress update events are raised
+            for upload operations. By default, the progress update events are 
+            raised at every 100KB of data transferred. 
+            </para>
+            <para>
+            If the value of this property is set less than ClientConfig.BufferSize, 
+            progress updates events will be raised at the interval specified by ClientConfig.BufferSize.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.RequestMinCompressionSizeBytes">
+            <summary>
+            Minimum size in bytes that a request body should be to trigger compression.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.ResignRetries">
+            <summary>
+            Flag on whether to resign requests on retry or not.
+            For Amazon S3 and Amazon Glacier this value will always be set to true.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.RetryMode">
+            <summary>
+            Returns the flag indicating the current mode in use for request 
+            retries and influences the value returned from <see cref="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.MaxErrorRetry"/>.
+            The default value is <see cref="F:Amazon.Runtime.RequestRetryMode.Standard"/>. This flag can be configured
+            by using the AWS_RETRY_MODE environment variable, retry_mode in the
+            shared configuration file, or by setting this value directly.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.SigV4aSigningRegionSet">
+            <summary>
+            List of AWS regions for SigV4a multi-region signing.
+            This is used as the default region set for the request if SigV4a is the selected authentication scheme.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.ServiceURL">
+            <summary>
+            <para>
+            Gets and sets of the ServiceURL property.
+            This is an optional property; change it
+            only if you want to try a different service
+            endpoint.
+            </para>
+            <para>
+            RegionEndpoint and ServiceURL are mutually exclusive properties. 
+            Whichever property is set last will cause the other to automatically 
+            be reset to null.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.ThrottleRetries">
+            <summary>
+            Enable or disable the Retry Throttling feature by setting the ThrottleRetries flag to True/False respectively.
+            Retry Throttling is a feature that intelligently throttles retry attempts when a large percentage of requests 
+            are failing and retries are unsuccessful as well. In such situations the allotted retry capacity for the service URL
+            will be drained until requests start to succeed again. Once the requisite capacity is available, retries would 
+            be permitted again. When retries are throttled, the service enters a fail-fast behaviour as the traditional retry attempt
+            for the request would be circumvented. Hence, errors will resurface quickly. This will result in a greater number of exceptions
+            but prevents requests being tied up in unsuccessful retry attempts.
+            Note: Retry Throttling is enabled by default. Set the ThrottleRetries flag to false to switch off this feature.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.Timeout">
+            <summary>
+            The timeout that is set on the HttpClient Timeout for configuring the wait time for requests time out.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.UseAlternateUserAgentHeader">
+             <summary>
+             When set to true, the service client will use the x-amz-user-agent
+             header instead of the User-Agent header to report version and
+             environment information to the AWS service.
+            
+             Note: This is especially useful when using a platform like WebAssembly
+             which doesn't allow to specify the User-Agent header.
+             </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.UseDualstackEndpoint">
+            <summary>
+            Configures the endpoint calculation for a service to go to a dual stack (ipv6 enabled) endpoint
+            for the configured region.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.UseFIPSEndpoint">
+            <summary>
+            Configures the endpoint calculation to go to a FIPS (https://aws.amazon.com/compliance/fips/) endpoint
+            for the configured region.
+            </summary>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.UseHttp">
+            <summary>
+            Gets and sets the UseHttp.
+            If this property is set to true, the client attempts
+            to use HTTP protocol, if the target endpoint supports it.
+            By default, this property is set to false.
+            </summary>
+            <remarks>This does not apply if an explicit <see cref="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.ServiceURL"/> is specified.</remarks>
+        </member>
+        <member name="P:Amazon.Extensions.NETCore.Setup.DefaultClientConfig.ServiceSpecificSettings">
+            <summary>
+            Service specific config settings. For example Amazon S3's config property UseAccelerateEndpoint property.
+            
+            Setting these config on the service specific setting requires .NET reflection. If running in a trimmed environment
+            like Native AOT additional testing is required to ensure the reflection does not attempt to access code 
+            that has been trimmed.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.Configuration.ConfigurationExtensions">
+            <summary>
+            This class adds extension methods to IConfiguration making it easier to pull out
+            AWS configuration options.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.Configuration.ConfigurationExtensions.DEFAULT_CONFIG_SECTION">
+            <summary>
+            The default section where settings are read from the IConfiguration object. This is set to "AWS".
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Configuration.ConfigurationExtensions.GetAWSOptions(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Constructs an AWSOptions class with the options specified in the "AWS" section in the IConfiguration object.
+            </summary>
+            <param name="config"></param>
+            <returns>The AWSOptions containing the values set in configuration system.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.Configuration.ConfigurationExtensions.GetAWSOptions(Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Constructs an AWSOptions class with the options specified in the "AWS" section in the IConfiguration object.
+            </summary>
+            <param name="config"></param>
+            <param name="configSection">The config section to extract AWS options from.</param>
+            <returns>The AWSOptions containing the values set in configuration system.</returns>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions">
+            <summary>
+            This class adds extension methods to IServiceCollection making it easier to add Amazon service clients
+            to the NET Core dependency injection framework.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.AddDefaultAWSOptions(Microsoft.Extensions.DependencyInjection.IServiceCollection,Amazon.Extensions.NETCore.Setup.AWSOptions)">
+            <summary>
+            Adds the AWSOptions object to the dependency injection framework providing information
+            that will be used to construct Amazon service clients.
+            </summary>
+            <param name="collection"></param>
+            <param name="options">The default AWS options used to construct AWS service clients with.</param>
+            <returns>Returns back the IServiceCollection to continue the fluent system of IServiceCollection.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.AddDefaultAWSOptions(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Func{System.IServiceProvider,Amazon.Extensions.NETCore.Setup.AWSOptions},Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the AWSOptions object to the dependency injection framework providing information
+            that will be used to construct Amazon service clients.
+            </summary>
+            <param name="collection"></param>
+            <param name="implementationFactory">The factory that creates the default AWS options.
+            The AWS options will be used to construct AWS service clients
+            </param>
+            <param name="lifetime">The lifetime of the AWSOptions. The default is Singleton.</param>
+            <returns>Returns back the IServiceCollection to continue the fluent system of IServiceCollection.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.TryAddDefaultAWSOptions(Microsoft.Extensions.DependencyInjection.IServiceCollection,Amazon.Extensions.NETCore.Setup.AWSOptions)">
+            <summary>
+            Adds the AWSOptions object to the dependency injection framework providing information
+            that will be used to construct Amazon service clients if they haven't already been registered.
+            </summary>
+            <param name="collection"></param>
+            <param name="options">The default AWS options used to construct AWS service clients with.</param>
+            <returns>Returns back the IServiceCollection to continue the fluent system of IServiceCollection.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.TryAddDefaultAWSOptions(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Func{System.IServiceProvider,Amazon.Extensions.NETCore.Setup.AWSOptions},Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the AWSOptions object to the dependency injection framework providing information
+            that will be used to construct Amazon service clients if they haven't already been registered.
+            </summary>
+            <param name="collection"></param>
+            <param name="implementationFactory">The factory that creates the default AWS options.
+            The AWS options will be used to construct AWS service clients
+            </param>
+            <param name="lifetime">The lifetime of the AWSOptions. The default is Singleton.</param>
+            <returns>Returns back the IServiceCollection to continue the fluent system of IServiceCollection.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.AddAWSService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the Amazon service client to the dependency injection framework. The Amazon service client is not
+            created until it is requested. If the ServiceLifetime property is set to Singleton, the default, then the same
+            instance will be reused for the lifetime of the process and the object should not be disposed.
+            </summary>
+            <typeparam name="T">The AWS service interface, like IAmazonS3.</typeparam>
+            <param name="collection"></param>
+            <param name="lifetime">The lifetime of the service client created. The default is Singleton.</param>
+            <returns>Returns back the IServiceCollection to continue the fluent system of IServiceCollection.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.AddAWSService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,Amazon.Extensions.NETCore.Setup.AWSOptions,Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the Amazon service client to the dependency injection framework. The Amazon service client is not
+            created until it is requested. If the ServiceLifetime property is set to Singleton, the default, then the same
+            instance will be reused for the lifetime of the process and the object should not be disposed.
+            </summary>
+            <typeparam name="T">The AWS service interface, like IAmazonS3.</typeparam>
+            <param name="collection"></param>
+            <param name="options">The AWS options used to create the service client overriding the default AWS options added using AddDefaultAWSOptions.</param>
+            <param name="lifetime">The lifetime of the service client created. The default is Singleton.</param>
+            <returns>Returns back the IServiceCollection to continue the fluent system of IServiceCollection.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.TryAddAWSService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the Amazon service client to the dependency injection framework if the service type hasn't already been registered.
+            The Amazon service client is not created until it is requested. If the ServiceLifetime property is set to Singleton,
+            the default, then the same instance will be reused for the lifetime of the process and the object should not be disposed.
+            </summary>
+            <typeparam name="T">The AWS service interface, like IAmazonS3.</typeparam>
+            <param name="collection"></param>
+            <param name="lifetime">The lifetime of the service client created. The default is Singleton.</param>
+            <returns>Returns back the IServiceCollection to continue the fluent system of IServiceCollection.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.TryAddAWSService``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,Amazon.Extensions.NETCore.Setup.AWSOptions,Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the Amazon service client to the dependency injection framework if the service type hasn't already been registered.
+            The Amazon service client is not created until it is requested. If the ServiceLifetime property is set to Singleton,
+            the default, then the same instance will be reused for the lifetime of the process and the object should not be disposed.
+            </summary>
+            <typeparam name="T">The AWS service interface, like IAmazonS3.</typeparam>
+            <param name="collection"></param>
+            <param name="options">The AWS options used to create the service client overriding the default AWS options added using AddDefaultAWSOptions.</param>
+            <param name="lifetime">The lifetime of the service client created. The default is Singleton.</param>
+            <returns>Returns back the IServiceCollection to continue the fluent system of IServiceCollection.</returns>
+        </member>
+    </members>
+</doc>
