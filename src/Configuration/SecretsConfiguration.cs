@@ -103,25 +103,25 @@ namespace docke_web_Api.Configuration
 
         //    dbKeys = GetSecret("docke_web_api_k8s", "us-east-1");
 
-        //var folderPath = builder.Configuration.GetValue<string>("SecretPath")
-        //    ?? throw new ApplicationException("Mandatory config for SecretPath is missing.");
+            //var folderPath = builder.Configuration.GetValue<string>("SecretPath")
+            //    ?? throw new ApplicationException("Mandatory config for SecretPath is missing.");
 
 
-        //Log.Information($"The secrets folder path is {folderPath}");
+            //Log.Information($"The secrets folder path is {folderPath}");
 
-        //if (!Directory.Exists(folderPath))
-        //{
-        //    Log.Warning($"The directory {folderPath} does not exist");
+            //if (!Directory.Exists(folderPath))
+            //{
+            //    Log.Warning($"The directory {folderPath} does not exist");
 
-        //    return;
-        //}
+            //    return;
+            //}
 
-        //foreach (var file in Directory.EnumerateFiles(folderPath))
-        //{
-        //    var contents = File.ReadAllText(file).Trim();
-        //    var fileName = file.Split("/").Last().Trim();
-        //    builder.Configuration[fileName] = contents;
-        //}
+            //foreach (var file in Directory.EnumerateFiles(folderPath))
+            //{
+            //    var contents = File.ReadAllText(file).Trim();
+            //    var fileName = file.Split("/").Last().Trim();
+            //    builder.Configuration[fileName] = contents;
+            //}
         //}
 
 
