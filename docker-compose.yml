@@ -5,8 +5,8 @@
       dockerfile: Dockerfile
       args:
         dll: "docke_web_Api.dll"
-    image: docke_web_api
-    container_name: docke_web_api:offline
+    image: docke_web_api:offline
+    container_name: docke_web_api
     environment:
       ASPNETCORE_URLS: "http://0.0.0.0:8080"
       ASPNETCORE_ENVIRONMENT: "LOC"  # "Production"
