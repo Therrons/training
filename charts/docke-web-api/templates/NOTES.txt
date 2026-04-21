@@ -1,0 +1,15 @@
+Release:    {{ .Release.Name }}
+Namespace:  {{ .Values.namespace.name }}
+
+Service:    {{ include "docke-web-api.fullname" . }} ({{ .Values.service.type }}) port {{ .Values.service.port }}
+Ingress:    http://{{ .Values.ingress.host }}/swagger
+
+Common commands:
+  kubectl get all -n {{ .Values.namespace.name }}
+  kubectl get ingress -n {{ .Values.namespace.name }}
+  kubectl logs -f -n {{ .Values.namespace.name }} deploy/{{ include "docke-web-api.fullname" . }}
+  kubectl port-forward -n {{ .Values.namespace.name }} svc/{{ include "docke-web-api.fullname" . }} 8085:{{ .Values.service.port }}
+
+Persistence:
+  - If persistence.enabled=true and perReplica=false, one PVC named {{ include "docke-web-api.fullname" . }}-pvc is created.
+  - If perReplica=true, a StatefulSet is used and each pod gets its own PVC via volumeClaimTemplates.

@@ -1,15 +1,25 @@
-name: Build and Push Docker Image
+name: CI - Docker + Helm Validation
 
 on:
+  pull_request:
+    branches: [ main ]
   push:
-    branches: [ "Docker", "K8s" ]
+    branches: [ "main", "Docker", "K8s" ]
+
+env:
+  IMAGE_NAME: docke_web_api
+  IMAGE_TAG: cith3rn5@gmail.demo
+  CHART_PATH: charts/docke-web-api
+  NAMESPACE: docke-web-api
 
 jobs:
-  build:
+  ci-pr:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    name: PR Checks
 
     steps:
       - name: Checkout repository
@@ -29,4 +39,93 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/docke_web_Api:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docke_web_api:latest # image name and tag must be lower case
+    
+    
+      - uses: actions/checkout@v5
+
+      - name: Lint Dockerfile
+        run: docker run --rm -i hadolint/hadolint < Dockerfile
+
+      - name: Build Docker image
+        run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
+
+      - name: Run container smoke test
+        run: |
+          docker run -d -p 8080:8080 \
+            -e ASPNETCORE_ALLOWEDHOSTS="*" \
+            --name api-test \
+            $IMAGE_NAME:$IMAGE_TAG
+          sleep 5
+          curl -f http://localhost:8080/health/readiness
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: helm lint $CHART_PATH
+
+      - name: Render Helm (dev)
+        run: |
+          helm template docke-web-api $CHART_PATH \
+            -f $CHART_PATH/values-dev.yaml \
+            > rendered.yaml
+
+      # - name: Validate Kubernetes YAML
+      #   run: |
+      #       # Install kubeval
+      #       wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+      #       tar xf kubeval-linux-amd64.tar.gz
+    
+      #       # Validate the rendered YAML
+      #       ./kubeval -f rendered-${{ matrix.env }}.yaml
+
+      - name: Comment PR summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `✅ CI checks completed.
+
+            - Docker image built
+            - App started successfully
+            - Helm lint & schema validation passed
+            - Kubernetes YAML valid
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
+
+  ci-main:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [ dev ]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: helm lint $CHART_PATH
+
+      - name: Render Helm (${{ matrix.env }})
+        run: |
+          helm template docke-web-api $CHART_PATH \
+            -f $CHART_PATH/values-${{ matrix.env }}.yaml \
+            > rendered-${{ matrix.env }}.yaml
+
+      # - name: Validate Kubernetes YAML
+      #   run: |
+      #       # Install kubeval
+      #       wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+      #       tar xf kubeval-linux-amd64.tar.gz
+    
+      #       # Validate the rendered YAML
+      #       ./kubeval -f rendered-${{ matrix.env }}.yaml

@@ -40,8 +40,4 @@
     <ItemGroup>
       <ProjectReference Include="..\docke_web_Api_models\docke_web_Api_models.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Configuration\" />
-    </ItemGroup>
 </Project>
