@@ -1,0 +1,82 @@
+{{- if and .Values.persistence.enabled (eq .Values.persistence.perReplica true) -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "docke_web_api.fullname" . }}
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "docke_web_api.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "docke_web_api.fullname" . }}-headless
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "docke_web_api.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "docke_web_api.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: docke-web-api-sa
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+              name: http
+          env:
+            - name: ASPNETCORE_URLS
+              value: {{ .Values.env.ASPNETCORE_URLS | quote }}
+            - name: ASPNETCORE_ENVIRONMENT
+              value: {{ .Values.env.ASPNETCORE_ENVIRONMENT | quote }}
+            {{- if .Values.env.BUILD_DATE }}
+            - name: BUILD_DATE
+              value: {{ .Values.env.BUILD_DATE | quote }}
+            {{- end }}
+            {{- if .Values.env.BUILD_VERSION }}
+            - name: BUILD_VERSION
+              value: {{ .Values.env.BUILD_VERSION | quote }}
+            {{- end }}
+            {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.k8sSecretName }}
+            - name: DB_Id
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalSecrets.k8sSecretName }}
+                  key: DB_Id
+            - name: DB_Secret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalSecrets.k8sSecretName }}
+                  key: DB_Secret
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readinessPath | quote }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.probes.readinessInitialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readinessPeriodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.livenessPath | quote }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.probes.livenessInitialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.livenessPeriodSeconds }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: {{ toYaml .Values.persistence.accessModes | nindent 10 }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+        {{- if .Values.persistence.storageClassName }}
+        storageClassName: {{ .Values.persistence.storageClassName }}
+        {{- end }}
+{{- end }}
