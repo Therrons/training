@@ -72,7 +72,7 @@ jobs:
             > rendered.yaml
 
       - name: Validate Kubernetes YAML
-        run: kubectl apply --dry-run=client -f rendered.yaml
+        run: kubectl apply --dry-run=client --validate=false  -f rendered.yaml # do not validate against cluster since it may not have the CRD (Custom Resource Definitions)s installed
 
       - name: Comment PR summary
         if: always()
@@ -116,4 +116,4 @@ jobs:
             > rendered-${{ matrix.env }}.yaml
 
       - name: Validate Kubernetes YAML
-        run: kubectl apply --dry-run=client -f rendered-${{ matrix.env }}.yaml
+        run: kubectl apply --dry-run=client --validate=false -f rendered-${{ matrix.env }}.yaml # do not validate against cluster since it may not have the CRD (Custom Resource Definitions)s installed
