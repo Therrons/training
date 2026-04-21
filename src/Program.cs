@@ -43,15 +43,20 @@ public class Program
         builder.Host.UseSerilog(); // Use Serilog for logging instead of the default .NET logger
 
         // check if we're in LOC environment, and if so, add environment variables to configuration (for secrets)   
-        if (builder.Environment.EnvironmentName.Equals("LOC", StringComparison.InvariantCultureIgnoreCase))
+        if (builder.Environment.EnvironmentName.Equals("LOC", StringComparison.InvariantCultureIgnoreCase)) 
             builder.Configuration.AddEnvironmentVariables();
 
         // order matters - load this after environment variables (for local secrets)
         if (args != null && args.Length > 0)
             builder.Configuration.AddCommandLine(args);
 
+
+
+
+        //builder.Services.
+
         AWSOptions awsOptions = new AWSOptions();
-        awsOptions.Region = Amazon.RegionEndpoint.GetBySystemName(builder.Configuration["AWSRegion"] ?? "us-east-1");
+        awsOptions.Region = Amazon.RegionEndpoint.GetBySystemName(builder.Configuration["AWSRegion"] ?? "us-east-1");   
 
         builder.Services.AddAWSService<IAmazonSecretsManager>(awsOptions)
             .AddSingleton<SecretsConfiguration>();

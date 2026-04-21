@@ -1,0 +1,6 @@
+apiVersion: v2
+name: docke-web-api
+description: ASP.NET Core API packaged for Kubernetes with Traefik Ingress and optional AWS External Secrets
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
