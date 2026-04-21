@@ -72,8 +72,14 @@ jobs:
             > rendered.yaml
 
       - name: Validate Kubernetes YAML
-        # do not validate against cluster since it may not have the CRD (Custom Resource Definitions)s installed
-        run: kubectl apply --dry-run=client --validate=false --kubeconfig=/dev/null -f rendered-${{ matrix.env }}.yaml
+        run: |
+            # Install kubeval
+            wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+            tar xf kubeval-linux-amd64.tar.gz
+    
+            # Validate the rendered YAML
+            ./kubeval -f rendered-${{ matrix.env }}.yaml
+
       - name: Comment PR summary
         if: always()
         uses: actions/github-script@v7
@@ -116,5 +122,10 @@ jobs:
             > rendered-${{ matrix.env }}.yaml
 
       - name: Validate Kubernetes YAML
-        # do not validate against cluster since it may not have the CRD (Custom Resource Definitions)s installed
-        run: kubectl apply --dry-run=client --validate=false --kubeconfig=/dev/null -f rendered-${{ matrix.env }}.yaml
+        run: |
+            # Install kubeval
+            wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+            tar xf kubeval-linux-amd64.tar.gz
+    
+            # Validate the rendered YAML
+            ./kubeval -f rendered-${{ matrix.env }}.yaml
