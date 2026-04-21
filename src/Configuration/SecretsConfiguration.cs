@@ -16,52 +16,6 @@ namespace docke_web_Api.Configuration
 {
     public class SecretsConfiguration
     {
-        //private IAmazonSecretsManager _secretsManager;
-        //public SecretsConfiguration(AmazonSecretsManager secretsManager)
-        //{
-        //    _secretsManager = secretsManager;
-        //}
-
-
-        //public async Task<DB_Keys> GetSecretAsync(string secretName)
-        //{
-        //    try
-        //    {
-        //        _secretsManager.Config. = RegionEndpoint.USEast1; // Set your region
-        //        var response = await _secretsManager.GetSecretValueAsync(
-        //               new GetSecretValueRequest
-        //               {
-        //                   SecretId = secretName,
-
-        //               });
-
-        //        if (string.IsNullOrEmpty(response.SecretString))
-        //            throw new InvalidOperationException("Secret is empty");
-        //        return JsonConvert.DeserializeObject<DB_Keys>(response.SecretString);
-        //    }
-        //    catch (AmazonSecretsManagerException e)
-        //    {
-        //        // Handle common exceptions like ResourceNotFound or AccessDenied
-        //        Console.WriteLine($"Error retrieving DB Keys: {e.Message}");
-        //        throw;
-        //    }
-        //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         private IAmazonSecretsManager _secretsManager;
         public SecretsConfiguration(IAmazonSecretsManager secretsManager)
         {
@@ -103,25 +57,25 @@ namespace docke_web_Api.Configuration
 
         //    dbKeys = GetSecret("docke_web_api_k8s", "us-east-1");
 
-            //var folderPath = builder.Configuration.GetValue<string>("SecretPath")
-            //    ?? throw new ApplicationException("Mandatory config for SecretPath is missing.");
+        //var folderPath = builder.Configuration.GetValue<string>("SecretPath")
+        //    ?? throw new ApplicationException("Mandatory config for SecretPath is missing.");
 
 
-            //Log.Information($"The secrets folder path is {folderPath}");
+        //Log.Information($"The secrets folder path is {folderPath}");
 
-            //if (!Directory.Exists(folderPath))
-            //{
-            //    Log.Warning($"The directory {folderPath} does not exist");
+        //if (!Directory.Exists(folderPath))
+        //{
+        //    Log.Warning($"The directory {folderPath} does not exist");
 
-            //    return;
-            //}
+        //    return;
+        //}
 
-            //foreach (var file in Directory.EnumerateFiles(folderPath))
-            //{
-            //    var contents = File.ReadAllText(file).Trim();
-            //    var fileName = file.Split("/").Last().Trim();
-            //    builder.Configuration[fileName] = contents;
-            //}
+        //foreach (var file in Directory.EnumerateFiles(folderPath))
+        //{
+        //    var contents = File.ReadAllText(file).Trim();
+        //    var fileName = file.Split("/").Last().Trim();
+        //    builder.Configuration[fileName] = contents;
+        //}
         //}
 
 

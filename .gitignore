@@ -28,10 +28,6 @@
 /src/.vs/ProjectEvaluation
 /src/.vs/docke_web_Api/config
 /.vs
-/src/.vs/docke_web_Api/DesignTimeBuild
-/docke_web_Api_models/bin/Debug/net8.0
+/src/.vs
 /docke_web_Api_models/obj
-/src/.vs/docke_web_Api_Docker/DesignTimeBuild
-/src/.vs/docke_web_Api_Docker/FileContentIndex
-/src/.vs/docke_web_Api_Docker/v18
 /docke_web_Api_models/bin
