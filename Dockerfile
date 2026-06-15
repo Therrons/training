@@ -13,6 +13,9 @@ ARG APP_PORT=8080
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
 # ARG is scope based and must therefore be re-declared in this stage
+# if not redeclared, build will fail with "APP_PORT not found" error since it's only defined in the build stage
+# when redeclared, pulls the value from the global scope where it was originally defined, so we don't need to hardcode it again here
+
 ARG APP_PORT  
 
 # Create non-root user (K8s best practice)
@@ -25,7 +28,9 @@ RUN useradd \
 WORKDIR /repo
 
 # Optional: custom CA certificates (folder may be empty but must exist)
+# If the folder does not exist create it to avoid build errors
 # If you don't use custom certs, you can delete this block safely
+RUN mkdir -p /usr/local/share/ca-certificates
 COPY certs/ /usr/local/share/ca-certificates/
 RUN update-ca-certificates || true
 
@@ -63,6 +68,8 @@ RUN dotnet publish /repo/src/docke_web_Api.csproj -c Release -o /repo/publish --
 FROM base AS final
 
 # ARG is scope based and must therefore be re-declared in this stage
+# if not redeclared, build will fail with "APP_PORT not found" error since it's only defined in the build stage
+# when redeclared, pulls the value from the global scope where it was originally defined, so we don't need to hardcode it again here
 ARG APP_DLL 
 
 WORKDIR /repo

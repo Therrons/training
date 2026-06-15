@@ -51,8 +51,6 @@ public class Program
             builder.Configuration.AddCommandLine(args);
 
 
-
-
         //builder.Services.
 
         AWSOptions awsOptions = new AWSOptions();
@@ -60,6 +58,12 @@ public class Program
 
         builder.Services.AddAWSService<IAmazonSecretsManager>(awsOptions)
             .AddSingleton<SecretsConfiguration>();
+
+        builder.Services
+            .AddSingleton<docke_web_Api.Transactions.Services.ITransactionDataSource, docke_web_Api.Transactions.Services.BankTransactionSource>()
+            .AddSingleton<docke_web_Api.Transactions.Services.ITransactionDataSource, docke_web_Api.Transactions.Services.CreditCardTransactionSource>()
+            .AddSingleton<docke_web_Api.Transactions.Services.ITransactionDataSource, docke_web_Api.Transactions.Services.DigitalWalletTransactionSource>()
+            .AddSingleton<docke_web_Api.Transactions.Services.ITransactionAggregator, docke_web_Api.Transactions.Services.TransactionAggregator>();
 
         var time_docker_build = DateTime.Now.ToString();
 
@@ -106,12 +110,29 @@ public class Program
                 }
             });
 
+            c.MapType<docke_web_Api.Transactions.Dto.TransactionQueryDto>(() => new OpenApiSchema
+            {
+                Type = "object",
+                Properties = new Dictionary<string, OpenApiSchema>
+                {
+                    ["customerId"] = new OpenApiSchema { Type = "string", Description = "Customer identifier filter." },
+                    ["category"] = new OpenApiSchema { Type = "string", Description = "Category filter. Example: Groceries." },
+                    ["source"] = new OpenApiSchema { Type = "string", Description = "Source filter. Example: Bank." },
+                    ["fromPostedAt"] = new OpenApiSchema { Type = "string", Format = "date", Description = "Inclusive start date." },
+                    ["toPostedAt"] = new OpenApiSchema { Type = "string", Format = "date", Description = "Inclusive end date." },
+                    ["minimumAmount"] = new OpenApiSchema { Type = "number", Format = "decimal", Description = "Minimum transaction amount." },
+                    ["maximumAmount"] = new OpenApiSchema { Type = "number", Format = "decimal", Description = "Maximum transaction amount." }
+                }
+            });
+
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(builder.Environment.ContentRootPath, xmlFile);
             if (File.Exists(xmlPath))
             {
                 c.IncludeXmlComments(xmlPath);
             }
+
+            c.OperationFilter<docke_web_Api.Transactions.Swagger.TransactionExamplesOperationFilter>();
         });
 
 

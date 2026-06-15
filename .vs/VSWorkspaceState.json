@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\src",
+    "\\src\\database",
+    "\\src\\database (2)"
   ],
-  "SelectedNode": "\\docke_web_Api.sln",
+  "SelectedNode": "\\docker-compose.yml",
   "PreviewInSolutionExplorer": false
 }

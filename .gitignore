@@ -31,3 +31,6 @@
 /src/.vs
 /docke_web_Api_models/obj
 /docke_web_Api_models/bin
+
+# Local secrets — never commit
+.env
