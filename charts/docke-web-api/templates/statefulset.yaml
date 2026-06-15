@@ -2,12 +2,12 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "docke_web_api.fullname" . }}
+  name: {{ include "docke-web-api.fullname" . }}
   namespace: {{ .Values.namespace.name }}
   labels:
-    {{- include "docke_web_api.labels" . | nindent 4 }}
+    {{- include "docke-web-api.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "docke_web_api.fullname" . }}-headless
+  serviceName: {{ include "docke-web-api.fullname" . }}-headless
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "docke_web_api.labels" . | nindent 8 }}
+        {{- include "docke-web-api.labels" . | nindent 8 }}
     spec:
       serviceAccountName: docke-web-api-sa
       containers:

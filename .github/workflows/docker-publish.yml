@@ -42,7 +42,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/docke_web_api:latest # image name and tag must be lower case
     
     
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Lint Dockerfile
         run: docker run --rm -i hadolint/hadolint < Dockerfile
@@ -107,7 +107,7 @@ jobs:
         env: [ dev ]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Install Helm
         uses: azure/setup-helm@v4

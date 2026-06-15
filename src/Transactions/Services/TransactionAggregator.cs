@@ -17,16 +17,18 @@ namespace docke_web_Api.Transactions.Services
 
     public class TransactionAggregator : ITransactionAggregator
     {
-        private readonly IEnumerable<ITransactionDataSource> _dataSources;
+        private readonly List<TransactionRecord> _allTransactions;
 
         public TransactionAggregator(IEnumerable<ITransactionDataSource> dataSources)
         {
-            _dataSources = dataSources ?? Array.Empty<ITransactionDataSource>();
+            _allTransactions = (dataSources ?? Array.Empty<ITransactionDataSource>())
+                .SelectMany(source => source.GetTransactions())
+                .ToList();
         }
 
         public IEnumerable<TransactionRecord> GetAllTransactions()
         {
-            return _dataSources.SelectMany(source => source.GetTransactions()).OrderByDescending(t => t.PostedAt);
+            return _allTransactions.OrderByDescending(t => t.PostedAt);
         }
 
         public IEnumerable<TransactionRecord> GetTransactions(TransactionQueryParameters query)

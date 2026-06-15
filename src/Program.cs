@@ -170,11 +170,7 @@ public class Program
 
         app.UseHostFiltering(); // Apply Host Filtering based on the configured allowed hosts (currently set to allow all with "*", which is fine for this testing scenario but should be tightened in production).
 
-        // required for swagger exploration
-        // ================================
         app.MapControllers();
-        app.UseSwagger();
-        // ================================
 
         // ------------------------------------------------------------------
 

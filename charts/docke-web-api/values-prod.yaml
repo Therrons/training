@@ -18,9 +18,6 @@ env:
   BUILD_DATE: ""
   BUILD_VERSION: ""
 
-persistence:
-  perReplica: true
-
 containerPort: 8080
 service:
   type: ClusterIP
@@ -41,7 +38,7 @@ persistence:
   mountPath: /repo/data
   # If you need ONE shared volume across multiple replicas, you need an RWX StorageClass.
   # Otherwise, set perReplica: true to get a PVC per Pod (uses a StatefulSet).
-  perReplica: false
+  perReplica: true
   existingClaim: ""         # leave empty to create a new PVC
   accessModes: [ "ReadWriteOnce" ]
   size: 1Gi
@@ -50,9 +47,7 @@ persistence:
 ingress:
   enabled: true
   className: traefik
-  host: 
-    - api.localtest.me
-    - localhost
+  host: api.localtest.me
   tls:
     enabled: false
     secretName: ""

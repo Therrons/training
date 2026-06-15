@@ -1,3 +1,4 @@
+{{- if and .Values.persistence.enabled (not .Values.persistence.perReplica) (not .Values.persistence.existingClaim) -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -6,8 +7,11 @@ metadata:
   labels:
     {{- include "docke-web-api.labels" . | nindent 4 }}
 spec:
-  accessModes:
-    - ReadWriteOnce
+  accessModes: {{ toYaml .Values.persistence.accessModes | nindent 4 }}
   resources:
     requests:
-      storage: 1Gi
+      storage: {{ .Values.persistence.size }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- end }}
+{{- end }}
