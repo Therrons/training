@@ -8,10 +8,10 @@ on:
     branches: [ "main", "Docker", "K8s" ]
 
 env:
-  IMAGE_NAME: docke_web_api
+  IMAGE_NAME: fraud-poc-api
   IMAGE_TAG: ci
-  CHART_PATH: charts/docke-web-api
-  NAMESPACE: docke-web-api
+  CHART_PATH: charts/fraud-poc-api
+  NAMESPACE: fraud-poc-api
 
 jobs:
   ci-pr:

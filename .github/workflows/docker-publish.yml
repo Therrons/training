@@ -7,10 +7,10 @@ on:
     branches: [ "main", "Docker", "K8s" ]
 
 env:
-  IMAGE_NAME: docke_web_api
+  IMAGE_NAME: fraud-poc-api
   IMAGE_TAG: cith3rn5@gmail.demo
-  CHART_PATH: charts/docke-web-api
-  NAMESPACE: docke-web-api
+  CHART_PATH: charts/fraud-poc-api
+  NAMESPACE: fraud-poc-api
 
 jobs:
   ci-pr:
@@ -39,7 +39,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/docke_web_api:latest # image name and tag must be lower case
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fraud-poc-api:latest # image name and tag must be lower case
     
     
       - uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
 
       - name: Render Helm (dev)
         run: |
-          helm template docke-web-api $CHART_PATH \
+          helm template fraud-poc-api $CHART_PATH \
             -f $CHART_PATH/values-dev.yaml \
             > rendered.yaml
 
@@ -117,7 +117,7 @@ jobs:
 
       - name: Render Helm (${{ matrix.env }})
         run: |
-          helm template docke-web-api $CHART_PATH \
+          helm template fraud-poc-api $CHART_PATH \
             -f $CHART_PATH/values-${{ matrix.env }}.yaml \
             > rendered-${{ matrix.env }}.yaml
 

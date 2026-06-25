@@ -1,0 +1,21 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is in .gitignore – never commit it.
+
+aws_region   = "af-south-1"
+project_name = "fraud_poc_project"
+environment  = "dev"
+
+# GitHub repo allowed to assume the IAM role via OIDC.
+github_org  = "your-github-org"
+github_repo = "training"
+
+# Set false if the GitHub OIDC provider already exists in your AWS account.
+create_oidc_provider = true
+
+# Must match AWSSecretName in appsettings.LOC.json and the Dockerfile CMD.
+secret_name = "credit-plrcre-npr/fraud_poc_project_K8s/dev"
+
+# PostgreSQL credentials seeded into Secrets Manager.
+# In CI, supply db_password via TF_VAR_db_password env var instead.
+db_username = "therrons"
+db_password = "therrons"

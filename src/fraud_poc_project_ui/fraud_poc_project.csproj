@@ -1,0 +1,76 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <DocumentationFile>C:\Development\Therron\training\src\fraud_poc_project.xml</DocumentationFile>
+        <UserSecretsId>ff8b7950-3516-4b83-9e03-9af24f59945e</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Fraud\Dto\**" />
+      <Compile Remove="Fraud\Mapping\**" />
+      <Compile Remove="Fraud\Models\**" />
+      <Compile Remove="Fraud\Repository\**" />
+      <Compile Remove="Fraud\Rules\**" />
+      <Content Remove="Fraud\Dto\**" />
+      <Content Remove="Fraud\Mapping\**" />
+      <Content Remove="Fraud\Models\**" />
+      <Content Remove="Fraud\Repository\**" />
+      <Content Remove="Fraud\Rules\**" />
+      <EmbeddedResource Remove="Fraud\Dto\**" />
+      <EmbeddedResource Remove="Fraud\Mapping\**" />
+      <EmbeddedResource Remove="Fraud\Models\**" />
+      <EmbeddedResource Remove="Fraud\Repository\**" />
+      <EmbeddedResource Remove="Fraud\Rules\**" />
+      <None Remove="Fraud\Dto\**" />
+      <None Remove="Fraud\Mapping\**" />
+      <None Remove="Fraud\Models\**" />
+      <None Remove="Fraud\Repository\**" />
+      <None Remove="Fraud\Rules\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="tmpConn_strings.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="CapitecRootCA.cer" />
+      <None Remove="CapitecRootCA.crt" />
+      <None Remove="CapitecRootCA.pem" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.32" />
+      <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.4.16" />
+      <PackageReference Include="Confluent.Kafka" Version="2.3.0" />
+      <PackageReference Include="FluentValidation" Version="11.5.1" />
+      <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.1" />
+      <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.14" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
+      <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.3.0" />
+      <PackageReference Include="Microsoft.OpenApi" Version="1.6.14" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+      <PackageReference Include="Serilog" Version="3.1.1" />
+      <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+      <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+      <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+      <PackageReference Include="Serilog.Formatting.Compact" Version="2.0.0" />
+      <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+      <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
+      <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+      <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.3.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.6.2" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\fraud_poc_project_repo\fraud_poc_project_repo.csproj" />
+    </ItemGroup>
+</Project>

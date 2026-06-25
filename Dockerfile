@@ -2,10 +2,10 @@
 # 0. Global build arguments
 ############################################################
 # pass default value for argument to avoid build-time errors, can be overridden at runtime
-ARG APP_DLL=docke_web_Api.dll  
+ARG APP_DLL=fraud_poc_project.dll
 
 # pass default value for argument to avoid build-time errors, can be overridden at runtime
-ARG APP_PORT=8080 
+ARG APP_PORT=8080
 
 ############################################################
 # 1. Base runtime image
@@ -16,7 +16,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 # if not redeclared, build will fail with "APP_PORT not found" error since it's only defined in the build stage
 # when redeclared, pulls the value from the global scope where it was originally defined, so we don't need to hardcode it again here
 
-ARG APP_PORT  
+ARG APP_PORT
 
 # Create non-root user (K8s best practice)
 RUN useradd \
@@ -40,6 +40,18 @@ ENV ASPNETCORE_URLS="http://0.0.0.0:${APP_PORT}" \
     DOTNET_RUNNING_IN_CONTAINER=true \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
+# ── PostgreSQL credentials ────────────────────────────────────────────────────
+# These are declared empty here so Docker knows they exist as env var slots.
+# Real values are NEVER baked into the image – they are injected at `docker run`
+# time via -e flags (set by the GitHub Actions workflow from Secrets Manager).
+# If left empty at runtime, Program.cs falls back to the Secrets Manager SDK.
+ENV DB_USERNAME="" \
+    DB_PASSWORD="" \
+    DB_HOST="localhost" \
+    DB_PORT="5432" \
+    DB_NAME="fraud_db" \
+    AWSRegion=""
+
 EXPOSE ${APP_PORT}
 
 ############################################################
@@ -57,10 +69,10 @@ COPY . .
 #RUN echo "printing nuget-config image tree structure" && ls -la /repo/nuget-config
 
 # Restore & build
-RUN dotnet restore /repo/src/docke_web_Api.csproj --configfile /repo/nuget-config/NuGet.config
+RUN dotnet restore /repo/src/fraud_poc_project.csproj --configfile /repo/nuget-config/NuGet.config
 
 # explicitly switch off restore otherwise it will try to restore again and fail due to missing credentials (since we won't have access to the secret at build time)
-RUN dotnet publish /repo/src/docke_web_Api.csproj -c Release -o /repo/publish --no-restore /p:UseAppHost=false
+RUN dotnet publish /repo/src/fraud_poc_project.csproj -c Release -o /repo/publish --no-restore /p:UseAppHost=false
 
 ############################################################
 # 3. Final runtime image
@@ -70,7 +82,7 @@ FROM base AS final
 # ARG is scope based and must therefore be re-declared in this stage
 # if not redeclared, build will fail with "APP_PORT not found" error since it's only defined in the build stage
 # when redeclared, pulls the value from the global scope where it was originally defined, so we don't need to hardcode it again here
-ARG APP_DLL 
+ARG APP_DLL
 
 WORKDIR /repo
 
@@ -93,5 +105,6 @@ USER appuser
 # ENTRYPOINT required for K8s
 ENTRYPOINT ["sh", "-c", "dotnet /repo/${APP_DLL}"]
 
-# CMD can be overridden by K8s args
-CMD ["--write-dir", "/repo/data", "--AWSSecretName", "docke_web_api_k8s", "--AWSRegion", "us-east-1"]
+# CMD can be overridden by K8s args or docker run arguments.
+# DB_USERNAME and DB_PASSWORD are injected via -e at run time, not here.
+CMD ["--write-dir", "/repo/data"]

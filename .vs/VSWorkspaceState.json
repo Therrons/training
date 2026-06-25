@@ -1,12 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\.claude-flow",
-    "\\charts",
     "\\charts\\docke-web-api",
-    "\\src",
-    "\\src\\database"
+    "\\src"
   ],
-  "SelectedNode": "\\docker-compose.yml",
+  "SelectedNode": "\\src",
   "PreviewInSolutionExplorer": false
 }

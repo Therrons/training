@@ -23,14 +23,28 @@
 /src/CapitecRootCA.cer
 /src/CapitecRootCA.crt
 /src/CapitecRootCA.pem
-/src/.vs/docke_web_Api/v18
-/src/.vs/docke_web_Api/FileContentIndex
+/src/.vs/fraud_poc_project/v18
+/src/.vs/fraud_poc_project/FileContentIndex
 /src/.vs/ProjectEvaluation
-/src/.vs/docke_web_Api/config
+/src/.vs/fraud_poc_project/config
 /.vs
 /src/.vs
-/docke_web_Api_models/obj
-/docke_web_Api_models/bin
+/fraud_poc_project_models/obj
+/fraud_poc_project_models/bin
 
 # Local secrets — never commit
 .env
+
+# Terraform – never commit state, lock, or real var files
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+terraform.tfvars
+# RooCode files
+.roomodes
+.roo/
+# Keep memory bank files
+!memory-bank/
+!memory-bank/*.md
+# SPARC template specific ignores

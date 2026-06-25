@@ -1,0 +1,17 @@
+C:\Development\Therron\training\src\fraud_poc_project_buss\bin\Debug\net8.0\fraud_poc_project_models.staticwebassets.endpoints.json
+C:\Development\Therron\training\src\fraud_poc_project_buss\bin\Debug\net8.0\fraud_poc_project_buss.deps.json
+C:\Development\Therron\training\src\fraud_poc_project_buss\bin\Debug\net8.0\fraud_poc_project_buss.dll
+C:\Development\Therron\training\src\fraud_poc_project_buss\bin\Debug\net8.0\fraud_poc_project_buss.pdb
+C:\Development\Therron\training\src\fraud_poc_project_buss\bin\Debug\net8.0\fraud_poc_project_models.dll
+C:\Development\Therron\training\src\fraud_poc_project_buss\bin\Debug\net8.0\fraud_poc_project_models.pdb
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_poc_project_buss.csproj.AssemblyReference.cache
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_poc_project_buss.GeneratedMSBuildEditorConfig.editorconfig
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_poc_project_buss.AssemblyInfoInputs.cache
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_poc_project_buss.AssemblyInfo.cs
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_poc_project_buss.csproj.CoreCompileInputs.cache
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_poc_project_buss.sourcelink.json
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_po.6E870584.Up2Date
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_poc_project_buss.dll
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\refint\fraud_poc_project_buss.dll
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\fraud_poc_project_buss.pdb
+C:\Development\Therron\training\src\fraud_poc_project_buss\obj\Debug\net8.0\ref\fraud_poc_project_buss.dll

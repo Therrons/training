@@ -1,0 +1,112 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{40555FDF-AF2F-4673-B84D-EF5F4831D612}"
+	ProjectSection(SolutionItems) = preProject
+		..\.dockerignore = ..\.dockerignore
+		..\.env = ..\.env
+		..\.env.example = ..\.env.example
+		..\.gitignore = ..\.gitignore
+		..\docker-compose.yml = ..\docker-compose.yml
+		..\Dockerfile = ..\Dockerfile
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fraud_poc_project_ui", "fraud_poc_project_ui", "{733D2A69-2835-4A9C-8D5F-6A649A6B5EFA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fraud_poc_project_buss", "fraud_poc_project_buss", "{AE82A68B-6F65-4AE0-AC6F-84E88A2979E0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fraud_poc_project_repo", "fraud_poc_project_repo", "{A585FE4A-A360-4318-AA55-C853F3CC0452}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fraud_poc_project_models", "fraud_poc_project_models", "{FA542CC3-B924-4FC5-B000-7A1D5FC6B1F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_buss", "fraud_poc_project_buss\fraud_poc_project_buss.csproj", "{4C4A38B7-086C-5862-67CE-42F3325A74E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_models", "fraud_poc_project_models\fraud_poc_project_models.csproj", "{CB728AAF-3479-FBF9-2D12-39B6864ED3B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_repo", "fraud_poc_project_repo\fraud_poc_project_repo.csproj", "{D39EF5F5-6899-125C-FDEE-D56B734FEC82}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project", "fraud_poc_project_ui\fraud_poc_project.csproj", "{91B3831A-B9CB-FE88-1002-2F2ED41228B9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "charts", "charts", "{0F47147B-1D71-457F-94FA-BC35B816C594}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nginx.conf", "nginx.conf", "{018498CF-9236-4769-89B4-B484D901CCB2}"
+	ProjectSection(SolutionItems) = preProject
+		..\nginx.conf\nginx.conf = ..\nginx.conf\nginx.conf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "terraform", "terraform", "{E0524E2C-38C5-4A76-82C3-99BC8F39AD67}"
+	ProjectSection(SolutionItems) = preProject
+		..\terraform\main.tf = ..\terraform\main.tf
+		..\terraform\outputs.tf = ..\terraform\outputs.tf
+		..\terraform\terraform.tfvars.example = ..\terraform\terraform.tfvars.example
+		..\terraform\variables.tf = ..\terraform\variables.tf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fraud-poc-api", "fraud-poc-api", "{EA733F44-C38E-4BCC-9F59-2E43B19AC19E}"
+	ProjectSection(SolutionItems) = preProject
+		..\charts\fraud-poc-api\Chart.yaml = ..\charts\fraud-poc-api\Chart.yaml
+		..\charts\fraud-poc-api\values-dev.yaml = ..\charts\fraud-poc-api\values-dev.yaml
+		..\charts\fraud-poc-api\values-prod.yaml = ..\charts\fraud-poc-api\values-prod.yaml
+		..\charts\fraud-poc-api\values-staging.yaml = ..\charts\fraud-poc-api\values-staging.yaml
+		..\charts\fraud-poc-api\values.schema.json = ..\charts\fraud-poc-api\values.schema.json
+		..\charts\fraud-poc-api\values.yaml = ..\charts\fraud-poc-api\values.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{737634C6-C06C-4B58-A855-6A5A9CD052C5}"
+	ProjectSection(SolutionItems) = preProject
+		..\charts\fraud-poc-api\templates\deployment.yaml = ..\charts\fraud-poc-api\templates\deployment.yaml
+		..\charts\fraud-poc-api\templates\externalsecret.yaml = ..\charts\fraud-poc-api\templates\externalsecret.yaml
+		..\charts\fraud-poc-api\templates\ingress.yaml = ..\charts\fraud-poc-api\templates\ingress.yaml
+		..\charts\fraud-poc-api\templates\middleware-cors.yaml = ..\charts\fraud-poc-api\templates\middleware-cors.yaml
+		..\charts\fraud-poc-api\templates\namespace.yaml = ..\charts\fraud-poc-api\templates\namespace.yaml
+		..\charts\fraud-poc-api\templates\NOTES.txt = ..\charts\fraud-poc-api\templates\NOTES.txt
+		..\charts\fraud-poc-api\templates\pvc.yaml = ..\charts\fraud-poc-api\templates\pvc.yaml
+		..\charts\fraud-poc-api\templates\service.yaml = ..\charts\fraud-poc-api\templates\service.yaml
+		..\charts\fraud-poc-api\templates\serviceaccount.yaml = ..\charts\fraud-poc-api\templates\serviceaccount.yaml
+		..\charts\fraud-poc-api\templates\statefulset.yaml = ..\charts\fraud-poc-api\templates\statefulset.yaml
+		..\charts\fraud-poc-api\templates\_helpers.tpl = ..\charts\fraud-poc-api\templates\_helpers.tpl
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C4A38B7-086C-5862-67CE-42F3325A74E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C4A38B7-086C-5862-67CE-42F3325A74E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C4A38B7-086C-5862-67CE-42F3325A74E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C4A38B7-086C-5862-67CE-42F3325A74E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB728AAF-3479-FBF9-2D12-39B6864ED3B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB728AAF-3479-FBF9-2D12-39B6864ED3B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB728AAF-3479-FBF9-2D12-39B6864ED3B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB728AAF-3479-FBF9-2D12-39B6864ED3B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D39EF5F5-6899-125C-FDEE-D56B734FEC82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D39EF5F5-6899-125C-FDEE-D56B734FEC82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D39EF5F5-6899-125C-FDEE-D56B734FEC82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D39EF5F5-6899-125C-FDEE-D56B734FEC82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4C4A38B7-086C-5862-67CE-42F3325A74E7} = {AE82A68B-6F65-4AE0-AC6F-84E88A2979E0}
+		{CB728AAF-3479-FBF9-2D12-39B6864ED3B1} = {FA542CC3-B924-4FC5-B000-7A1D5FC6B1F7}
+		{D39EF5F5-6899-125C-FDEE-D56B734FEC82} = {A585FE4A-A360-4318-AA55-C853F3CC0452}
+		{91B3831A-B9CB-FE88-1002-2F2ED41228B9} = {733D2A69-2835-4A9C-8D5F-6A649A6B5EFA}
+		{0F47147B-1D71-457F-94FA-BC35B816C594} = {40555FDF-AF2F-4673-B84D-EF5F4831D612}
+		{018498CF-9236-4769-89B4-B484D901CCB2} = {40555FDF-AF2F-4673-B84D-EF5F4831D612}
+		{E0524E2C-38C5-4A76-82C3-99BC8F39AD67} = {40555FDF-AF2F-4673-B84D-EF5F4831D612}
+		{EA733F44-C38E-4BCC-9F59-2E43B19AC19E} = {0F47147B-1D71-457F-94FA-BC35B816C594}
+		{737634C6-C06C-4B58-A855-6A5A9CD052C5} = {EA733F44-C38E-4BCC-9F59-2E43B19AC19E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C80A3F97-0960-4DA9-97DA-A297A5DBDCD0}
+	EndGlobalSection
+EndGlobal
