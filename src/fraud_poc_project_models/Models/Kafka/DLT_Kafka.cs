@@ -1,4 +1,7 @@
-﻿namespace fraud_poc_project_models.Models.Kafka
+﻿using System.Formats.Asn1;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace fraud_poc_project_models.Models.Kafka
 {
     public class DLT_Kafka
     {

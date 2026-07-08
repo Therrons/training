@@ -19,5 +19,23 @@
             Retrieve all fraud rule results for a specific fraud event.
             </summary>
         </member>
+        <member name="T:fraud_poc_project.Controllers.LoadSimulatorController">
+            <summary>
+            Produces synthetic transaction events to Kafka to simulate load.
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Controllers.LoadSimulatorController.Simulate(System.Int32,System.Double,System.Threading.CancellationToken)">
+            <summary>
+            Produce a batch of synthetic transaction events to the fraud topic.
+            </summary>
+            <param name="count">Number of events to produce (1–1000, default 50).</param>
+            <param name="highFraudRatio">Fraction of events that should look fraudulent (0.0–1.0, default 0.2).</param>
+            <param name="cancellationToken">Cancellation token.</param>
+        </member>
+        <member name="M:fraud_poc_project.Controllers.LoadSimulatorController.Preview(System.Boolean)">
+            <summary>
+            Produce a single synthetic transaction event and return it as a preview.
+            </summary>
+        </member>
     </members>
 </doc>

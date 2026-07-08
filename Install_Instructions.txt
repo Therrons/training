@@ -1,0 +1,2 @@
+1. Rancher Desktop installed
+2.Kafka and Traefik installed (run attached docker-compose.yml)

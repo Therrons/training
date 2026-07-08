@@ -1,38 +1,27 @@
 using Amazon.SecretsManager;
 using Amazon.SecretsManager.Model;
 using fraud_poc_project_models.Models.Database;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Serilog;
 using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace fraud_poc_project.Configuration
 {
-    public class SecretsConfiguration
+    public static class SecretsConfiguration
     {
-        private readonly IAmazonSecretsManager _secretsManager;
-
-        public SecretsConfiguration(IAmazonSecretsManager secretsManager)
+        public static void ConfigureSecrets(this WebApplicationBuilder builder)
         {
-            _secretsManager = secretsManager;
-        }
-
-        public async Task<DB_Keys> GetSecretAsync(string secretName)
-        {
-            try
+            if (builder.Environment.EnvironmentName.Equals("LOC", StringComparison.InvariantCultureIgnoreCase))
             {
-                var response = await _secretsManager.GetSecretValueAsync(
-                    new GetSecretValueRequest { SecretId = secretName });
-
-                if (string.IsNullOrEmpty(response.SecretString))
-                    throw new InvalidOperationException($"Secret '{secretName}' is empty.");
-
-                return JsonConvert.DeserializeObject<DB_Keys>(response.SecretString)
-                    ?? throw new InvalidOperationException($"Failed to deserialise secret '{secretName}'.");
-            }
-            catch (AmazonSecretsManagerException e)
-            {
-                Console.WriteLine($"Error retrieving DB_Keys from Secrets Manager: {e.Message}");
-                throw;
+                builder.Configuration.AddJsonFile("secrets.json", true, true);
+                builder.Configuration.AddEnvironmentVariables();
+                return;
             }
         }
     }

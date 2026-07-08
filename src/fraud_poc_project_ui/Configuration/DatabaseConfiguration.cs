@@ -20,7 +20,7 @@ namespace fraud_poc_project.Configuration
 
             if (Directory.Exists(scriptsPath))
             {
-                InitializeDatabase(connectionString, scriptsPath, Log.Logger);
+                InitializeDatabase(connectionString, scriptsPath, Log.Logger, configuration);
                 Log.Information("Database initialization completed.");
             }
             else
@@ -29,7 +29,7 @@ namespace fraud_poc_project.Configuration
             }
         }
 
-        private static void InitializeDatabase(string connectionString, string scriptsPath, Serilog.ILogger logger)
+        private static void InitializeDatabase(string connectionString, string scriptsPath, ILogger logger, IConfiguration configuration)
         {
             try
             {
@@ -46,6 +46,10 @@ namespace fraud_poc_project.Configuration
                 {
                     logger.Information("Executing script: {FileName}", Path.GetFileName(sqlFile));
                     var sql = File.ReadAllText(sqlFile);
+
+                    // insert values into placeholders in the SQL script
+                    sql = sql.Replace("${Schema}", configuration["Database:DBSchema"] ?? "fr");
+                    sql = sql.Replace("{db_user}", Environment.GetEnvironmentVariable("DB_USERNAME") ?? "public");
 
                     using var command = new Npgsql.NpgsqlCommand(sql, connection);
                     command.ExecuteNonQuery();

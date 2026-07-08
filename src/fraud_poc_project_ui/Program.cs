@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,8 +30,6 @@ public class Program
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        
         
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
@@ -39,37 +39,16 @@ public class Program
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
 
-        builder.Services.AddSerilog(); // Add Serilog services to the DI container
-
-        builder.Host.UseSerilog(); // Use Serilog for logging
-
-        bool isLocal = builder.Environment.EnvironmentName.Equals("LOC", StringComparison.InvariantCultureIgnoreCase);
-        if (isLocal)
-            builder.Configuration.AddEnvironmentVariables();
+        builder.Services.AddSerilog();  // Add Serilog services to the DI container
+        builder.Host.UseSerilog();      // Use Serilog for logging
+       
+        builder.ConfigureSecrets();     // Load secrets from AWS Secrets Manager and add them to the configuration
+        builder.AddConfigurations();    // Add configurations from appsettings.json, environment variables, and command line arguments
+        builder.AddServices_AddDI();          // Add application services to the DI container
 
         if (args != null && args.Length > 0)
             builder.Configuration.AddCommandLine(args);
-
-        var envVariables = new Environment_Variables().Get_Environment_Values(builder);
-        var connectionString = "";
-
-        if (!isLocal)
-            connectionString = $"Server={envVariables.DBHost};Port={envVariables.DBPort};Database={envVariables.DBName};" +
-                               $"User Id={envVariables.DBUsername};Password={envVariables.DBPassword};" +
-                               "Pooling=true;Connection Lifetime=0;SSLMode=Require;Trust Server Certificate=true;";
-        else
-            connectionString = $"Server={envVariables.DBHost};Database={envVariables.DBName};" +
-                               $"User Id={envVariables.DBUsername};Password={envVariables.DBPassword};" +
-                               "Pooling=true;Connection Lifetime=0;SSLMode=Disable;Trust Server Certificate=true;";
-
-
-        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-        {
-            ["ConnectionStrings:PostgreSQL"] = connectionString
-        });
-
-        builder.Services.AddDbContextPool<DB_Connection_Read_Write>(options => options.UseNpgsql(connectionString));
-
+                
         // ── Database initialization ───────────────────────────
         var createDbFlag = builder.Configuration["Database:CreateDatabaseOnStartup"]?.ToLowerInvariant();
         if (createDbFlag == "yes" || createDbFlag == "true")
@@ -78,26 +57,30 @@ public class Program
         }
 
         var time_docker_build = DateTime.Now.ToString();
-
+                
         var writeDir =
             builder.Configuration["write-dir"] ??
             Environment.GetEnvironmentVariable("write_dir") ??
-            "/repo/data";
+            "/repo/data"; // Default write directory once running in K8s -  if not specified in configuration or environment variable
 
         var version_docker_build = Environment.GetEnvironmentVariable("Build_Version") ??
             "Docker Build Version: UNKNOWN";
-
-        if (string.IsNullOrWhiteSpace(writeDir))
-            throw new InvalidOperationException("A non-empty --write-dir or WRITE_DIR is required.");
+               
 
         if (!Directory.Exists(writeDir)) Directory.CreateDirectory(writeDir);
 
+        // ==================================================
+        // ==================================================
+        // use for testing purposes only, to write a file to the host machine   
         file_Path_Name = Path.Combine(writeDir, FileName);
+        // ==================================================
+        // ==================================================
 
+        var isLocal = builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
 
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddHealthChecks();
+        builder.Services.AddControllers();          // Add controller services to the DI container  
+        builder.Services.AddEndpointsApiExplorer(); // Add API explorer services to the DI container    
+        builder.Services.AddHealthChecks();         // Add health check services to the DI container
 
         builder.Services.AddSwaggerGen(c =>
         {
@@ -179,17 +162,13 @@ public class Program
             });
         });
 
-        app.ConfigureHealthChecks();
-
+        app.ConfigureHealthChecks(); // Configure health check endpoints for liveness and readiness probes
+        
         if (!isLocal)
-        {
-            app.UseSwaggerUI(settings => settings.SupportedSubmitMethods());
-            app.Run("http://0.0.0.0:8080");
-        }
+            app.UseSwaggerUI(settings => settings.SupportedSubmitMethods(Array.Empty<SubmitMethod>())); // Read - only documentation in production
         else
-        {
             app.UseSwaggerUI();
-            app.Run();
-        }
+
+        app.Run();
     }
 }
