@@ -4,12 +4,12 @@
         <name>fraud_poc_project</name>
     </assembly>
     <members>
-        <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_models.Dto.FraudQueryDto)">
+        <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
             <summary>
             Query fraud-evaluated transaction events by date range and optional filters.
             </summary>
         </member>
-        <member name="M:fraud_poc_project.Controllers.FraudController.QueryFlaggedEvents(fraud_poc_project_models.Dto.FraudQueryDto)">
+        <member name="M:fraud_poc_project.Controllers.FraudController.QueryFlaggedEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
             <summary>
             Query only flagged transaction events by date range and optional filters.
             </summary>

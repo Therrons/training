@@ -1,9 +1,14 @@
-using fraud_poc_project_models.Models;
-using fraud_poc_project_models.Models.Fraud;
+using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Helper;
+using fraud_poc_project_buss.Models.Fraud;
+using fraud_poc_project_buss.Models.Kafka;
+using fraud_poc_project_repo.Connection;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Npgsql;
+using System.Data;
 
 namespace fraud_poc_project_repo
 {
@@ -12,16 +17,44 @@ namespace fraud_poc_project_repo
         private readonly string _connectionString;
         private readonly string _schema;
         private readonly ILogger<FraudRepository> _logger;
+        private readonly IDBConnection _dbConnection;
 
-        public FraudRepository(IConfiguration configuration, ILogger<FraudRepository> logger)
+        public FraudRepository(IConfiguration configuration,
+            ILogger<FraudRepository> logger,
+            IDBConnection dbConnection)
         {
             _connectionString = configuration.GetConnectionString("PostgreSQL")
                 ?? throw new InvalidOperationException("ConnectionStrings:PostgreSQL is not configured.");
             _schema = configuration["Database:Schema"] ?? "public";
             _logger = logger;
+            _dbConnection = dbConnection;
         }
 
-        public async Task<long> SaveFraudEvaluationAsync(FraudEvaluationResult result)
+        public async Task<bool> CaptureErrorAsync(string correlationID, DLT_Kafka model)
+        {
+            var dbConnector = _dbConnection.DB_Connector;
+            if (dbConnector.State == ConnectionState.Closed) await dbConnector.OpenAsync().ConfigureAwait(false);
+
+            try
+            {
+                await using var command = new NpgsqlCommand($"CALL {_dbConnection.DB_Schema}.sp_insert_dlt_error(@topic_data, @topic_schema, @topic_name, @topic_dlt_name, @message_data, @error);", dbConnector);
+                command.Parameters.AddWithValue("@topic_data", model.Topic_Data);
+                command.Parameters.AddWithValue("@topic_schema", model.Topic_Schema);
+                command.Parameters.AddWithValue("@topic_name", model.Topic_Name);
+                command.Parameters.AddWithValue("@topic_dlt_name", model.Topic_DLT_Name);
+                command.Parameters.AddWithValue("@message_data", model.MessageData);
+                command.Parameters.AddWithValue("@error", model.Error);
+                await command.ExecuteScalarAsync().ConfigureAwait(false);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Correlation ID: {correlationID} - Failed to write Error to Database for error Model={model}", Guid.NewGuid(), JsonConvert.SerializeObject(model));
+                throw;
+            }
+        }
+
+        public async Task<long> SaveFraudEvaluationAsync(FraudEventRecord result)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
@@ -32,16 +65,13 @@ namespace fraud_poc_project_repo
                 long fraudEventId;
 
                 await using (var cmd = new NpgsqlCommand($"CALL \"{_schema}\".sp_insert_fraud_event(" +
-                    "@kafka_topic, @kafka_partition, @kafka_offset, " +
-                    "@transaction_id, @customer_id, @account_id, " +
+                    "@kafka_topic, @transaction_id, @customer_id, @account_id, " +
                     "@amount, @currency, @merchant_name, @merchant_category, " +
                     "@transaction_type, @channel, @country_code, @transaction_time, " +
                     "@is_flagged, @fraud_score, @flagged_reason, @p_fraud_event_id)", conn, tx))
                 {
                     var e = result.Event;
                     cmd.Parameters.AddWithValue("kafka_topic", e.KafkaTopic);
-                    cmd.Parameters.AddWithValue("kafka_partition", e.KafkaPartition);
-                    cmd.Parameters.AddWithValue("kafka_offset", e.KafkaOffset);
                     cmd.Parameters.AddWithValue("transaction_id", e.TransactionId);
                     cmd.Parameters.AddWithValue("customer_id", e.CustomerId);
                     cmd.Parameters.AddWithValue("account_id", e.AccountId);
@@ -107,7 +137,7 @@ namespace fraud_poc_project_repo
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryParameters query)
+        public async Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query)
         {
             var results = new List<FraudEventRecord>();
 
@@ -134,9 +164,36 @@ namespace fraud_poc_project_repo
             return results;
         }
 
-        public async Task<IEnumerable<FraudRuleResultRecord>> GetRuleResultsForEventAsync(long fraudEventId)
+        public async Task<IEnumerable<FraudEventRecord>> QueryFlaggedOnlyFraudEventsAsync(FraudQueryDto query)
         {
-            var results = new List<FraudRuleResultRecord>();
+            var results = new List<FraudEventRecord>();
+
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            await using var cmd = new NpgsqlCommand(
+                $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
+                "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
+                conn);
+            cmd.Parameters.AddWithValue("date_from", query.DateFrom);
+            cmd.Parameters.AddWithValue("date_to", query.DateTo);
+            cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("is_flagged_only", true);
+            cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                results.Add(MapFraudEventRecord(reader));
+            }
+
+            return results;
+        }
+
+        public async Task<IEnumerable<FraudRuleSetRecord>> GetRuleResultsForEventAsync(long fraudEventId)
+        {
+            var results = new List<FraudRuleSetRecord>();
 
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
@@ -154,39 +211,36 @@ namespace fraud_poc_project_repo
             return results;
         }
 
-        private static FraudRuleResultRecord MapFraudRuleResultRecord(NpgsqlDataReader r) => new()
+        private static FraudRuleSetRecord MapFraudRuleResultRecord(NpgsqlDataReader r) => new()
         {
-            Id = r.GetInt64(r.GetOrdinal("id")),
             FraudEventId = r.GetInt64(r.GetOrdinal("fraud_event_id")),
-            RuleCode = r.GetString(r.GetOrdinal("rule_code")),
-            RuleDescription = r.IsDBNull(r.GetOrdinal("rule_description")) ? null : r.GetString(r.GetOrdinal("rule_description")),
+            RuleCode = r.DBNullString("rule_code"),
+            RuleDescription = r.DBNullString("rule_description"),
             IsTriggered = r.GetBoolean(r.GetOrdinal("is_triggered")),
-            ScoreContribution = r.GetDecimal(r.GetOrdinal("score_contribution")),
-            EvaluatedAt = r.GetDateTime(r.GetOrdinal("evaluated_at"))
+            ScoreContribution = r.GetDecimal(r.GetOrdinal("score_contribution"))
         };
 
         private static FraudEventRecord MapFraudEventRecord(NpgsqlDataReader r) => new()
         {
-            Id = r.GetInt64(r.GetOrdinal("id")),
-            KafkaTopic = r.GetString(r.GetOrdinal("kafka_topic")),
-            KafkaPartition = r.GetInt32(r.GetOrdinal("kafka_partition")),
-            KafkaOffset = r.GetInt64(r.GetOrdinal("kafka_offset")),
-            ConsumedAt = r.GetDateTime(r.GetOrdinal("consumed_at")),
-            TransactionId = r.GetGuid(r.GetOrdinal("transaction_id")),
-            CustomerId = r.GetString(r.GetOrdinal("customer_id")),
-            AccountId = r.GetString(r.GetOrdinal("account_id")),
-            Amount = r.GetDecimal(r.GetOrdinal("amount")),
-            Currency = r.GetString(r.GetOrdinal("currency")),
-            MerchantName = r.IsDBNull(r.GetOrdinal("merchant_name")) ? null : r.GetString(r.GetOrdinal("merchant_name")),
-            MerchantCategory = r.IsDBNull(r.GetOrdinal("merchant_category")) ? null : r.GetString(r.GetOrdinal("merchant_category")),
-            TransactionType = r.GetString(r.GetOrdinal("transaction_type")),
-            Channel = r.IsDBNull(r.GetOrdinal("channel")) ? null : r.GetString(r.GetOrdinal("channel")),
-            CountryCode = r.IsDBNull(r.GetOrdinal("country_code")) ? null : r.GetString(r.GetOrdinal("country_code")),
-            TransactionTime = r.GetDateTime(r.GetOrdinal("transaction_time")),
+            Event = new TransactionEvent
+            {
+                Id = r.GetInt64(r.GetOrdinal("id")),
+                KafkaTopic = r.DBNullString("kafka_topic"),
+                TransactionId = r.GetGuid(r.GetOrdinal("transaction_id")),
+                CustomerId = r.DBNullString("customer_id"),
+                AccountId = r.DBNullString("account_id"),
+                Amount = r.GetDecimal(r.GetOrdinal("amount")),
+                Currency = r.DBNullString("currency"),
+                MerchantName = r.DBNullString("merchant_name"),
+                MerchantCategory = r.DBNullString("merchant_category"),
+                TransactionType = r.DBNullString("transaction_type"),
+                Channel = r.DBNullString("channel"),
+                CountryCode = r.DBNullString("country_code"),
+                TransactionTime = r.GetDateTime(r.GetOrdinal("transaction_time")),
+            },
             IsFlagged = r.GetBoolean(r.GetOrdinal("is_flagged")),
             FraudScore = r.GetDecimal(r.GetOrdinal("fraud_score")),
-            FlaggedReason = r.IsDBNull(r.GetOrdinal("flagged_reason")) ? null : r.GetString(r.GetOrdinal("flagged_reason")),
-            TimeLogged = r.GetDateTime(r.GetOrdinal("time_logged"))
+            FlaggedReason = r.DBNullString("flagged_reason")
         };
     }
 }

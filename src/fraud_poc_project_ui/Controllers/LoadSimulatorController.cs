@@ -1,10 +1,10 @@
-using Credit.Kafka.Messaging.Producers;
-using fraud_poc_project.Kafka.Events;
-using fraud_poc_project_models.Models.Settings;
+using fraud_poc_project.Models;
+using fraud_poc_project_buss.Models.Fraud;
+using fraud_poc_project_buss.Models.Kafka;
+using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,17 +22,17 @@ namespace fraud_poc_project.Controllers
         private static readonly string[] MerchantCategories = { "retail", "grocery", "gambling", "crypto", "fuel", "restaurant", "travel", "money_transfer" };
         private static readonly string[] CountryCodes = { "ZA", "US", "GB", "NG", "DE", "CN" };
 
-        private readonly IDomainProducer _producer;
-        private readonly AppSettings _appSettings;
+        private readonly IFraudProducer _producer;
+        private readonly FraudKafkaConsumerSettings _consumerSettings;
         private readonly ILogger<LoadSimulatorController> _logger;
 
         public LoadSimulatorController(
-            IDomainProducer producer,
-            AppSettings appSettings,
+            IFraudProducer producer,
+            FraudKafkaConsumerSettings consumerSettings,
             ILogger<LoadSimulatorController> logger)
         {
             _producer = producer;
-            _appSettings = appSettings;
+            _consumerSettings = consumerSettings;
             _logger = logger;
         }
 
@@ -54,9 +54,6 @@ namespace fraud_poc_project.Controllers
             if (highFraudRatio < 0.0 || highFraudRatio > 1.0)
                 return BadRequest("highFraudRatio must be between 0.0 and 1.0.");
 
-            var topic = _appSettings.IncomingFraudConsumerOptions?.FraudTopic
-                ?? throw new InvalidOperationException("FraudTopic is not configured.");
-
             var rng = new Random();
             int produced = 0;
             int failed = 0;
@@ -69,7 +66,7 @@ namespace fraud_poc_project.Controllers
                 bool isFraudulent = rng.NextDouble() < highFraudRatio;
                 var @event = BuildEvent(rng, isFraudulent);
 
-                bool ok = await _producer.ProduceAsync(topic, @event.TransactionId.ToString(), @event);
+                bool ok = await _producer.ProduceAsync(@event, cancellationToken);
                 if (ok)
                     produced++;
                 else
@@ -89,7 +86,7 @@ namespace fraud_poc_project.Controllers
                 Requested = count,
                 Produced = produced,
                 Failed = failed,
-                Topic = topic
+                Topic = _consumerSettings.TransactionTopic
             });
         }
 
@@ -97,12 +94,12 @@ namespace fraud_poc_project.Controllers
         /// Produce a single synthetic transaction event and return it as a preview.
         /// </summary>
         [HttpGet("preview")]
-        public ActionResult<FraudTransactionDomainEvent> Preview([FromQuery] bool fraudulent = false)
+        public ActionResult<TransactionEvent> Preview([FromQuery] bool fraudulent = false)
         {
             return Ok(BuildEvent(new Random(), fraudulent));
         }
 
-        private static FraudTransactionDomainEvent BuildEvent(Random rng, bool fraudulent)
+        private static TransactionEvent BuildEvent(Random rng, bool fraudulent)
         {
             // Pick a random customer from a pool so some customers appear repeatedly
             var customerId = $"CUST-{rng.Next(1, 200):D4}";
@@ -139,15 +136,9 @@ namespace fraud_poc_project.Controllers
             }
 
             var correlationId = Guid.NewGuid();
-            return new FraudTransactionDomainEvent
+            return new TransactionEvent
             {
-                Metadata = new Credit.Kafka.Messaging.Contracts.DomainEventMetadata
-                {
-                    PublishedAt = DateTime.UtcNow,
-                    Type = FraudTransactionDomainEvent.EventType,
-                    Version = FraudTransactionDomainEvent.EventVersion,
-                    CorrelationId = correlationId
-                },
+                CorrelationId = correlationId,
                 TransactionId = Guid.NewGuid(),
                 CustomerId = customerId,
                 AccountId = accountId,
@@ -163,13 +154,5 @@ namespace fraud_poc_project.Controllers
         }
 
         private static T Pick<T>(Random rng, T[] items) => items[rng.Next(items.Length)];
-    }
-
-    public class LoadSimulationResult
-    {
-        public int Requested { get; init; }
-        public int Produced { get; init; }
-        public int Failed { get; init; }
-        public string Topic { get; init; } = string.Empty;
     }
 }

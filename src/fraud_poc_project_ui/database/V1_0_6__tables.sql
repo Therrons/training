@@ -24,10 +24,6 @@ CREATE TABLE IF NOT EXISTS "${Schema}".fraud_event (
     id                  bigint       NOT NULL DEFAULT nextval('"${Schema}".fraud_event_id_seq'::regclass),
     -- Kafka envelope fields
     kafka_topic         VARCHAR(250) NOT NULL,
-    kafka_partition     INTEGER      NOT NULL DEFAULT 0,
-    kafka_offset        BIGINT       NOT NULL DEFAULT 0,
-    consumed_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    -- Transaction event payload
     transaction_id      UUID         NOT NULL,
     customer_id         VARCHAR(100) NOT NULL,
     account_id          VARCHAR(100) NOT NULL,
@@ -38,8 +34,7 @@ CREATE TABLE IF NOT EXISTS "${Schema}".fraud_event (
     transaction_type    VARCHAR(50)  NOT NULL,   -- e.g. POS, ATM, EFT, CNP
     channel             VARCHAR(50),              -- e.g. Online, InStore, ATM
     country_code        VARCHAR(10),
-    transaction_time    TIMESTAMP    NOT NULL,
-    -- Fraud evaluation outcome
+    transaction_time    TIMESTAMP    NOT NULL,  -- Fraud evaluation outcome
     is_flagged          BOOLEAN      NOT NULL DEFAULT FALSE,
     fraud_score         NUMERIC(5,2) NOT NULL DEFAULT 0,   -- 0-100 composite score
     flagged_reason      TEXT,
@@ -60,9 +55,6 @@ CREATE INDEX IF NOT EXISTS idx_fraud_event_transaction_time
 CREATE INDEX IF NOT EXISTS idx_fraud_event_is_flagged
     ON "${Schema}".fraud_event (is_flagged);
 
-CREATE INDEX IF NOT EXISTS idx_fraud_event_consumed_at
-    ON "${Schema}".fraud_event (consumed_at);
-
 
 /**================================**=================================================================**/
 -- Table: fraud_rule_result - individual rule evaluations for each fraud_event
@@ -73,8 +65,7 @@ CREATE TABLE IF NOT EXISTS "${Schema}".fraud_rule_result (
     rule_code       VARCHAR(100) NOT NULL,   -- e.g. HIGH_AMOUNT, VELOCITY, GEO_ANOMALY
     rule_description VARCHAR(500),
     is_triggered    BOOLEAN      NOT NULL DEFAULT FALSE,
-    score_contribution NUMERIC(5,2) NOT NULL DEFAULT 0,
-    evaluated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    score_contribution NUMERIC(5,2) NOT NULL DEFAULT 0
     CONSTRAINT fraud_rule_result_pkey PRIMARY KEY (id),
     CONSTRAINT fk_fraud_rule_result_event
         FOREIGN KEY (fraud_event_id) REFERENCES "${Schema}".fraud_event (id)

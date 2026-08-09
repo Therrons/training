@@ -9,23 +9,28 @@
     <PropertyGroup>
         <RestorePackagesPath>../src/nuget-packages</RestorePackagesPath>
     </PropertyGroup>
-    
-    <ItemGroup>
-        <Compile Remove="Connection\DB_Connection_Read.cs" />
-    </ItemGroup>
-
+      
     <ItemGroup>
         <PackageReference Include="AWSSDK.RDS" Version="4.0.21.6" />
+        <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
         <PackageReference Include="Npgsql" Version="8.0.3" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\fraud_poc_project_buss\fraud_poc_project_buss.csproj" />
-        <ProjectReference Include="..\fraud_poc_project_models\fraud_poc_project_models.csproj" />
+      <ProjectReference Include="..\fraud_poc_project_buss\fraud_poc_project_buss.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="Confluent.Kafka">
+        <HintPath>..\Kafka\src\nuget-packages\confluent.kafka\2.14.2\lib\net8.0\Confluent.Kafka.dll</HintPath>
+      </Reference>
       <Reference Include="Newtonsoft.Json">
         <HintPath>..\src\nuget-packages\newtonsoft.json\13.0.4\lib\net6.0\Newtonsoft.Json.dll</HintPath>
       </Reference>

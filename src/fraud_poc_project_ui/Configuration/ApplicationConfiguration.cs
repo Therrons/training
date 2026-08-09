@@ -12,6 +12,6 @@ namespace fraud_poc_project.Configuration
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName.ToUpper()}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
-       }
+        }
     }
 }

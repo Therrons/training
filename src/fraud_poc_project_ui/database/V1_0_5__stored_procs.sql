@@ -28,8 +28,6 @@ ALTER PROCEDURE "${Schema}".sp_insert_dlt_error(text, varchar, varchar, varchar,
 /**================================**===================================================**/
 CREATE OR REPLACE PROCEDURE "${Schema}".sp_insert_fraud_event(
     IN p_kafka_topic        varchar(250),
-    IN p_kafka_partition    integer,
-    IN p_kafka_offset       bigint,
     IN p_transaction_id     uuid,
     IN p_customer_id        varchar(100),
     IN p_account_id         varchar(100),
@@ -50,15 +48,13 @@ LANGUAGE 'plpgsql'
 AS $BODY$
 BEGIN
     INSERT INTO "${Schema}".fraud_event (
-        kafka_topic, kafka_partition, kafka_offset,
-        transaction_id, customer_id, account_id,
+        kafka_topic, transaction_id, customer_id, account_id,
         amount, currency, merchant_name, merchant_category,
         transaction_type, channel, country_code, transaction_time,
         is_flagged, fraud_score, flagged_reason
     )
     VALUES (
-        p_kafka_topic, p_kafka_partition, p_kafka_offset,
-        p_transaction_id, p_customer_id, p_account_id,
+        p_kafka_topic, p_transaction_id, p_customer_id, p_account_id,
         p_amount, p_currency, p_merchant_name, p_merchant_category,
         p_transaction_type, p_channel, p_country_code, p_transaction_time,
         p_is_flagged, p_fraud_score, p_flagged_reason
@@ -68,7 +64,7 @@ END;
 $BODY$;
 
 ALTER PROCEDURE "${Schema}".sp_insert_fraud_event(
-    varchar, integer, bigint, uuid, varchar, varchar, numeric, varchar,
+    varchar, uuid, varchar, varchar, numeric, varchar,
     varchar, varchar, varchar, varchar, varchar, timestamp, boolean, numeric, text)
     OWNER TO "${db_user}";
 

@@ -1,87 +1,103 @@
 using Confluent.Kafka;
-using Credit.Kafka.Messaging.Builders;
-using Credit.Kafka.Messaging.Config;
-using Credit.Kafka.Messaging.Consumers;
-using Credit.Kafka.Messaging.DependencyInjection;
-using fraud_poc_project.Kafka.Consumer;
-using fraud_poc_project_models.Models.Settings;
+using Confluent.Kafka.Admin;
+using fraud_poc_project_buss.Helper;
+using fraud_poc_project_buss.Models.Kafka;
+using fraud_poc_project_buss.Models.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using OptionsModels.KafkaOptions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace fraud_poc_project.Configuration
 {
     public static class KafkaConfiguration
     {
-        private static IConfiguration _configuration;
+        private static KafkaSettings _kafkaSettings;
+        private static AppSettings _appSettings;
 
-        public static IServiceCollection ConfigureKafka(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddKafkaConfigurations(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
-            var provider = services.BuildServiceProvider();
-            var appSettings = provider.GetRequiredService<AppSettings>();
-            var consumerOpts = appSettings.IncomingFraudConsumerOptions;
-            _configuration = configuration;
+            var brokerSettings = services.AddOptions<FraudKafkaBrokerSettings>()
+                .BindConfiguration("KafkaSettings:BrokerSettings")
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-            SetupBroker(services, appSettings, consumerOpts);
-            SetupProducer(services, appSettings);
-            SetupFraudConsumer(services, appSettings, consumerOpts);
+            services.AddOptions<FraudKafkaProducerSettings>()
+                .BindConfiguration("KafkaSettings:ProducerSettings")
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            services.AddOptions<FraudKafkaConsumerSettings>()
+                .BindConfiguration("KafkaSettings:ConsumerSettings")
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            services.AddOptions<KafkaAdminOptions>()
+                .BindConfiguration("KafkaAdminOptions")
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
             return services;
         }
 
-        private static void SetupBroker(
-            IServiceCollection services,
-            AppSettings appSettings,
-            OptionsModels.KafkaOptions.ConsumerOptions.IncomingFraudConsumerOptions consumerOpts)
+        public static void Kafka_Setup_Topics(this IServiceCollection services)
         {
-            var brokerBuilder = new BrokerOptionsBuilder()
-                .WithBootstrapServers(consumerOpts.BootstrapServers ?? "")
-                .WithSaslMechanism(
-                    consumerOpts.SaslMechanism,
-                    _configuration[consumerOpts.SaslUserName],
-                    _configuration[consumerOpts.SaslPassword])
-                .WithSecurityProtocol(consumerOpts.SecurityProtocol);
+            // Build a temporary service provider to resolve the options
+            var serviceProvider = services.BuildServiceProvider();
 
-            //var brokerBuilder = new BrokerOptionsBuilder()
-            //    .WithBootstrapServers(consumerOpts.BootstrapServers ?? "")
-            //    .WithSaslMechanism(
-            //        consumerOpts.SaslMechanism,
-            //        "kafka-user",
-            //        "kafka-user-pass")
-            //    .WithSecurityProtocol(consumerOpts.SecurityProtocol);
+            // get options values populated from config
+            var brokerSettings = serviceProvider.GetRequiredService<IOptions<FraudKafkaBrokerSettings>>().Value;
+            var kafkaAdminSettings = serviceProvider.GetRequiredService<IOptions<KafkaAdminOptions>>().Value;
 
-            foreach (var topic in appSettings.KafkaAdminOptions.TopicOptions)
-                brokerBuilder.CreateTopic(topic.Topic, topic.Partitions, topic.ReplicationFactor);
+            if (brokerSettings != null && kafkaAdminSettings != null)
+            {
+                // validate that the options value met the minimum required values
+                Model_Extensions_Helper.ValidateOptions(brokerSettings);
+                Model_Extensions_Helper.ValidateOptions(kafkaAdminSettings);
 
-            services.RegisterKafkaBroker(brokerBuilder);
+
+                if (brokerSettings.AllowAutoCreateTopics == true && kafkaAdminSettings?.TopicOptions.Any() == true)
+                {
+                    AdminClientBuilder adminClientBuilder = new AdminClientBuilder(new AdminClientConfig
+                    {
+                        BootstrapServers = brokerSettings.BootstrapServers,
+                        SaslUsername = brokerSettings.SaslUserName,
+                        SaslPassword = brokerSettings.SaslPassword,
+                        SaslMechanism = brokerSettings.SaslMechanism,
+                        SecurityProtocol = brokerSettings.SecurityProtocol
+                    });
+                    CreateKafkaTopics(adminClientBuilder, kafkaAdminSettings);
+                }
+            }
         }
 
-        private static void SetupProducer(IServiceCollection services, AppSettings appSettings)
+        private static void CreateKafkaTopics(AdminClientBuilder adminClientBuilder, KafkaAdminOptions kafkaAdminSettings)
         {
-            var producerBuilder = new ProducerOptionsBuilder()
-                .DefaultProducer()
-                .WithCompressionType(appSettings.CompressionType)
-                .WithApplicationName(appSettings.ApplicationName ?? "fraud_poc");
+            using (IAdminClient adminClient = adminClientBuilder.Build())
+            {
+                // get list of existing topics in kafka
+                List<string> topicsOnBroker = adminClient.GetMetadata(TimeSpan.FromSeconds(30.0)).Topics.Select((TopicMetadata a) => a.Topic).ToList();
 
-            services.RegisterKafkaProducer(producerBuilder);
-        }
+                // only create topics which does not exist yet
+                List<TopicSpecification> list = (from x in kafkaAdminSettings.TopicOptions
+                                                 where !topicsOnBroker.Contains(x.Topic)
+                                                 select new TopicSpecification
+                                                 {
+                                                     Name = x.Topic,
+                                                     ReplicationFactor = x.ReplicationFactor,
+                                                     NumPartitions = x.Partitions,
+                                                 }).ToList();
+                if (list.Count != 0)
+                {
+                    adminClient.CreateTopicsAsync(list).GetAwaiter().GetResult();
+                }
 
-        private static void SetupFraudConsumer(
-            IServiceCollection services,
-            AppSettings appSettings,
-            OptionsModels.KafkaOptions.ConsumerOptions.IncomingFraudConsumerOptions consumerOpts)
-        {
-            var batchConsumerBuilder = new BatchConsumerOptionsBuilder()
-                .WithGroupId(consumerOpts.GroupId ?? "fraud-detection-group")
-                .WithAutoOffsetReset(consumerOpts.AutoOffsetReset)
-                .WithPartitionAssignmentStrategy(consumerOpts.PartitionAssignmentStrategy)
-                .WithMaxPollIntervalMs(consumerOpts.MaxPollIntervalMs)
-                .WithSessionTimeoutMs(consumerOpts.SessionTimeoutMs)
-                .WithConcurrency(consumerOpts.ConsumerConcurrency)
-                .WithBatchSize(consumerOpts.BatchSize)
-                .WithTopicHandler(consumerOpts.FraudTopic, typeof(FraudBatchConsumerWorker));
-
-            services.RegisterKafkaBatchMultiConsumers<KafkaBatchMultiConsumers<BatchConsumerOptions>,
-                BatchConsumerOptionsBuilder>(batchConsumerBuilder);
+            }
         }
     }
 }

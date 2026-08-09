@@ -12,9 +12,6 @@ CREATE OR REPLACE FUNCTION "${Schema}".fn_select_fraud_events(
 RETURNS TABLE (
     id                  bigint,
     kafka_topic         varchar(250),
-    kafka_partition     integer,
-    kafka_offset        bigint,
-    consumed_at         timestamp,
     transaction_id      uuid,
     customer_id         varchar(100),
     account_id          varchar(100),
@@ -38,9 +35,6 @@ BEGIN
     SELECT
         fe.id,
         fe.kafka_topic,
-        fe.kafka_partition,
-        fe.kafka_offset,
-        fe.consumed_at,
         fe.transaction_id,
         fe.customer_id,
         fe.account_id,
@@ -82,8 +76,7 @@ RETURNS TABLE (
     rule_code           varchar(100),
     rule_description    varchar(500),
     is_triggered        boolean,
-    score_contribution  numeric(5,2),
-    evaluated_at        timestamp
+    score_contribution  numeric(5,2)
 )
 LANGUAGE 'plpgsql'
 AS $BODY$
@@ -95,8 +88,7 @@ BEGIN
         frr.rule_code,
         frr.rule_description,
         frr.is_triggered,
-        frr.score_contribution,
-        frr.evaluated_at
+        frr.score_contribution
     FROM "${Schema}".fraud_rule_result frr
     WHERE frr.fraud_event_id = p_fraud_event_id
     ORDER BY frr.score_contribution DESC;

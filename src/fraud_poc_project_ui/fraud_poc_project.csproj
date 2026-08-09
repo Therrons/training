@@ -12,34 +12,7 @@
     <PropertyGroup>
         <RestorePackagesPath>../src/nuget-packages</RestorePackagesPath>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Compile Remove="Fraud\Dto\**" />
-      <Compile Remove="Fraud\Mapping\**" />
-      <Compile Remove="Fraud\Models\**" />
-      <Compile Remove="Fraud\Repository\**" />
-      <Compile Remove="Fraud\Rules\**" />
-      <Content Remove="Fraud\Dto\**" />
-      <Content Remove="Fraud\Mapping\**" />
-      <Content Remove="Fraud\Models\**" />
-      <Content Remove="Fraud\Repository\**" />
-      <Content Remove="Fraud\Rules\**" />
-      <EmbeddedResource Remove="Fraud\Dto\**" />
-      <EmbeddedResource Remove="Fraud\Mapping\**" />
-      <EmbeddedResource Remove="Fraud\Models\**" />
-      <EmbeddedResource Remove="Fraud\Repository\**" />
-      <EmbeddedResource Remove="Fraud\Rules\**" />
-      <None Remove="Fraud\Dto\**" />
-      <None Remove="Fraud\Mapping\**" />
-      <None Remove="Fraud\Models\**" />
-      <None Remove="Fraud\Repository\**" />
-      <None Remove="Fraud\Rules\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Remove="tmpConn_strings.json" />
-    </ItemGroup>
-
+    
     <ItemGroup>
       <None Remove="CapitecRootCA.cer" />
       <None Remove="CapitecRootCA.crt" />
@@ -49,6 +22,7 @@
     <ItemGroup>
       <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.32" />
       <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.4.16" />
+      <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
       <PackageReference Include="Microsoft.OpenApi" Version="1.6.14" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
@@ -61,7 +35,16 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\fraud_poc_project_buss\fraud_poc_project_buss.csproj" />
       <ProjectReference Include="..\fraud_poc_project_repo\fraud_poc_project_repo.csproj" />
-      <ProjectReference Include="..\Kafka\Credit.Kafka.Messaging\Credit.Kafka.Messaging.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Confluent.Kafka">
+        <HintPath>..\Kafka\src\nuget-packages\confluent.kafka\2.14.2\lib\net8.0\Confluent.Kafka.dll</HintPath>
+      </Reference>
+      <Reference Include="Newtonsoft.Json">
+        <HintPath>..\src\nuget-packages\newtonsoft.json\13.0.4\lib\net6.0\Newtonsoft.Json.dll</HintPath>
+      </Reference>
     </ItemGroup>
 </Project>

@@ -1,22 +1,20 @@
 ﻿using Amazon.Extensions.NETCore.Setup;
-using Amazon.RDS.Model;
 using Amazon.SecretsManager;
 using fraud_poc_project.Controllers;
-using fraud_poc_project.Fraud.Services;
 using fraud_poc_project.Kafka.Consumer;
+using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
-using fraud_poc_project_models.Models.Database;
-using fraud_poc_project_models.Models.Settings;
+using fraud_poc_project_buss.Models.Database;
+using fraud_poc_project_buss.Models.Settings;
+using fraud_poc_project_buss.Service;
 using fraud_poc_project_repo;
 using fraud_poc_project_repo.Connection;
-using fraud_poc_project_repo.DB_Operations;
 using fraud_poc_project_repo.Interfaces;
+using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,17 +35,15 @@ namespace fraud_poc_project.Configuration
                 .AddSingleton<AWSSecretsConfiguration>();
 
             // ── Bind AppSettings so Kafka configuration can resolve it ─────────
-            var appSettings = builder.Configuration
-                .GetSection("AppSettings")
-                .Get<AppSettings>()
-                ?? new AppSettings();
-            builder.Services.AddSingleton(appSettings);
+            builder.Services.AddOptions<AppSettings>()
+               .BindConfiguration("AppSettings")
+               .ValidateDataAnnotations()
+               .ValidateOnStart();
 
-            var dbSettings = builder.Configuration
-                .GetSection("Database")
-                .Get<Database>()
-                ?? new Database();
-            builder.Services.AddSingleton(dbSettings);
+            builder.Services.AddOptions<Database>()
+              .BindConfiguration("Database")
+              .ValidateDataAnnotations()
+              .ValidateOnStart();
 
             var envVariables = new Environment_Variables().Get_Environment_Values(builder);
             var isLocal = builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
@@ -60,17 +56,18 @@ namespace fraud_poc_project.Configuration
             connectionString.Append($"Password={envVariables.DBPassword};");
             connectionString.Append($"Pooling=true;");
             connectionString.Append($"Connection Lifetime=0;");
-            connectionString.Append(!isLocal? "SSLMode=Require;" : "SSLMode=Disable;");
+            connectionString.Append(!isLocal ? "SSLMode=Require;" : "SSLMode=Disable;");
             connectionString.Append("Trust Server Certificate = true;");
 
             builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:PostgreSQL"] = connectionString.ToString()  
-            });     
+                ["ConnectionStrings:PostgreSQL"] = connectionString.ToString()
+            });
 
             // ── Add db functionality ─────────
-            builder.Services.AddDbContextPool<Setup_DB_Connection>(options => options.UseNpgsql(connectionString.ToString()));
-            builder.Services.AddScoped<DB_Operations>();
+            builder.Services.AddDbContextPool<IDBConnection, DBConnection>(options => options.UseNpgsql(connectionString.ToString()));
+            builder.Services.AddScoped<ITransactionEventHandler, FraudBatchConsumerWorker>();
+            builder.Services.AddScoped<IFraudRepository, FraudRepository>();
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
 
             // ── Fraud rules ───────────────────────────────────────────────────────
@@ -84,15 +81,18 @@ namespace fraud_poc_project.Configuration
 
             builder.Services
                 .AddSingleton<IFraudEvaluationService, FraudEvaluationService>()
-                .AddScoped<IFraudRepository, FraudRepository>()
                 .AddTransient<FraudBatchConsumerWorker>();
 
             // this is only for testing purposes, to be removed in production
             builder.Services.AddTransient<UserInputController>();
 
-            // ── Kafka (library-based batch consumer + producer) ───────────────
-            ////builder.Services.ConfigureKafka(builder.Configuration);
+            builder.Services.AddKafkaConfigurations(builder.Configuration)
+               .Kafka_Setup_Topics();
 
+            // setup instances that use the above kafka classes via DI
+            builder.Services.AddSingleton<IFraudProducer, FraudProducer>();
+            builder.Services.AddHostedService<FraudConsumer>();
+            builder.Services.AddSingleton(sp => sp.GetRequiredService<FraudConsumer>());
         }
     }
 }

@@ -1,13 +1,8 @@
 using fraud_poc_project.Configuration;
-using fraud_poc_project_models.Dto;
-using fraud_poc_project_models.Models.Settings;
-using fraud_poc_project_repo.Connection;
+using fraud_poc_project_buss.Dto;
 using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,7 +25,7 @@ public class Program
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
@@ -41,14 +36,17 @@ public class Program
 
         builder.Services.AddSerilog();  // Add Serilog services to the DI container
         builder.Host.UseSerilog();      // Use Serilog for logging
-       
+
         builder.ConfigureSecrets();     // Load secrets from AWS Secrets Manager and add them to the configuration
         builder.AddConfigurations();    // Add configurations from appsettings.json, environment variables, and command line arguments
-        builder.AddServices_AddDI();          // Add application services to the DI container
+        builder.AddServices_AddDI();    // Add application services to the DI container
+        builder.AddCorsConfiguration(); // Add CORS configuration to the DI container - the alternative would be to add CORS via Nginx
+                                        // or native cloud solution, eg AWS API Gateway  
+
 
         if (args != null && args.Length > 0)
             builder.Configuration.AddCommandLine(args);
-                
+
         // ── Database initialization ───────────────────────────
         var createDbFlag = builder.Configuration["Database:CreateDatabaseOnStartup"]?.ToLowerInvariant();
         if (createDbFlag == "yes" || createDbFlag == "true")
@@ -57,7 +55,7 @@ public class Program
         }
 
         var time_docker_build = DateTime.Now.ToString();
-                
+
         var writeDir =
             builder.Configuration["write-dir"] ??
             Environment.GetEnvironmentVariable("write_dir") ??
@@ -65,14 +63,14 @@ public class Program
 
         var version_docker_build = Environment.GetEnvironmentVariable("Build_Version") ??
             "Docker Build Version: UNKNOWN";
-               
+
 
         if (!Directory.Exists(writeDir)) Directory.CreateDirectory(writeDir);
 
         // ==================================================
         // ==================================================
         // use for testing purposes only, to write a file to the host machine   
-        file_Path_Name = Path.Combine(writeDir, FileName);
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string> { { "file_Path_Name", Path.Combine(writeDir, FileName) } });
         // ==================================================
         // ==================================================
 
@@ -128,16 +126,6 @@ public class Program
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
         logger.LogInformation("Docker Build Data: {time_docker_build}\r\nDocker Build Version: {version_docker_build}", time_docker_build, version_docker_build);
 
-        var fwdOptions = new ForwardedHeadersOptions
-        {
-            ForwardedHeaders =
-                ForwardedHeaders.XForwardedFor |
-                ForwardedHeaders.XForwardedProto |
-                ForwardedHeaders.XForwardedHost
-        };
-
-        app.UseForwardedHeaders(fwdOptions);
-        app.UseHostFiltering();
         app.MapControllers();
 
         var configuredServerUrl = app.Configuration.GetValue<string>("Meta:Url");
@@ -163,7 +151,7 @@ public class Program
         });
 
         app.ConfigureHealthChecks(); // Configure health check endpoints for liveness and readiness probes
-        
+
         if (!isLocal)
             app.UseSwaggerUI(settings => settings.SupportedSubmitMethods(Array.Empty<SubmitMethod>())); // Read - only documentation in production
         else

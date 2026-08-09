@@ -1,12 +1,8 @@
 ﻿using Amazon.SecretsManager;
 using Amazon.SecretsManager.Model;
-using fraud_poc_project_models.Models.Database;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
+using fraud_poc_project_buss.Models.Database;
 using Newtonsoft.Json;
-using Serilog;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace fraud_poc_project.Configuration

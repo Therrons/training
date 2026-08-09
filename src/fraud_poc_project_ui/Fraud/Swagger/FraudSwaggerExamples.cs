@@ -79,7 +79,6 @@ namespace fraud_poc_project.Fraud.Swagger
                 ["kafkaTopic"] = new OpenApiString("transaction-events"),
                 ["kafkaPartition"] = new OpenApiInteger(0),
                 ["kafkaOffset"] = new OpenApiLong(1024),
-                ["consumedAt"] = new OpenApiString(DateTime.UtcNow.AddMinutes(-5).ToString("o")),
                 ["transactionId"] = new OpenApiString(Guid.NewGuid().ToString()),
                 ["customerId"] = new OpenApiString("cust-001"),
                 ["accountId"] = new OpenApiString("acc-9876"),
