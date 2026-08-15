@@ -34,7 +34,7 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddAWSService<IAmazonSecretsManager>(awsOptions)
                 .AddSingleton<AWSSecretsConfiguration>();
 
-            // ── Bind AppSettings so Kafka configuration can resolve it ─────────
+            // ── Bind AppSettings so Kafka configuration can resolve it ──
             builder.Services.AddOptions<AppSettings>()
                .BindConfiguration("AppSettings")
                .ValidateDataAnnotations()
@@ -64,35 +64,40 @@ namespace fraud_poc_project.Configuration
                 ["ConnectionStrings:PostgreSQL"] = connectionString.ToString()
             });
 
-            // ── Add db functionality ─────────
+            // ── Add db functionality ───
             builder.Services.AddDbContextPool<IDBConnection, DBConnection>(options => options.UseNpgsql(connectionString.ToString()));
             builder.Services.AddScoped<ITransactionEventHandler, FraudBatchConsumerWorker>();
             builder.Services.AddScoped<IFraudRepository, FraudRepository>();
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
 
-            // ── Fraud rules ───────────────────────────────────────────────────────
-            builder.Services
-                .AddSingleton<IFraudRule, HighAmountRule>()
-                .AddSingleton<IFraudRule, ForeignCnpRule>()
-                .AddSingleton<IFraudRule, AtmWithdrawalLimitRule>()
-                .AddSingleton<IFraudRule, HighRiskMerchantCategoryRule>()
-                .AddSingleton<IFraudRule, UnusualHoursRule>()
-                .AddSingleton<IFraudRule, RoundAmountRule>();
+                        // ── Fraud rules ───
+                        builder.Services
+                            .AddSingleton<IFraudRule, HighAmountRule>()
+                            .AddSingleton<IFraudRule, ForeignCnpRule>()
+                            .AddSingleton<IFraudRule, AtmWithdrawalLimitRule>()
+                            .AddSingleton<IFraudRule, HighRiskMerchantCategoryRule>()
+                            .AddSingleton<IFraudRule, UnusualHoursRule>()
+                            .AddSingleton<IFraudRule, RoundAmountRule>();
 
-            builder.Services
-                .AddSingleton<IFraudEvaluationService, FraudEvaluationService>()
-                .AddTransient<FraudBatchConsumerWorker>();
+                        builder.Services
+                            .AddSingleton<IFraudEvaluationService, FraudEvaluationService>()
+                            .AddTransient<FraudBatchConsumerWorker>();
 
-            // this is only for testing purposes, to be removed in production
+            // this is only for testing purposes
+#if DEBUG
             builder.Services.AddTransient<UserInputController>();
+#endif
 
             builder.Services.AddKafkaConfigurations(builder.Configuration)
-               .Kafka_Setup_Topics();
+               .KafkaSetupTopics();
 
             // setup instances that use the above kafka classes via DI
             builder.Services.AddSingleton<IFraudProducer, FraudProducer>();
-            builder.Services.AddHostedService<FraudConsumer>();
-            builder.Services.AddSingleton(sp => sp.GetRequiredService<FraudConsumer>());
+            builder.Services.AddSingleton<FraudConsumer>();
+            builder.Services.AddHostedService(sp => sp.GetRequiredService<FraudConsumer>());
+
+            
+            builder.ConfigureSwagger();
         }
     }
 }

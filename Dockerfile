@@ -42,7 +42,7 @@ ENV ASPNETCORE_URLS="http://0.0.0.0:${APP_PORT}" \
 
 # ── PostgreSQL credentials ────────────────────────────────────────────────────
 # These are declared empty here so Docker knows they exist as env var slots.
-# Real values are NEVER baked into the image – they are injected at `docker run`
+# Real values are injected at `docker run`
 # time via -e flags (set by the GitHub Actions workflow from Secrets Manager).
 # If left empty at runtime, Program.cs falls back to the Secrets Manager SDK.
 ENV DB_USERNAME="" \
@@ -106,5 +106,5 @@ USER appuser
 ENTRYPOINT ["sh", "-c", "dotnet /repo/${APP_DLL}"]
 
 # CMD can be overridden by K8s args or docker run arguments.
-# DB_USERNAME and DB_PASSWORD are injected via -e at run time, not here.
+# DB_USERNAME and DB_PASSWORD are injected run time, not here.
 CMD ["--write-dir", "/repo/data"]

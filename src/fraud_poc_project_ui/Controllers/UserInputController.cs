@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Controllers
 {
+    /// <summary>
+    /// testing controllers
+    /// </summary>
     [ApiController]
     [Route("TestFunctions")]
     public class UserInputController : ControllerBase
@@ -29,6 +32,11 @@ namespace fraud_poc_project.Controllers
 
         }
 
+        /// <summary>
+        /// This endpoint is for testing the writing of user input to a file. It appends the provided input string to a file specified in the configuration. If the input is null, it appends an empty line. The method returns a message indicating that the input has been appended to the file.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         #region Testing Docker
         [HttpGet("Write_Input")]
         public async Task<ActionResult<string>> Write_Input(string input)
@@ -51,8 +59,8 @@ namespace fraud_poc_project.Controllers
         #endregion
 
 
-        [HttpGet("Put_Test_In_DB")]
-        public async Task<ActionResult<string>> Put_Test_In_DB(string input = "tester")
+        [HttpGet("ValidateDB")]
+        public async Task<ActionResult<string>> ValidateDB(string input = "tester")
         {
             try
             {
@@ -74,8 +82,8 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        [HttpGet("Put_Test_In_Kafka")]
-        public async Task<ActionResult<string>> Put_Test_In_Kafka(string input = "tester")
+        [HttpGet("ValidateKafka")]
+        public async Task<ActionResult<string>> ValidateKafka(string input = "tester")
         {
             var accNum = (new Random().Next(450000001, 459999999)).ToString();
             var kafkaStream = $"credit-domain-dev-credit-notifier-viya-proxy";
@@ -103,6 +111,10 @@ namespace fraud_poc_project.Controllers
             }
         }
 
+        /// <summary>
+        /// This endpoint is for testing the retrieval of a test message in Kafka. It captures a test error message and sends it to the Kafka topic specified in the DLT_Kafka model. If successful, it returns "Success". If an exception occurs, it logs the error and rethrows the exception.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("Retrieve_Test_In_Kafka")]
         public async Task<ActionResult<string>> Retrieve_Test_In_Kafka()
         {

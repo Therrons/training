@@ -91,7 +91,7 @@ namespace fraud_poc_project_repo.Kafka
 
             try
             {
-                await RunConsumerLoopAsync(stoppingToken);
+                await Task.Run(async () => await RunConsumerLoopAsync(stoppingToken));
             }
             finally
             {
@@ -142,7 +142,7 @@ namespace fraud_poc_project_repo.Kafka
                         if (batch.Count > 0)
                         {
                             _consumer.Commit(batch[^1]);
-                            _logger.LogDebug("Committed offset: {Offset}", batch[^1].Offset.Value);
+                            _logger.LogDebug("Committed offset: {Offset}", batch[^1].Offset.Value);  // batch[^1] is the new way of saying batch[batch.Count - 1]
                         }
 
                         batch.Clear();
@@ -170,7 +170,7 @@ namespace fraud_poc_project_repo.Kafka
                         await ProcessBatchAsync(batch, CancellationToken.None);
                         if (batch.Count > 0)
                         {
-                            _consumer.Commit(batch[^1]);
+                            _consumer.Commit(batch[^1]);  // batch[^1] is the new way of saying batch[batch.Count - 1]
                         }
                     }
                     break;
@@ -378,10 +378,10 @@ namespace fraud_poc_project_repo.Kafka
             base.Dispose();
         }
 
-        ~FraudConsumer() 
+        ~FraudConsumer()
         {
             _logger.LogInformation("Stopping FraudConsumer...");
             base.StopAsync(CancellationToken.None);
-        }    
+        }
     }
 }

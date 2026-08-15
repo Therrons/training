@@ -1,11 +1,12 @@
 using fraud_poc_project.Configuration;
-using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Models.Kafka;
 using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -37,12 +38,11 @@ public class Program
         builder.Services.AddSerilog();  // Add Serilog services to the DI container
         builder.Host.UseSerilog();      // Use Serilog for logging
 
-        builder.ConfigureSecrets();     // Load secrets from AWS Secrets Manager and add them to the configuration
+        builder.ConfigureSecrets();     // Load secrets and add them to the configuration
         builder.AddConfigurations();    // Add configurations from appsettings.json, environment variables, and command line arguments
         builder.AddServices_AddDI();    // Add application services to the DI container
         builder.AddCorsConfiguration(); // Add CORS configuration to the DI container - the alternative would be to add CORS via Nginx
                                         // or native cloud solution, eg AWS API Gateway  
-
 
         if (args != null && args.Length > 0)
             builder.Configuration.AddCommandLine(args);
@@ -64,99 +64,70 @@ public class Program
         var version_docker_build = Environment.GetEnvironmentVariable("Build_Version") ??
             "Docker Build Version: UNKNOWN";
 
-
         if (!Directory.Exists(writeDir)) Directory.CreateDirectory(writeDir);
 
-        // ==================================================
-        // ==================================================
-        // use for testing purposes only, to write a file to the host machine   
+
+        // use for testing purposes only, to write a file to the host machine
+#if DEBUG
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string> { { "file_Path_Name", Path.Combine(writeDir, FileName) } });
-        // ==================================================
-        // ==================================================
+#endif
 
         var isLocal = builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
 
-        builder.Services.AddControllers();          // Add controller services to the DI container  
-        builder.Services.AddEndpointsApiExplorer(); // Add API explorer services to the DI container    
+        builder.Services.AddControllers();          // Add controller services to the DI container
+        builder.Services.AddEndpointsApiExplorer(); // Add API explorer services to the DI container
         builder.Services.AddHealthChecks();         // Add health check services to the DI container
 
-        builder.Services.AddSwaggerGen(c =>
+        if (!isLocal)
         {
-            c.SwaggerDoc("v1", new OpenApiInfo
+            builder.Services.AddSwaggerGen(c =>
             {
-                Title = "Fraud Detection API",
-                Version = "v1",
-                Description = "Consumes categorized transaction events from Kafka, applies fraud rules, stores results in PostgreSQL, and exposes them via this API.",
-                Contact = new OpenApiContact
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Email = "centralisedsystems@capitecbank.co.za",
-                    Name = "Centralised Systems"
-                }
+                    Title = "Fraud Detection API",
+                    Version = "v1",
+                    Description = "Consumes categorized transaction events from Kafka, applies fraud rules, stores results in PostgreSQL, and exposes them via this API.",
+                    Contact = new OpenApiContact
+                    {
+                        Email = "centralisedsystems@capitecbank.co.za",
+                        Name = "Centralised Systems"
+                    }
+                });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(builder.Environment.ContentRootPath, xmlFile);
+                if (File.Exists(xmlPath))
+                    c.IncludeXmlComments(xmlPath);
             });
-
-            c.MapType<FraudQueryDto>(() => new OpenApiSchema
-            {
-                Type = "object",
-                Properties = new Dictionary<string, OpenApiSchema>
-                {
-                    ["dateFrom"] = new OpenApiSchema { Type = "string", Format = "date-time", Description = "Inclusive start date/time (transaction_time)." },
-                    ["dateTo"] = new OpenApiSchema { Type = "string", Format = "date-time", Description = "Inclusive end date/time (transaction_time)." },
-                    ["customerId"] = new OpenApiSchema { Type = "string", Description = "Optional customer identifier filter." },
-                    ["isFlaggedOnly"] = new OpenApiSchema { Type = "boolean", Description = "Return only flagged events when true." },
-                    ["transactionType"] = new OpenApiSchema { Type = "string", Description = "Optional transaction type filter (e.g. POS, ATM, EFT, CNP)." },
-                    ["minFraudScore"] = new OpenApiSchema { Type = "number", Format = "decimal", Description = "Optional minimum fraud score (0-100)." }
-                }
-            });
-
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = Path.Combine(builder.Environment.ContentRootPath, xmlFile);
-            if (File.Exists(xmlPath))
-                c.IncludeXmlComments(xmlPath);
-
-            c.OperationFilter<fraud_poc_project.Fraud.Swagger.FraudExamplesOperationFilter>();
-        });
+        }
+        else
+            builder.Services.AddSwaggerGen();
 
         builder.Services.Configure<HostFilteringOptions>(options =>
         {
             options.AllowedHosts = new[] { "*" };
         });
 
+        var kafKaProducerIdemPotence = builder.Configuration["KafkaSettings:ProducerSettings:EnableIdempotence"]?.ToLowerInvariant();
+        if (kafKaProducerIdemPotence == "true") builder.AddKafkaProducerIdempotence();
+
         var app = builder.Build();
-
-        var logger = app.Services.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation("Docker Build Data: {time_docker_build}\r\nDocker Build Version: {version_docker_build}", time_docker_build, version_docker_build);
-
-        app.MapControllers();
-
-        var configuredServerUrl = app.Configuration.GetValue<string>("Meta:Url");
-
-        app.UseSwagger(options =>
-        {
-            options.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
-            {
-                var scheme = httpReq.Scheme;
-                var host = httpReq.Headers["X-Forwarded-Host"].FirstOrDefault()
-                           ?? httpReq.Host.Value;
-                var pathBase = httpReq.Headers["X-Forwarded-Prefix"].FirstOrDefault()
-                               ?? httpReq.PathBase.Value;
-                var serverUrl = string.IsNullOrWhiteSpace(configuredServerUrl)
-                    ? $"{scheme}://{host}{pathBase}"
-                    : configuredServerUrl.TrimEnd('/');
-
-                swaggerDoc.Servers = new List<OpenApiServer>
-                {
-                    new OpenApiServer { Url = serverUrl }
-                };
-            });
-        });
-
-        app.ConfigureHealthChecks(); // Configure health check endpoints for liveness and readiness probes
+        app.UseRouting();
+        app.UseSwagger();
 
         if (!isLocal)
-            app.UseSwaggerUI(settings => settings.SupportedSubmitMethods(Array.Empty<SubmitMethod>())); // Read - only documentation in production
+            app.UseSwaggerUI(settings => settings.SupportedSubmitMethods(Array.Empty<SubmitMethod>())); // Read-only documentation in production
         else
             app.UseSwaggerUI();
 
-        app.Run();
+        app.ConfigureHealthChecks();
+
+        app.MapControllers();
+
+        if (!isLocal)
+            app.Run("http://0.0.0.0:8080");
+        else
+            app.Run();
     }
+
+    
 }

@@ -6,8 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_buss", "..\src\fraud_poc_project_buss\fraud_poc_project_buss.csproj", "{974E67AB-EFCF-7F7F-40B4-0B57063D1526}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_repo", "..\src\fraud_poc_project_repo\fraud_poc_project_repo.csproj", "{D39EF5F5-6899-125C-FDEE-D56B734FEC82}"
+	ProjectSection(ProjectDependencies) = postProject
+		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17} = {65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project", "..\src\fraud_poc_project_ui\fraud_poc_project.csproj", "{91B3831A-B9CB-FE88-1002-2F2ED41228B9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17} = {65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI_Fraud_POC", "UI_Fraud_POC", "{93FA5A22-354B-4739-8498-0C432612534D}"
 EndProject

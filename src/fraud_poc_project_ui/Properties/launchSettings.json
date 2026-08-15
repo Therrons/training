@@ -17,9 +17,9 @@
         "DB_NAME": "fraud_db"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5138"
+      "applicationUrl": "http://localhost:5237"
     }
-  },
-  "applicationUrl": "http://localhost:5237",
-  "dotnetRunMessages": true
+  }
+  //"applicationUrl": "http://localhost:5237",
+  //"dotnetRunMessages": true
 }

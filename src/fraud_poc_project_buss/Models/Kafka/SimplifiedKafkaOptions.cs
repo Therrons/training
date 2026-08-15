@@ -27,6 +27,9 @@ namespace fraud_poc_project_buss.Models.Kafka
         public int MessageTimeoutMs { get; set; } = 30000;
         public double LingerMs { get; set; } = 10;
         public bool EnableIdempotence { get; set; } = true;
+        public int ReconnectBackoffMs { get; set; } = 50;
+        public int ReconnectBackoffMaxMs { get; set; } = 10000;
+        public int ApiVersionRequestTimeoutMs { get; set; } = 10000;
     }
 
     /// <summary>

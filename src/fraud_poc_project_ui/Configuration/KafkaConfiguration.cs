@@ -42,10 +42,12 @@ namespace fraud_poc_project.Configuration
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            services.AddSingleton<KafkaBrokerHealthCheck>();
+
             return services;
         }
 
-        public static void Kafka_Setup_Topics(this IServiceCollection services)
+        public static void KafkaSetupTopics(this IServiceCollection services)
         {
             // Build a temporary service provider to resolve the options
             var serviceProvider = services.BuildServiceProvider();
@@ -59,7 +61,6 @@ namespace fraud_poc_project.Configuration
                 // validate that the options value met the minimum required values
                 Model_Extensions_Helper.ValidateOptions(brokerSettings);
                 Model_Extensions_Helper.ValidateOptions(kafkaAdminSettings);
-
 
                 if (brokerSettings.AllowAutoCreateTopics == true && kafkaAdminSettings?.TopicOptions.Any() == true)
                 {

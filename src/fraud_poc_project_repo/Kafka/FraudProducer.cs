@@ -43,10 +43,13 @@ namespace fraud_poc_project_repo.Kafka
                 MessageTimeoutMs = _producerOptions.MessageTimeoutMs,
                 LingerMs = _producerOptions.LingerMs,
                 AllowAutoCreateTopics = brokerOptions.Value.AllowAutoCreateTopics,
-                Acks = Acks.All, // Wait for all replicas
-                MaxInFlight = 5, // For idempotent producer
+                Acks = Acks.All,
+                MaxInFlight = 5,
                 MessageSendMaxRetries = int.MaxValue,
-                SslEndpointIdentificationAlgorithm = SslEndpointIdentificationAlgorithm.None
+                SslEndpointIdentificationAlgorithm = SslEndpointIdentificationAlgorithm.None,
+                ReconnectBackoffMs = _producerOptions.ReconnectBackoffMs,
+                ReconnectBackoffMaxMs = _producerOptions.ReconnectBackoffMaxMs,
+                ApiVersionRequestTimeoutMs = _producerOptions.ApiVersionRequestTimeoutMs
             };
             _producer = new ProducerBuilder<string, byte[]>(producerConfig)
                 .SetLogHandler((_, message) => LogKafkaMessage(message))

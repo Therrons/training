@@ -25,7 +25,7 @@ namespace fraud_poc_project.Configuration
             }
             else
             {
-                Log.Warning("Database scripts folder not found at: {ScriptsPath}", scriptsPath);
+                Log.Error("Database scripts folder not found at: {ScriptsPath}", scriptsPath);
             }
         }
 

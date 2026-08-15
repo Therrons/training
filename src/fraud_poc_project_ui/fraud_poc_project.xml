@@ -4,12 +4,19 @@
         <name>fraud_poc_project</name>
     </assembly>
     <members>
-        <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_models.Dto.FraudQueryDto)">
+        <member name="M:fraud_poc_project.Configuration.ConfigureSwaggerForRancher.ConfigureSwagger(Microsoft.AspNetCore.Builder.WebApplicationBuilder)">
+            <summary>
+            Configure Swagger to dynamically set the server URL based on the incoming request 
+            this is because the service is hosted in K8s and I still want the swagger to work
+            </summary>
+            <param name="builder"></param>
+        </member>
+        <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
             <summary>
             Query fraud-evaluated transaction events by date range and optional filters.
             </summary>
         </member>
-        <member name="M:fraud_poc_project.Controllers.FraudController.QueryFlaggedEvents(fraud_poc_project_models.Dto.FraudQueryDto)">
+        <member name="M:fraud_poc_project.Controllers.FraudController.QueryFlaggedEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
             <summary>
             Query only flagged transaction events by date range and optional filters.
             </summary>
@@ -18,6 +25,42 @@
             <summary>
             Retrieve all fraud rule results for a specific fraud event.
             </summary>
+        </member>
+        <member name="T:fraud_poc_project.Controllers.LoadSimulatorController">
+            <summary>
+            Produces synthetic transaction events to Kafka to simulate load.
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Controllers.LoadSimulatorController.Simulate(System.Int32,System.Double,System.Threading.CancellationToken)">
+            <summary>
+            Produce a batch of synthetic transaction events to the fraud topic.
+            </summary>
+            <param name="count">Number of events to produce (1–1000, default 50).</param>
+            <param name="highFraudRatio">Fraction of events that should look fraudulent (0.0–1.0, default 0.2).</param>
+            <param name="cancellationToken">Cancellation token.</param>
+        </member>
+        <member name="M:fraud_poc_project.Controllers.LoadSimulatorController.Preview(System.Boolean)">
+            <summary>
+            Produce a single synthetic transaction event and return it as a preview.
+            </summary>
+        </member>
+        <member name="T:fraud_poc_project.Controllers.UserInputController">
+            <summary>
+            testing controllers
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Controllers.UserInputController.Write_Input(System.String)">
+            <summary>
+            This endpoint is for testing the writing of user input to a file. It appends the provided input string to a file specified in the configuration. If the input is null, it appends an empty line. The method returns a message indicating that the input has been appended to the file.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:fraud_poc_project.Controllers.UserInputController.Retrieve_Test_In_Kafka">
+            <summary>
+            This endpoint is for testing the retrieval of a test message in Kafka. It captures a test error message and sends it to the Kafka topic specified in the DLT_Kafka model. If successful, it returns "Success". If an exception occurs, it logs the error and rethrows the exception.
+            </summary>
+            <returns></returns>
         </member>
     </members>
 </doc>
