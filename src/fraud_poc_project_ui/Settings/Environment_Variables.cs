@@ -3,6 +3,9 @@ using System;
 
 namespace fraud_poc_project.Settings
 {
+    // Reads database connection details from environment variables (used when running
+    // in Docker/Kubernetes), falling back to values from appsettings.json, and finally
+    // to sensible local defaults.
     public class Environment_Variables
     {
         public string DBUsername { get; private set; }

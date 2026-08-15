@@ -6,6 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace fraud_poc_project.Configuration
 {
+    // CORS controls which other websites are allowed to call this API directly from a
+    // browser. This only adds a policy if CORS is turned on in AppSettings; otherwise
+    // browser calls from other sites will be blocked by default, which is the safer option.
     public static class CorsConfiguration
     {
         public static void AddCorsConfiguration(this WebApplicationBuilder builder)
@@ -22,7 +25,6 @@ namespace fraud_poc_project.Configuration
                               .AllowAnyMethod();
                     });
                 }
-                ;
             });
         }
     }

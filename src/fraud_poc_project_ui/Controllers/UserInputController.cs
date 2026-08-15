@@ -10,13 +10,14 @@ using System.Threading.Tasks;
 namespace fraud_poc_project.Controllers
 {
     /// <summary>
-    /// testing controllers
+    /// A grab-bag of manual test endpoints - not part of the real fraud detection
+    /// feature. Only registered with the DI container in Debug builds (see
+    /// ServiceConfiguration.cs), so these endpoints aren't available in production.
     /// </summary>
     [ApiController]
     [Route("TestFunctions")]
     public class UserInputController : ControllerBase
     {
-        private readonly IServiceProvider _sp;
         private readonly IConfiguration _config;
         private readonly ILogger<UserInputController> _logger;
         private readonly IFraudRepository _fraudRepository;
@@ -32,12 +33,8 @@ namespace fraud_poc_project.Controllers
 
         }
 
-        /// <summary>
-        /// This endpoint is for testing the writing of user input to a file. It appends the provided input string to a file specified in the configuration. If the input is null, it appends an empty line. The method returns a message indicating that the input has been appended to the file.
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        #region Testing Docker
+        // Adds a line of text to a test file on disk - just to prove the app can write
+        // to its mounted volume when running in Docker.
         [HttpGet("Write_Input")]
         public async Task<ActionResult<string>> Write_Input(string input)
         {
@@ -46,6 +43,7 @@ namespace fraud_poc_project.Controllers
             return $"Input appended to: {_filePath}";
         }
 
+        // Reads back everything written to that same test file.
         [HttpGet("Print_File_Input")]
         public async Task<ActionResult<string>> Print_File_Input()
         {
@@ -56,9 +54,8 @@ namespace fraud_poc_project.Controllers
             var content = await System.IO.File.ReadAllTextAsync(_filePath);
             return $"File content:{Environment.NewLine}{content}";
         }
-        #endregion
 
-
+        // Writes a fake error to the database, to prove the database connection works.
         [HttpGet("ValidateDB")]
         public async Task<ActionResult<string>> ValidateDB(string input = "tester")
         {
@@ -82,39 +79,18 @@ namespace fraud_poc_project.Controllers
             }
         }
 
+        /// <summary>
+        /// Placeholder endpoint left over from an earlier version of this test controller.
+        /// It doesn't actually talk to Kafka right now - it just always returns "success".
+        /// </summary>
         [HttpGet("ValidateKafka")]
-        public async Task<ActionResult<string>> ValidateKafka(string input = "tester")
+        public Task<ActionResult<string>> ValidateKafka(string input = "tester")
         {
-            var accNum = (new Random().Next(450000001, 459999999)).ToString();
-            var kafkaStream = $"credit-domain-dev-credit-notifier-viya-proxy";
-            int iNum = 0;
-
-            try
-            {
-                //    int itotal = declineReasonsItems.Count;
-                //    for (int i = 0; i < itotal; i++)
-                //    {
-                //        iNum = i;
-                //        var producer = _servicesProvider.GetRequiredService<IDomainProducer>();
-
-                //        producer.Produce(kafkaStream, declineReasonsItems[i].Metadata.CorrelationId.ToString(), declineReasonsItems[i]);
-
-                //        _logger.LogInformation($"The following value {Newtonsoft.Json.JsonConvert.SerializeObject(declineReasonsItems[i])}\r\nhas been placed on the '{kafkaStream}' kafka stream");
-                //    }
-
-                return new ActionResult<string>("success");
-            }
-            catch (Exception ex)
-            {
-                //_logger.LogInformation($"Error: Unable to place {Newtonsoft.Json.JsonConvert.SerializeObject(declineReasonsItems[iNum])}\r\non the '{kafkaStream}' kafka stream due to the following error\r\n{ex}");
-                throw;
-            }
+            return Task.FromResult(new ActionResult<string>("success"));
         }
 
-        /// <summary>
-        /// This endpoint is for testing the retrieval of a test message in Kafka. It captures a test error message and sends it to the Kafka topic specified in the DLT_Kafka model. If successful, it returns "Success". If an exception occurs, it logs the error and rethrows the exception.
-        /// </summary>
-        /// <returns></returns>
+        // Does the same thing as ValidateDB above (writes a fake error to the database) -
+        // kept as a separate endpoint from an earlier round of testing.
         [HttpGet("Retrieve_Test_In_Kafka")]
         public async Task<ActionResult<string>> Retrieve_Test_In_Kafka()
         {
@@ -133,7 +109,7 @@ namespace fraud_poc_project.Controllers
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Correlation ID: {correlationid} - Failed to write Error to Database for error Model={model}", Guid.NewGuid(), JsonConvert.SerializeObject(input));
+                _logger.LogError(ex, "Failed to write test error to database");
                 throw;
             }
         }

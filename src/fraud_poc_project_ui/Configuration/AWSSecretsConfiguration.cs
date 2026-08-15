@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Configuration
 {
+    // Fetches secrets (like database credentials) from AWS Secrets Manager, so we don't
+    // have to store passwords directly in config files.
     public class AWSSecretsConfiguration
     {
         private readonly IAmazonSecretsManager _secretsManager;

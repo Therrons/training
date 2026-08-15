@@ -14,6 +14,9 @@ namespace fraud_poc_project.Configuration
         public string Message { get; set; }
     }
 
+    // Checks whether the Kafka broker is reachable before the app fully starts up.
+    // Tries with "idempotence" (exactly-once delivery guarantees) first, since that's
+    // the safest mode, and falls back to a simpler mode if the broker doesn't support it.
     public class KafkaBrokerHealthCheck
     {
         private readonly FraudKafkaBrokerSettings _brokerSettings;
@@ -56,6 +59,8 @@ namespace fraud_poc_project.Configuration
                 "Please ensure the broker is running and accessible.");
         }
 
+        // Repeatedly tries to reach the Kafka broker, waiting delayMs between attempts,
+        // up to maxRetries times. Returns as soon as it succeeds once.
         private async Task<BrokerHealthCheckResult> TryConnectAsync(
             int maxRetries,
             int delayMs,

@@ -8,13 +8,16 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Configuration
 {
+    // Only used when the producer's EnableIdempotence setting is true. Checks the
+    // Kafka broker before the app finishes starting up, and quietly turns idempotence
+    // off if the broker doesn't support it - better to start in a degraded mode than
+    // not start at all.
     public static class KafkaIdempotence
     {
         public static async Task AddKafkaProducerIdempotence(this WebApplicationBuilder builder)
         {
-            //Perform pre-flight Kafka broker health check before building the app
-            //This allows us to adjust settings based on broker capabilities as
-            // since we have IdempotenceEnabled = true which takes longer to startup
+            // Check the broker now, before the app finishes starting, because idempotent
+            // mode can take longer to become ready and we want to adjust settings if needed.
             var brokerSettings = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<FraudKafkaBrokerSettings>>();
             var preFlightLogger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<KafkaBrokerHealthCheck>>();
 

@@ -13,11 +13,10 @@ using System.Linq;
 
 namespace fraud_poc_project.Configuration
 {
+    // Loads all the Kafka-related settings from config, and can create any Kafka
+    // topics that don't exist yet (only when auto-create is turned on).
     public static class KafkaConfiguration
     {
-        private static KafkaSettings _kafkaSettings;
-        private static AppSettings _appSettings;
-
         public static IServiceCollection AddKafkaConfigurations(
             this IServiceCollection services,
             IConfiguration configuration)
@@ -47,57 +46,67 @@ namespace fraud_poc_project.Configuration
             return services;
         }
 
+        // If auto-create-topics is turned on, this checks which Kafka topics we need
+        // and creates any that don't already exist on the broker.
         public static void KafkaSetupTopics(this IServiceCollection services)
         {
-            // Build a temporary service provider to resolve the options
+            // Build a temporary service provider just so we can read the settings we
+            // registered above - a normal DI container isn't available this early in startup.
             var serviceProvider = services.BuildServiceProvider();
 
-            // get options values populated from config
             var brokerSettings = serviceProvider.GetRequiredService<IOptions<FraudKafkaBrokerSettings>>().Value;
             var kafkaAdminSettings = serviceProvider.GetRequiredService<IOptions<KafkaAdminOptions>>().Value;
 
-            if (brokerSettings != null && kafkaAdminSettings != null)
-            {
-                // validate that the options value met the minimum required values
-                Model_Extensions_Helper.ValidateOptions(brokerSettings);
-                Model_Extensions_Helper.ValidateOptions(kafkaAdminSettings);
+            if (brokerSettings == null || kafkaAdminSettings == null)
+                return;
 
-                if (brokerSettings.AllowAutoCreateTopics == true && kafkaAdminSettings?.TopicOptions.Any() == true)
-                {
-                    AdminClientBuilder adminClientBuilder = new AdminClientBuilder(new AdminClientConfig
-                    {
-                        BootstrapServers = brokerSettings.BootstrapServers,
-                        SaslUsername = brokerSettings.SaslUserName,
-                        SaslPassword = brokerSettings.SaslPassword,
-                        SaslMechanism = brokerSettings.SaslMechanism,
-                        SecurityProtocol = brokerSettings.SecurityProtocol
-                    });
-                    CreateKafkaTopics(adminClientBuilder, kafkaAdminSettings);
-                }
-            }
+            // Make sure the required settings were actually filled in before we try to use them.
+            Model_Extensions_Helper.ValidateOptions(brokerSettings);
+            Model_Extensions_Helper.ValidateOptions(kafkaAdminSettings);
+
+            var noTopicsConfigured = kafkaAdminSettings.TopicOptions == null || !kafkaAdminSettings.TopicOptions.Any();
+            if (!brokerSettings.AllowAutoCreateTopics || noTopicsConfigured)
+                return;
+
+            var adminClientBuilder = new AdminClientBuilder(new AdminClientConfig
+            {
+                BootstrapServers = brokerSettings.BootstrapServers,
+                SaslUsername = brokerSettings.SaslUserName,
+                SaslPassword = brokerSettings.SaslPassword,
+                SaslMechanism = brokerSettings.SaslMechanism,
+                SecurityProtocol = brokerSettings.SecurityProtocol
+            });
+            CreateMissingKafkaTopics(adminClientBuilder, kafkaAdminSettings);
         }
 
-        private static void CreateKafkaTopics(AdminClientBuilder adminClientBuilder, KafkaAdminOptions kafkaAdminSettings)
+        // Compares the topics we need (from config) against the topics that already
+        // exist on the Kafka broker, and creates only the ones that are missing.
+        private static void CreateMissingKafkaTopics(AdminClientBuilder adminClientBuilder, KafkaAdminOptions kafkaAdminSettings)
         {
-            using (IAdminClient adminClient = adminClientBuilder.Build())
+            using var adminClient = adminClientBuilder.Build();
+
+            var existingTopics = adminClient.GetMetadata(TimeSpan.FromSeconds(30))
+                .Topics
+                .Select(topic => topic.Topic)
+                .ToList();
+
+            var topicsToCreate = new List<TopicSpecification>();
+            foreach (var topicOption in kafkaAdminSettings.TopicOptions)
             {
-                // get list of existing topics in kafka
-                List<string> topicsOnBroker = adminClient.GetMetadata(TimeSpan.FromSeconds(30.0)).Topics.Select((TopicMetadata a) => a.Topic).ToList();
+                if (existingTopics.Contains(topicOption.Topic))
+                    continue; // already exists - nothing to do
 
-                // only create topics which does not exist yet
-                List<TopicSpecification> list = (from x in kafkaAdminSettings.TopicOptions
-                                                 where !topicsOnBroker.Contains(x.Topic)
-                                                 select new TopicSpecification
-                                                 {
-                                                     Name = x.Topic,
-                                                     ReplicationFactor = x.ReplicationFactor,
-                                                     NumPartitions = x.Partitions,
-                                                 }).ToList();
-                if (list.Count != 0)
+                topicsToCreate.Add(new TopicSpecification
                 {
-                    adminClient.CreateTopicsAsync(list).GetAwaiter().GetResult();
-                }
+                    Name = topicOption.Topic,
+                    ReplicationFactor = topicOption.ReplicationFactor,
+                    NumPartitions = topicOption.Partitions
+                });
+            }
 
+            if (topicsToCreate.Count > 0)
+            {
+                adminClient.CreateTopicsAsync(topicsToCreate).GetAwaiter().GetResult();
             }
         }
     }

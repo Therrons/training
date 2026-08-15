@@ -17,6 +17,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
+// This is the app's starting point - it runs once when the app boots up.
+// It wires everything together, in order: logging, secrets, configuration,
+// application services (database, Kafka, fraud rules), then starts the web server.
 public class Program
 {
     public static string file_Path_Name = "";
@@ -27,6 +30,8 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Step 1: set up logging (Serilog) so everything below can log to the console
+        // and to a rolling daily log file.
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
@@ -38,15 +43,17 @@ public class Program
         builder.Services.AddSerilog();  // Add Serilog services to the DI container
         builder.Host.UseSerilog();      // Use Serilog for logging
 
+        // Step 2: load secrets and settings, then register every service the app needs.
         builder.ConfigureSecrets();     // Load secrets and add them to the configuration
         builder.AddConfigurations();    // Add configurations from appsettings.json, environment variables, and command line arguments
         builder.AddServices_AddDI();    // Add application services to the DI container
         builder.AddCorsConfiguration(); // Add CORS configuration to the DI container - the alternative would be to add CORS via Nginx
-                                        // or native cloud solution, eg AWS API Gateway  
+                                        // or native cloud solution, eg AWS API Gateway
 
         if (args != null && args.Length > 0)
             builder.Configuration.AddCommandLine(args);
 
+        // Step 3: optionally run the database setup scripts before anything else starts.
         // ── Database initialization ───────────────────────────
         var createDbFlag = builder.Configuration["Database:CreateDatabaseOnStartup"]?.ToLowerInvariant();
         if (createDbFlag == "yes" || createDbFlag == "true")
@@ -74,6 +81,7 @@ public class Program
 
         var isLocal = builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
 
+        // Step 4: register the API framework pieces (controllers, Swagger, health checks).
         builder.Services.AddControllers();          // Add controller services to the DI container
         builder.Services.AddEndpointsApiExplorer(); // Add API explorer services to the DI container
         builder.Services.AddHealthChecks();         // Add health check services to the DI container
@@ -107,9 +115,12 @@ public class Program
             options.AllowedHosts = new[] { "*" };
         });
 
+        // Step 5: if idempotent Kafka producing is turned on, double-check the broker
+        // supports it before we finish starting up (see KafkaIdempotence.cs).
         var kafKaProducerIdemPotence = builder.Configuration["KafkaSettings:ProducerSettings:EnableIdempotence"]?.ToLowerInvariant();
         if (kafKaProducerIdemPotence == "true") builder.AddKafkaProducerIdempotence();
 
+        // Step 6: build the app and start handling web requests.
         var app = builder.Build();
         app.UseRouting();
         app.UseSwagger();

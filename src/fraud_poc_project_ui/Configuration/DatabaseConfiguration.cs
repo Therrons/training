@@ -8,6 +8,8 @@ using System.Linq;
 
 namespace fraud_poc_project.Configuration
 {
+    // Runs the database setup SQL scripts on startup, when Database:CreateDatabaseOnStartup
+    // is turned on. Useful for a fresh environment that doesn't have its tables yet.
     public static class DatabaseConfiguration
     {
         public static void ConfigureDatabaseServices(this IServiceCollection services, WebApplicationBuilder builder, IConfiguration configuration)
@@ -29,6 +31,9 @@ namespace fraud_poc_project.Configuration
             }
         }
 
+        // Runs every .sql file found under scriptsPath, in alphabetical order, against
+        // the database. File names are usually prefixed with numbers (01_, 02_, ...) so
+        // they run in the right order.
         private static void InitializeDatabase(string connectionString, string scriptsPath, ILogger logger, IConfiguration configuration)
         {
             try

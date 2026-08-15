@@ -9,6 +9,9 @@ using System.Text.Json;
 
 namespace fraud_poc_project_repo.Kafka
 {
+    // Runs in the background for as long as the app is running. It continuously reads
+    // transaction messages from Kafka, groups them into small batches, and passes each
+    // batch off to be evaluated for fraud and saved to the database.
     public class FraudConsumer : BackgroundService
     {
         private readonly IConsumer<string, byte[]> _consumer;
@@ -38,6 +41,7 @@ namespace fraud_poc_project_repo.Kafka
             _deadLetterProducer = deadLetterProducer;
             _appSettings = appSettings.Value;
 
+            // Translate our own settings objects into the config class the Kafka client library expects.
             var config = new ConsumerConfig
             {
                 BootstrapServers = brokerOptions.Value.BootstrapServers,
@@ -81,7 +85,9 @@ namespace fraud_poc_project_repo.Kafka
                 _consumerOptions.BatchTimeoutSeconds);
         }
 
-        // Override ExecuteAsync instead of StartAsync
+        // This runs automatically when the app starts, and keeps running until the app
+        // shuts down. (We override ExecuteAsync, which BackgroundService calls for us,
+        // instead of StartAsync.)
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _consumer.Subscribe(_consumerOptions.TransactionTopic);
@@ -100,6 +106,9 @@ namespace fraud_poc_project_repo.Kafka
             }
         }
 
+        // The main loop: keep grabbing messages one at a time and collecting them into
+        // a batch. Once the batch is either "full" (reached BatchSize) or has been
+        // waiting too long (reached BatchTimeoutSeconds), process it and start a new batch.
         private async Task RunConsumerLoopAsync(CancellationToken cancellationToken)
         {
             var batch = new List<ConsumeResult<string, byte[]>>();
@@ -110,7 +119,8 @@ namespace fraud_poc_project_repo.Kafka
             {
                 try
                 {
-                    // Poll with a short timeout to check batch conditions frequently
+                    // Check for one new message, but don't wait long - we need to keep
+                    // checking the batch-timeout condition below even if nothing new arrives.
                     var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(100));
 
                     if (consumeResult?.Message != null)
@@ -124,7 +134,8 @@ namespace fraud_poc_project_repo.Kafka
                             batch.Count);
                     }
 
-                    // Check if we should process the batch
+                    // Time to process the batch if it's full, or if it's non-empty and has
+                    // been waiting around longer than the configured timeout.
                     var timeSinceLastBatch = DateTime.UtcNow - lastBatchTime;
                     var shouldProcessBatch = batch.Count >= _consumerOptions.BatchSize ||
                                             (batch.Count > 0 && timeSinceLastBatch >= batchTimeout);
@@ -182,91 +193,10 @@ namespace fraud_poc_project_repo.Kafka
             }
         }
 
-        //private async Task ProcessBatchAsync(List<ConsumeResult<string, byte[]>> batch, CancellationToken cancellationToken)
-        //{
-        //    if (batch.Count == 0) return;
-
-        //    var startTime = DateTime.UtcNow;
-        //    var deserializedBatch = new List<(TransactionEvent Event, ConsumeResult<string, byte[]> ConsumeResult)>();
-        //    var failedMessages = new List<(TransactionEvent Event, string Error)>();
-        //    //var failedMessages = new List<(ConsumeResult<string, byte[]> ConsumeResult, string Error)>();
-
-        //    // Deserialize all messages in the batch
-        //    foreach (var consumeResult in batch)
-        //    {
-        //        try
-        //        {
-        //            var transactionEvent = JsonSerializer.Deserialize<TransactionEvent>(
-        //                consumeResult.Message.Value,
-        //                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-        //            if (transactionEvent == null)
-        //            {
-        //                failedMessages.Add((consumeResult, "Deserialization returned null"));
-        //                continue;
-        //            }
-
-        //            deserializedBatch.Add((transactionEvent, consumeResult));
-        //        }
-        //        catch (JsonException ex)
-        //        {
-        //            _logger.LogError(ex, "JSON deserialization error for offset: {Offset}", consumeResult.Offset.Value);
-        //            failedMessages.Add((consumeResult, $"JSON error: {ex.Message}"));
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _logger.LogError(ex, "Unexpected deserialization error for offset: {Offset}", consumeResult.Offset.Value);
-        //            failedMessages.Add((consumeResult, $"Deserialization error: {ex.Message}"));
-        //        }
-        //    }
-
-        //    // Process the batch
-        //    if (deserializedBatch.Count > 0)
-        //    {
-        //        try
-        //        {
-        //            bool success = await _eventHandler.HandleBatchAsync(deserializedBatch, cancellationToken);
-
-        //            var processingTime = (DateTime.UtcNow - startTime).TotalMilliseconds;
-
-        //            if (success)
-        //            {
-        //                _logger.LogInformation(
-        //                    "Successfully processed batch of {Count} messages in {ProcessingTime}ms ({Throughput} msg/sec)",
-        //                    deserializedBatch.Count,
-        //                    processingTime,
-        //                    Math.Round(deserializedBatch.Count / (processingTime / 1000), 2));
-        //            }
-        //            else
-        //            {
-        //                _logger.LogWarning("Batch processing failed, sending all messages to DLT");
-
-        //                // Send all messages in batch to dead letter
-        //                foreach (var itm in deserializedBatch)
-        //                {
-        //                    await SendToDeadLetterAsync(itm.Event, "Batch handler returned false");
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _logger.LogError(ex, "Error processing batch of {Count} messages", deserializedBatch.Count);
-
-        //            // Send all messages in batch to dead letter on exception
-        //            foreach (var itm in deserializedBatch)
-        //            {
-        //                await SendToDeadLetterAsync(itm.Event, $"Batch processing error: {ex.Message}");
-        //            }
-        //        }
-        //    }
-
-        //    // Handle failed deserializations
-        //    foreach (var itm in failedMessages)
-        //    {
-        //        await SendToDeadLetterAsync(itm., itm.Error);
-        //    }
-        //}
-
+        // Takes one batch of raw Kafka messages and turns them into fraud results:
+        //   1. Turn each raw message into a TransactionEvent (skip/log any that fail).
+        //   2. Hand the whole batch to the event handler to evaluate and save.
+        //   3. If that fails, send every message in the batch to the dead-letter topic.
         private async Task ProcessBatchAsync(List<ConsumeResult<string, byte[]>> batch, CancellationToken cancellationToken)
         {
             if (batch.Count == 0) return;
@@ -274,7 +204,7 @@ namespace fraud_poc_project_repo.Kafka
             var startTime = DateTime.UtcNow;
             var deserializedBatch = new List<(TransactionEvent Event, ConsumeResult<string, byte[]> ConsumeResult)>();
 
-            // Deserialize all messages in the batch
+            // Step 1: turn each raw Kafka message into a TransactionEvent object.
             foreach (var consumeResult in batch)
             {
                 try
@@ -301,6 +231,7 @@ namespace fraud_poc_project_repo.Kafka
 
             if (deserializedBatch.Count == 0) return;
 
+            // Step 2: hand the whole batch over to be evaluated and saved.
             try
             {
                 await _eventHandler.HandleBatchAsync(deserializedBatch, cancellationToken);
@@ -319,12 +250,16 @@ namespace fraud_poc_project_repo.Kafka
             }
             catch (Exception ex)
             {
+                // Step 3: if handling the batch failed, don't lose the messages - send
+                // every one of them to the dead-letter topic so they can be looked at later.
                 _logger.LogError(ex, "Error processing batch of {Count} messages", deserializedBatch.Count);
                 foreach (var itm in deserializedBatch)
                     await SendToDeadLetterAsync(itm.Event, $"Batch processing error: {ex.Message}");
             }
         }
 
+        // Sends one failed transaction event to the dead-letter topic. If even that fails,
+        // we just log it - there's nowhere else left to send it.
         private async Task SendToDeadLetterAsync(TransactionEvent consumeResult, string errorMessage)
         {
             try
@@ -337,6 +272,8 @@ namespace fraud_poc_project_repo.Kafka
             }
         }
 
+        // Converts a raw Kafka log entry into one of our normal log levels, so it shows
+        // up consistently alongside the rest of the app's logs.
         private void LogKafkaMessage(LogMessage logMessage)
         {
             var level = logMessage.Level switch
@@ -350,6 +287,8 @@ namespace fraud_poc_project_repo.Kafka
             _logger.Log(level, "Kafka log: {Message}", logMessage.Message);
         }
 
+        // Logs a Kafka client error. "Fatal" errors mean the connection is broken and
+        // the consumer likely can't recover on its own, so those get logged as critical.
         private void LogKafkaError(Error error)
         {
             if (error.IsFatal)

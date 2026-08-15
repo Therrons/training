@@ -8,6 +8,10 @@ using System.Text.Json;
 
 namespace fraud_poc_project_repo.Kafka
 {
+    // Sends transaction events to Kafka. There are four "send" methods below
+    // (Produce, ProduceAsync, ProduceDlt, ProduceDltAsync) - they all do the same basic
+    // thing (turn the message into JSON bytes and hand it to the Kafka client) but differ
+    // in whether they wait for confirmation and which topic they're aimed at.
     public class FraudProducer : IFraudProducer
     {
         private readonly IProducer<string, byte[]> _producer;
@@ -31,6 +35,8 @@ namespace fraud_poc_project_repo.Kafka
             _logger = logger;
             _appSettings = appSettings.Value;
             _producerOptions = producerOptions.Value;
+
+            // Translate our own settings objects into the config class the Kafka client library expects.
             var producerConfig = new ProducerConfig
             {
                 BootstrapServers = brokerOptions.Value.BootstrapServers,
@@ -60,6 +66,20 @@ namespace fraud_poc_project_repo.Kafka
                     _appSettings.ApplicationName);
         }
 
+        // Turns a transaction event into the raw Kafka message format: JSON bytes as the
+        // value, customer id as the key (so all of one customer's events land on the same
+        // partition), and the transaction time as the message timestamp.
+        private static Message<string, byte[]> BuildKafkaMessage<T>(T message) where T : TransactionEvent
+        {
+            var payload = JsonSerializer.SerializeToUtf8Bytes(message, _jsonOptions);
+            return new Message<string, byte[]>
+            {
+                Key = message.CustomerId,
+                Value = payload,
+                Timestamp = new Timestamp(message.TransactionTime)
+            };
+        }
+
         public async Task<bool> ProduceAsync<T>(
             T message,
             CancellationToken cancellationToken = default) where T : TransactionEvent
@@ -68,14 +88,7 @@ namespace fraud_poc_project_repo.Kafka
             string _key = message.CustomerId;
             try
             {
-                var payload = JsonSerializer.SerializeToUtf8Bytes(message, _jsonOptions);
-
-                var kafkaMessage = new Message<string, byte[]>
-                {
-                    Key = _key,
-                    Value = payload,
-                    Timestamp = new Timestamp(message.TransactionTime)
-                };
+                var kafkaMessage = BuildKafkaMessage(message);
 
                 var deliveryResult = await _producer.ProduceAsync(_topic, kafkaMessage, cancellationToken);
 
@@ -124,15 +137,7 @@ namespace fraud_poc_project_repo.Kafka
 
             try
             {
-                var payload = JsonSerializer.SerializeToUtf8Bytes(message, _jsonOptions);
-
-                var kafkaMessage = new Message<string, byte[]>
-                {
-                    Key = _key,
-                    Value = payload,
-                    Timestamp = new Timestamp(message.TransactionTime)
-                };
-
+                var kafkaMessage = BuildKafkaMessage(message);
                 _producer.Produce(message.KafkaTopic, kafkaMessage);
                 return true;
             }
@@ -160,15 +165,7 @@ namespace fraud_poc_project_repo.Kafka
         {
             try
             {
-                var payload = JsonSerializer.SerializeToUtf8Bytes(message, _jsonOptions);
-
-                var kafkaMessage = new Message<string, byte[]>
-                {
-                    Key = message.CustomerId,
-                    Value = payload,
-                    Timestamp = new Timestamp(message.TransactionTime)
-                };
-
+                var kafkaMessage = BuildKafkaMessage(message);
                 _producer.Produce(message.KafkaTopic, kafkaMessage);
                 return true;
             }
@@ -192,6 +189,8 @@ namespace fraud_poc_project_repo.Kafka
             }
         }
 
+        // Same idea as ProduceAsync, but first checks that a dead-letter topic was
+        // actually set on the message before trying to send it.
         public async Task<bool> ProduceDltAsync<T>(T message, CancellationToken cancellationToken = default) where T : TransactionEvent
         {
             string _topic = message.KafkaTopic;

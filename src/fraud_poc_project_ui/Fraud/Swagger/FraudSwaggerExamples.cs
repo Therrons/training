@@ -5,6 +5,8 @@ using System;
 
 namespace fraud_poc_project.Fraud.Swagger
 {
+    // Adds example values and descriptions to the Swagger/OpenAPI documentation page,
+    // so anyone testing the API can see realistic sample data instead of blank fields.
     public class FraudExamplesOperationFilter : IOperationFilter
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)

@@ -12,6 +12,10 @@ using System.Data;
 
 namespace fraud_poc_project_repo
 {
+    // Talks directly to the PostgreSQL database for everything fraud-related: saving
+    // evaluation results, recording errors, and answering search queries from the API.
+    // Each method opens its own database connection, runs one SQL stored procedure or
+    // function, and closes the connection again.
     public class FraudRepository : IFraudRepository
     {
         private readonly string _connectionString;
@@ -30,6 +34,7 @@ namespace fraud_poc_project_repo
             _dbConnection = dbConnection;
         }
 
+        // Records a dead-letter error by calling the sp_insert_dlt_error stored procedure.
         public async Task<bool> CaptureErrorAsync(string correlationID, DLT_Kafka model)
         {
             var dbConnector = _dbConnection.DB_Connector;
@@ -54,6 +59,10 @@ namespace fraud_poc_project_repo
             }
         }
 
+        // Saves one fraud evaluation result to the database:
+        //   1. Insert the transaction + its overall score/flag into fraud_event.
+        //   2. Insert one row per rule result into fraud_rule_result, linked to that event.
+        // Both steps happen in a single transaction, so if either one fails, nothing is saved.
         public async Task<long> SaveFraudEvaluationAsync(FraudEventRecord result)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
@@ -121,6 +130,8 @@ namespace fraud_poc_project_repo
             }
         }
 
+        // A simpler way to record a dead-letter error, used when we only have the raw
+        // topic name, message text, and error message (no full DLT_Kafka model).
         public async Task SavedltErrorAsync(string topic, string messageData, string error)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
@@ -137,6 +148,7 @@ namespace fraud_poc_project_repo
             await cmd.ExecuteNonQueryAsync();
         }
 
+        // Looks up transactions matching the given filters (date range, customer, etc).
         public async Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query)
         {
             var results = new List<FraudEventRecord>();
@@ -164,6 +176,8 @@ namespace fraud_poc_project_repo
             return results;
         }
 
+        // Same as QueryFraudEventsAsync, but always forces is_flagged_only = true,
+        // so only the transactions that were flagged as fraud come back.
         public async Task<IEnumerable<FraudEventRecord>> QueryFlaggedOnlyFraudEventsAsync(FraudQueryDto query)
         {
             var results = new List<FraudEventRecord>();
@@ -191,6 +205,7 @@ namespace fraud_poc_project_repo
             return results;
         }
 
+        // Looks up every rule result that was recorded for one specific fraud event.
         public async Task<IEnumerable<FraudRuleSetRecord>> GetRuleResultsForEventAsync(long fraudEventId)
         {
             var results = new List<FraudRuleSetRecord>();
@@ -211,6 +226,7 @@ namespace fraud_poc_project_repo
             return results;
         }
 
+        // Turns one database row into a FraudRuleSetRecord object.
         private static FraudRuleSetRecord MapFraudRuleResultRecord(NpgsqlDataReader r) => new()
         {
             FraudEventId = r.GetInt64(r.GetOrdinal("fraud_event_id")),
@@ -220,6 +236,7 @@ namespace fraud_poc_project_repo
             ScoreContribution = r.GetDecimal(r.GetOrdinal("score_contribution"))
         };
 
+        // Turns one database row into a FraudEventRecord object (transaction + outcome).
         private static FraudEventRecord MapFraudEventRecord(NpgsqlDataReader r) => new()
         {
             Event = new TransactionEvent

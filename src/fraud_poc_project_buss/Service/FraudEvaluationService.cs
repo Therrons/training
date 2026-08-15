@@ -9,10 +9,20 @@ namespace fraud_poc_project_buss.Service
         Task<FraudEventRecord> EvaluateAsync(TransactionEvent kafkaEvent);
     }
 
+    // This is the "brain" that decides if a transaction looks like fraud.
+    // Steps:
+    //   1. Run every fraud rule (see FraudRules.cs) against the transaction.
+    //   2. Add up the score points from every rule that triggered.
+    //   3. If the total score is 40 or more, flag the transaction as suspicious.
     public class FraudEvaluationService : IFraudEvaluationService
     {
         private readonly IEnumerable<IFraudRule> _rules;
+
+        // A transaction is flagged once its total score reaches this many points.
         private const decimal FlagThreshold = 40m;
+
+        // The highest possible score, even if the rules would add up to more.
+        private const decimal MaxScore = 100m;
 
         public FraudEvaluationService(IEnumerable<IFraudRule> rules)
         {
@@ -24,19 +34,18 @@ namespace fraud_poc_project_buss.Service
             if (kafkaEvent == null)
                 throw new ArgumentNullException(nameof(kafkaEvent));
 
-            var ruleResults = _rules.Select(r => r.Evaluate(kafkaEvent)).ToList();
+            // Step 1: ask every rule what it thinks of this transaction.
+            var ruleResults = _rules.Select(rule => rule.Evaluate(kafkaEvent)).ToList();
+            var triggeredRules = ruleResults.Where(result => result.IsTriggered).ToList();
 
-            var score = ruleResults
-                .Where(r => r.IsTriggered)
-                .Sum(r => r.ScoreContribution);
+            // Step 2: add up the points from only the rules that triggered, capped at 100.
+            var score = triggeredRules.Sum(result => result.ScoreContribution);
+            score = Math.Min(score, MaxScore);
 
-            // Cap score at 100
-            score = Math.Min(score, 100m);
-
+            // Step 3: flag it if the score is high enough, and list which rules caused it.
             var isFlagged = score >= FlagThreshold;
-
             var flaggedReason = isFlagged
-                ? string.Join(", ", ruleResults.Where(r => r.IsTriggered).Select(r => r.RuleCode))
+                ? string.Join(", ", triggeredRules.Select(result => result.RuleCode))
                 : null;
 
             return new FraudEventRecord
@@ -49,6 +58,8 @@ namespace fraud_poc_project_buss.Service
             };
         }
 
+        // Same as Evaluate, but runs on a background thread so callers can await it
+        // without blocking.
         public async Task<FraudEventRecord> EvaluateAsync(TransactionEvent kafkaEvent)
          => await Task.Run(() => Evaluate(kafkaEvent));
     }

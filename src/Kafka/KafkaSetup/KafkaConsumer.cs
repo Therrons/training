@@ -3,6 +3,8 @@ using fraud_poc_project_buss.Models.Kafka;
 
 namespace KafkaSetup
 {
+    // Translates our own broker + consumer settings into the ConsumerConfig class that
+    // the Confluent Kafka library actually understands.
     public class KafkaConsumer : ConsumerConfig
     {
         public KafkaConsumer(FraudKafkaBrokerSettings brokerSettings, FraudKafkaConsumerSettings consumerSettings)

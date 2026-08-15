@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Kafka.Consumer
 {
+    // Takes transaction events that have been read from Kafka and runs them through
+    // fraud evaluation, then saves the results to the database.
     public class FraudBatchConsumerWorker : ITransactionEventHandler
     {
         private readonly ILogger<FraudBatchConsumerWorker> _logger;
@@ -32,6 +34,8 @@ namespace fraud_poc_project.Kafka.Consumer
             _fraudRepository = fraudRepository;
         }
 
+        // Evaluates one transaction for fraud and saves the result. If anything goes
+        // wrong, the transaction is sent to the dead-letter topic instead of being lost.
         public async Task HandleAsync((TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits) consumeResult, CancellationToken cancellationToken)
         {
             if (consumeResult.transactionEvent == null)
@@ -57,75 +61,16 @@ namespace fraud_poc_project.Kafka.Consumer
             }
         }
 
-        public async Task HandleBatchAsync(List<(TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits)> batch, CancellationToken cancellationToken)
+        // NOTE: this is currently a no-op placeholder - it takes the batch but doesn't
+        // evaluate or save anything yet. FraudConsumer.RunConsumerLoopAsync (in the repo
+        // project) calls this method for every batch it reads, so today those batches
+        // are effectively not being processed. HandleAsync above does the real
+        // evaluate-and-save work but isn't currently being called by the batch consumer.
+        // Left as-is since fixing the actual batch processing logic is a behavior change,
+        // not a simplification, and wasn't part of this cleanup.
+        public Task HandleBatchAsync(List<(TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits)> batch, CancellationToken cancellationToken)
         {
-            if (batch.Count == 0)
-                return;
-
-            using var scope = _serviceScopeFactory.CreateScope();
-            var evaluationService = scope.ServiceProvider.GetRequiredService<IFraudEvaluationService>();
-            var repository = scope.ServiceProvider.GetRequiredService<IFraudRepository>();
-
-            foreach (var consumeResult in batch)
-            {
-                //if (consumeResult?.Message?.Value == null)
-                //    continue;
-
-                //var rawJson = Encoding.UTF8.GetString(consumeResult.Message.Value);
-
-                //TransactionEvent? transEvent;
-                //try
-                //{
-                //    transEvent = JsonConvert.DeserializeObject<TransactionEvent>(rawJson);
-                //}
-                //catch (JsonException ex)
-                //{
-                //    _logger.LogWarning(ex,
-                //        "Failed to deserialize Kafka message at offset {Offset} on topic {Topic}",
-                //        consumeResult.Event.Offset.Value, consumeResult.Topic);
-                //    await SendToDlt(repository, consumeResult.Topic, rawJson, ex.Message);
-                //    continue;
-                //}
-
-                //if (transEvent == null)
-                //{
-                //    _logger.LogWarning(
-                //        "Null domain event at offset {Offset} on topic {Topic}",
-                //        consumeResult.Offset.Value, consumeResult.Topic);
-                //    continue;
-                //}
-
-                //var kafkaEvent = new TransactionEvent
-                //{
-                //    KafkaTopic = consumeResult.Topic,
-                //    TransactionId = transEvent.TransactionId,
-                //    CustomerId = transEvent.CustomerId,
-                //    AccountId = transEvent.AccountId,
-                //    Amount = transEvent.Amount,
-                //    Currency = transEvent.Currency,
-                //    MerchantName = transEvent.MerchantName,
-                //    MerchantCategory = transEvent.MerchantCategory,
-                //    TransactionType = transEvent.TransactionType,
-                //    Channel = transEvent.Channel,
-                //    CountryCode = transEvent.CountryCode,
-                //    TransactionTime = transEvent.TransactionTime
-                //};
-
-                //try
-                //{
-                //    var result = evaluationService.Evaluate(kafkaEvent);
-                //    await repository.SaveFraudEvaluationAsync(result);
-
-                //    _logger.LogInformation(
-                //        "Processed transaction {TransactionId}: flagged={IsFlagged}, score={FraudScore}",
-                //        kafkaEvent.TransactionId, result.IsFlagged, result.FraudScore);
-                //}
-                //catch (Exception ex)
-                //{
-                //    _logger.LogError(ex, "Error processing transaction {TransactionId}", kafkaEvent.TransactionId);
-                //    await SendToDlt(repository, consumeResult.Topic, rawJson, ex.Message);
-                //}
-            }
+            return Task.CompletedTask;
         }
 
         private async Task SendToDlt(IFraudRepository repository, string topic, string messageData, string error)

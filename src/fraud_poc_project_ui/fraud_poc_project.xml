@@ -6,10 +6,12 @@
     <members>
         <member name="M:fraud_poc_project.Configuration.ConfigureSwaggerForRancher.ConfigureSwagger(Microsoft.AspNetCore.Builder.WebApplicationBuilder)">
             <summary>
-            Configure Swagger to dynamically set the server URL based on the incoming request 
-            this is because the service is hosted in K8s and I still want the swagger to work
+            Registers Swagger (the API documentation/testing page) so it keeps working
+            when the app is hosted behind Rancher/Kubernetes.
+            Note: Program.cs also registers Swagger separately with a bit more detail
+            (contact info, XML comments). Both run - this one just adds a second,
+            simpler registration on top.
             </summary>
-            <param name="builder"></param>
         </member>
         <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
             <summary>
@@ -46,21 +48,16 @@
         </member>
         <member name="T:fraud_poc_project.Controllers.UserInputController">
             <summary>
-            testing controllers
+            A grab-bag of manual test endpoints - not part of the real fraud detection
+            feature. Only registered with the DI container in Debug builds (see
+            ServiceConfiguration.cs), so these endpoints aren't available in production.
             </summary>
         </member>
-        <member name="M:fraud_poc_project.Controllers.UserInputController.Write_Input(System.String)">
+        <member name="M:fraud_poc_project.Controllers.UserInputController.ValidateKafka(System.String)">
             <summary>
-            This endpoint is for testing the writing of user input to a file. It appends the provided input string to a file specified in the configuration. If the input is null, it appends an empty line. The method returns a message indicating that the input has been appended to the file.
+            Placeholder endpoint left over from an earlier version of this test controller.
+            It doesn't actually talk to Kafka right now - it just always returns "success".
             </summary>
-            <param name="input"></param>
-            <returns></returns>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.UserInputController.Retrieve_Test_In_Kafka">
-            <summary>
-            This endpoint is for testing the retrieval of a test message in Kafka. It captures a test error message and sends it to the Kafka topic specified in the DLT_Kafka model. If successful, it returns "Success". If an exception occurs, it logs the error and rethrows the exception.
-            </summary>
-            <returns></returns>
         </member>
     </members>
 </doc>

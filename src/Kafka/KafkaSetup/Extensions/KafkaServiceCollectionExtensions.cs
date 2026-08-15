@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KafkaSetup.Extensions
 {
+    // A one-call helper for wiring up all the Kafka-related pieces (broker, producer,
+    // consumer config) into the app's dependency injection container.
     public static class KafkaServiceCollectionExtensions
     {
         public static IServiceCollection AddKafka(
@@ -11,6 +13,7 @@ namespace KafkaSetup.Extensions
             IConfiguration configuration,
             string sectionName = "KafkaSettings")
         {
+            // Load and validate the Kafka settings from config (e.g. appsettings.json).
             services.AddOptions<KafkaSettings>()
               .BindConfiguration(sectionName)
               .ValidateDataAnnotations()

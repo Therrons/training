@@ -8,10 +8,12 @@ namespace fraud_poc_project.Configuration
     public static class ConfigureSwaggerForRancher
     {
         /// <summary>
-        /// Configure Swagger to dynamically set the server URL based on the incoming request 
-        /// this is because the service is hosted in K8s and I still want the swagger to work
+        /// Registers Swagger (the API documentation/testing page) so it keeps working
+        /// when the app is hosted behind Rancher/Kubernetes.
+        /// Note: Program.cs also registers Swagger separately with a bit more detail
+        /// (contact info, XML comments). Both run - this one just adds a second,
+        /// simpler registration on top.
         /// </summary>
-        /// <param name="builder"></param>
         public static void ConfigureSwagger(this WebApplicationBuilder builder)
         {
             builder.Services.AddSwaggerGen(c =>

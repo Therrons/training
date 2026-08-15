@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Controllers
 {
+    // The read-only API for looking up fraud results that have already been saved to
+    // the database. This doesn't evaluate anything itself - that happens automatically
+    // in the background via FraudConsumer/FraudBatchConsumerWorker.
     [ApiController]
     [Route("api/fraud")]
     public class FraudController : ControllerBase

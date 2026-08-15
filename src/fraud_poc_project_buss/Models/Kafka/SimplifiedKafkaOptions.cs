@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace fraud_poc_project_buss.Models.Kafka
 {
     /// <summary>
-    /// Simplified Kafka broker configuration for fraud detection
+    /// How to connect to the Kafka broker: its address and login details.
     /// </summary>
     public record FraudKafkaBrokerSettings
     {
@@ -19,7 +19,8 @@ namespace fraud_poc_project_buss.Models.Kafka
     }
 
     /// <summary>
-    /// Producer configuration for fraud events
+    /// Settings for sending ("producing") messages to Kafka, like how to compress them
+    /// and how long to wait before giving up.
     /// </summary>
     public record FraudKafkaProducerSettings
     {
@@ -33,14 +34,16 @@ namespace fraud_poc_project_buss.Models.Kafka
     }
 
     /// <summary>
-    /// Consumer configuration for transaction events
+    /// Settings for reading ("consuming") transaction messages from Kafka, including
+    /// how many messages to batch together before processing them.
     /// </summary>
     public record FraudKafkaConsumerSettings
     {
-        [Required(ErrorMessage = "Topic Name cannot be emptpy")]
+        // The Kafka topic to read incoming transactions from.
+        [Required(ErrorMessage = "TransactionTopic cannot be empty")]
         public required string TransactionTopic { get; set; }
 
-        [Required(ErrorMessage = "Topic Dtl Name cannot be emptpy")]
+        [Required(ErrorMessage = "TransactionTopicDtl cannot be empty")]
         public required string TransactionTopicDtl { get; set; }
 
         public AutoOffsetReset AutoOffsetReset { get; set; } = AutoOffsetReset.Earliest;
