@@ -1,9 +1,11 @@
 using fraud_poc_project.Models;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
+using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,11 +30,11 @@ namespace fraud_poc_project.Controllers
 
         public LoadSimulatorController(
             IFraudProducer producer,
-            FraudKafkaConsumerSettings consumerSettings,
+            IOptions<FraudKafkaConsumerSettings> consumerSettings,
             ILogger<LoadSimulatorController> logger)
         {
             _producer = producer;
-            _consumerSettings = consumerSettings;
+            _consumerSettings = consumerSettings.Value;
             _logger = logger;
         }
 
@@ -58,6 +60,8 @@ namespace fraud_poc_project.Controllers
             int produced = 0;
             int failed = 0;
 
+            cancellationToken = cancellationToken == default ? new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token : cancellationToken;
+
             for (int i = 0; i < count; i++)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -77,7 +81,7 @@ namespace fraud_poc_project.Controllers
                     await Task.Delay(50, cancellationToken);
             }
 
-            _logger.LogInformation(
+            _logger.LogInformationOnly(
                 "Load simulation completed: {Produced} produced, {Failed} failed out of {Total} requested.",
                 produced, failed, count);
 
@@ -99,7 +103,7 @@ namespace fraud_poc_project.Controllers
             return Ok(BuildEvent(new Random(), fraudulent));
         }
 
-        private static TransactionEvent BuildEvent(Random rng, bool fraudulent)
+        private TransactionEvent BuildEvent(Random rng, bool fraudulent)
         {
             // Pick a random customer from a pool so some customers appear repeatedly
             var customerId = $"CUST-{rng.Next(1, 200):D4}";
@@ -138,6 +142,7 @@ namespace fraud_poc_project.Controllers
             var correlationId = Guid.NewGuid();
             return new TransactionEvent
             {
+                KafkaTopic = _consumerSettings.TransactionTopic,
                 CorrelationId = correlationId,
                 TransactionId = Guid.NewGuid(),
                 CustomerId = customerId,

@@ -2,6 +2,7 @@ using Confluent.Kafka;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
+using fraud_poc_project_buss.Helper;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -68,17 +69,17 @@ namespace fraud_poc_project_repo.Kafka
                 .SetErrorHandler((_, error) => LogKafkaError(error))
                 .SetPartitionsAssignedHandler((c, partitions) =>
                 {
-                    _logger.LogInformation("Partitions assigned: {Partitions}",
+                    _logger.LogInformationOnly("Partitions assigned: {Partitions}",
                         string.Join(", ", partitions));
                 })
                 .SetPartitionsRevokedHandler((c, partitions) =>
                 {
-                    _logger.LogInformation("Partitions revoked: {Partitions}",
+                    _logger.LogInformationOnly("Partitions revoked: {Partitions}",
                         string.Join(", ", partitions));
                 })
                 .Build();
 
-            _logger.LogInformation(
+            _logger.LogInformationOnly(
                 "FraudKafkaConsumer initialized for topic: {Topic}, batchSize: {BatchSize}, batchTimeout: {BatchTimeout}s",
                 _consumerOptions.TransactionTopic,
                 _consumerOptions.BatchSize,
@@ -92,7 +93,7 @@ namespace fraud_poc_project_repo.Kafka
         {
             _consumer.Subscribe(_consumerOptions.TransactionTopic);
 
-            _logger.LogInformation("Starting Kafka consumer for topic: {Topic} with batch processing",
+            _logger.LogInformationOnly("Starting Kafka consumer for topic: {Topic} with batch processing",
                 _consumerOptions.TransactionTopic);
 
             try
@@ -102,7 +103,7 @@ namespace fraud_poc_project_repo.Kafka
             finally
             {
                 _consumer.Close();
-                _logger.LogInformation("Kafka consumer closed");
+                _logger.LogInformationOnly("Kafka consumer closed");
             }
         }
 
@@ -142,7 +143,7 @@ namespace fraud_poc_project_repo.Kafka
 
                     if (shouldProcessBatch)
                     {
-                        _logger.LogInformation(
+                        _logger.LogInformationOnly(
                             "Processing batch of {Count} messages (trigger: {Trigger})",
                             batch.Count,
                             batch.Count >= _consumerOptions.BatchSize ? "size" : "timeout");
@@ -172,12 +173,12 @@ namespace fraud_poc_project_repo.Kafka
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogInformation("Consumer operation cancelled");
+                    _logger.LogInformationOnly("Consumer operation cancelled");
 
                     // Process remaining messages in batch before stopping
                     if (batch.Count > 0)
                     {
-                        _logger.LogInformation("Processing remaining {Count} messages before shutdown", batch.Count);
+                        _logger.LogInformationOnly("Processing remaining {Count} messages before shutdown", batch.Count);
                         await ProcessBatchAsync(batch, CancellationToken.None);
                         if (batch.Count > 0)
                         {
@@ -234,10 +235,10 @@ namespace fraud_poc_project_repo.Kafka
             // Step 2: hand the whole batch over to be evaluated and saved.
             try
             {
-                await _eventHandler.HandleBatchAsync(deserializedBatch, cancellationToken);
+                await _eventHandler.HandleBatchTransactionSequentialAsync(deserializedBatch, cancellationToken);
                 var processingTime = (DateTime.UtcNow - startTime).TotalMilliseconds;
 
-                _logger.LogInformation(
+                _logger.LogInformationOnly(
                         "Successfully processed batch of {Count} messages in {ProcessingTime}ms ({Throughput} msg/sec)",
                         deserializedBatch.Count,
                         processingTime,
@@ -307,7 +308,7 @@ namespace fraud_poc_project_repo.Kafka
             {
                 _consumer?.Close();
                 _consumer?.Dispose();
-                _logger.LogInformation("FraudKafkaConsumer disposed");
+                _logger.LogInformationOnly("FraudKafkaConsumer disposed");
             }
             catch (Exception ex)
             {
@@ -319,7 +320,7 @@ namespace fraud_poc_project_repo.Kafka
 
         ~FraudConsumer()
         {
-            _logger.LogInformation("Stopping FraudConsumer...");
+            _logger.LogInformationOnly("Stopping FraudConsumer...");
             base.StopAsync(CancellationToken.None);
         }
     }

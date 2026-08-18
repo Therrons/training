@@ -1,5 +1,6 @@
 ﻿using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_repo.Interfaces;
+using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

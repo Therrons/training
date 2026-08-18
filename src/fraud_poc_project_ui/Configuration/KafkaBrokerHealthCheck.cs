@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using fraud_poc_project_buss.Models.Kafka;
+using fraud_poc_project_buss.Helper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -35,13 +36,13 @@ namespace fraud_poc_project.Configuration
             int delayMs = 2000,
             int coordinatorTimeoutMs = 15000)
         {
-            _logger.LogInformation("Attempting to connect to Kafka broker at {BootstrapServers} with idempotence enabled...", _brokerSettings.BootstrapServers);
+            _logger.LogInformationOnly("Attempting to connect to Kafka broker at {BootstrapServers} with idempotence enabled...", _brokerSettings.BootstrapServers);
 
             var result = await TryConnectAsync(maxRetries, delayMs, coordinatorTimeoutMs);
 
             if (result.IsHealthy)
             {
-                _logger.LogInformation("Kafka broker is ready with idempotence enabled!");
+                _logger.LogInformationOnly("Kafka broker is ready with idempotence enabled!");
                 return result;
             }
 

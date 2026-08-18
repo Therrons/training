@@ -38,7 +38,7 @@ CREATE OR REPLACE PROCEDURE "${Schema}".sp_insert_fraud_event(
     IN p_transaction_type   varchar(50),
     IN p_channel            varchar(50),
     IN p_country_code       varchar(10),
-    IN p_transaction_time   timestamp,
+    IN p_transaction_time   timestamp with time zone,
     IN p_is_flagged         boolean,
     IN p_fraud_score        numeric(5,2),
     IN p_flagged_reason     text,
@@ -65,7 +65,7 @@ $BODY$;
 
 ALTER PROCEDURE "${Schema}".sp_insert_fraud_event(
     varchar, uuid, varchar, varchar, numeric, varchar,
-    varchar, varchar, varchar, varchar, varchar, timestamp, boolean, numeric, text)
+    varchar, varchar, varchar, varchar, varchar, timestamp with time zone, boolean, numeric, text)
     OWNER TO "${db_user}";
 
 

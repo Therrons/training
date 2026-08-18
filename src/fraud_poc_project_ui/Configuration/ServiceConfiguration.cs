@@ -4,6 +4,7 @@ using fraud_poc_project.Controllers;
 using fraud_poc_project.Kafka.Consumer;
 using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
+using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Database;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
@@ -122,15 +123,6 @@ namespace fraud_poc_project.Configuration
                 .AddTransient<FraudBatchConsumerWorker>();
         }
 
-        // UserInputController only exists to help with manual testing, so it's only
-        // registered in Debug builds.
-        private static void RegisterTestOnlyControllers(WebApplicationBuilder builder)
-        {
-#if DEBUG
-            builder.Services.AddTransient<UserInputController>();
-#endif
-        }
-
         // Registers Kafka configuration, creates any missing topics, and wires up the
         // producer/consumer that use them.
         private static void RegisterKafka(WebApplicationBuilder builder)
@@ -141,6 +133,18 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddSingleton<IFraudProducer, FraudProducer>();
             builder.Services.AddSingleton<FraudConsumer>();
             builder.Services.AddHostedService(sp => sp.GetRequiredService<FraudConsumer>());
+        }
+
+        // UserInputController only exists to help with manual testing, so it's only
+        // registered in Debug builds.
+        private static void RegisterTestOnlyControllers(WebApplicationBuilder builder)
+        {
+            if (Model_Extensions_Helper.IsDebugMode)
+            {
+                builder.Services.AddTransient<UserInputController>();
+                builder.Services.AddTransient<LoadSimulatorController>();
+                builder.Services.AddTransient<FraudController>();
+            }
         }
     }
 }

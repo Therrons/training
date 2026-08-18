@@ -29,7 +29,7 @@ namespace fraud_poc_project_repo
         {
             _connectionString = configuration.GetConnectionString("PostgreSQL")
                 ?? throw new InvalidOperationException("ConnectionStrings:PostgreSQL is not configured.");
-            _schema = configuration["Database:Schema"] ?? "public";
+            _schema = configuration["Database:DBSchema"] ?? "public";
             _logger = logger;
             _dbConnection = dbConnection;
         }
@@ -73,38 +73,74 @@ namespace fraud_poc_project_repo
             {
                 long fraudEventId;
 
-                await using (var cmd = new NpgsqlCommand($"CALL \"{_schema}\".sp_insert_fraud_event(" +
-                    "@kafka_topic, @transaction_id, @customer_id, @account_id, " +
-                    "@amount, @currency, @merchant_name, @merchant_category, " +
-                    "@transaction_type, @channel, @country_code, @transaction_time, " +
-                    "@is_flagged, @fraud_score, @flagged_reason, @p_fraud_event_id)", conn, tx))
+                await using (var cmd = new NpgsqlCommand($"CALL \"fr\".sp_insert_fraud_event(" +
+                    "@p_kafka_topic, @p_transaction_id, @p_customer_id, @p_account_id, " +
+                    "@p_amount, @p_currency, @p_merchant_name, @p_merchant_category, " +
+                    "@p_transaction_type, @p_channel, @p_country_code, @p_transaction_time, " +
+                    "@p_is_flagged, @p_fraud_score, @p_flagged_reason, @p_fraud_event_id)", conn, tx))
                 {
                     var e = result.Event;
-                    cmd.Parameters.AddWithValue("kafka_topic", e.KafkaTopic);
-                    cmd.Parameters.AddWithValue("transaction_id", e.TransactionId);
-                    cmd.Parameters.AddWithValue("customer_id", e.CustomerId);
-                    cmd.Parameters.AddWithValue("account_id", e.AccountId);
-                    cmd.Parameters.AddWithValue("amount", e.Amount);
-                    cmd.Parameters.AddWithValue("currency", e.Currency);
-                    cmd.Parameters.AddWithValue("merchant_name", (object?)e.MerchantName ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("merchant_category", (object?)e.MerchantCategory ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("transaction_type", e.TransactionType);
-                    cmd.Parameters.AddWithValue("channel", (object?)e.Channel ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("country_code", (object?)e.CountryCode ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("transaction_time", e.TransactionTime);
-                    cmd.Parameters.AddWithValue("is_flagged", result.IsFlagged);
-                    cmd.Parameters.AddWithValue("fraud_score", result.FraudScore);
-                    cmd.Parameters.AddWithValue("flagged_reason", (object?)result.FlaggedReason ?? DBNull.Value);
+
+                    cmd.Parameters.Add("p_kafka_topic", NpgsqlTypes.NpgsqlDbType.Varchar).Value = e.KafkaTopic ?? "";
+                    cmd.Parameters.Add("p_transaction_id", NpgsqlTypes.NpgsqlDbType.Uuid).Value = e.TransactionId;
+                    cmd.Parameters.Add("p_customer_id", NpgsqlTypes.NpgsqlDbType.Varchar).Value = e.CustomerId ?? "";
+                    cmd.Parameters.Add("p_account_id", NpgsqlTypes.NpgsqlDbType.Varchar).Value = e.AccountId ?? "";
+                    cmd.Parameters.Add("p_amount", NpgsqlTypes.NpgsqlDbType.Numeric).Value = e.Amount;
+                    cmd.Parameters.Add("p_currency", NpgsqlTypes.NpgsqlDbType.Varchar).Value = e.Currency ?? "";
+                    cmd.Parameters.Add("p_merchant_name", NpgsqlTypes.NpgsqlDbType.Varchar).Value = (object?)e.MerchantName ?? DBNull.Value;
+                    cmd.Parameters.Add("p_merchant_category", NpgsqlTypes.NpgsqlDbType.Varchar).Value = (object?)e.MerchantCategory ?? DBNull.Value;
+                    cmd.Parameters.Add("p_transaction_type", NpgsqlTypes.NpgsqlDbType.Varchar).Value = e.TransactionType ?? "";
+                    cmd.Parameters.Add("p_channel", NpgsqlTypes.NpgsqlDbType.Varchar).Value = (object?)e.Channel ?? DBNull.Value;
+                    cmd.Parameters.Add("p_country_code", NpgsqlTypes.NpgsqlDbType.Varchar).Value = (object?)e.CountryCode ?? DBNull.Value;
+                    cmd.Parameters.Add("p_transaction_time", NpgsqlTypes.NpgsqlDbType.TimestampTz).Value = e.TransactionTime;
+                    cmd.Parameters.Add("p_is_flagged", NpgsqlTypes.NpgsqlDbType.Boolean).Value = result.IsFlagged;
+                    cmd.Parameters.Add("p_fraud_score", NpgsqlTypes.NpgsqlDbType.Numeric).Value = result.FraudScore;
+                    cmd.Parameters.Add("p_flagged_reason", NpgsqlTypes.NpgsqlDbType.Text).Value = (object?)result.FlaggedReason?? DBNull.Value;
 
                     var outParam = new NpgsqlParameter("p_fraud_event_id", NpgsqlTypes.NpgsqlDbType.Bigint)
                     {
-                        Direction = System.Data.ParameterDirection.Output
+                        Direction = System.Data.ParameterDirection.InputOutput,
+                        Value = -1
                     };
                     cmd.Parameters.Add(outParam);
 
                     await cmd.ExecuteNonQueryAsync();
-                    fraudEventId = (long)outParam.Value!;
+                    fraudEventId = (long)cmd.Parameters["p_fraud_event_id"].Value;
                 }
+
+                //await using (var cmd = new NpgsqlCommand($"CALL \"{_schema}\".sp_insert_fraud_event(" +
+                //    "@p_kafka_topic, @p_transaction_id, @p_customer_id, @p_account_id, " +
+                //    "@p_amount, @p_currency, @p_merchant_name, @p_merchant_category, " +
+                //    "@p_transaction_type, @p_channel, @p_country_code, @p_transaction_time, " +
+                //    "@p_is_flagged, @p_fraud_score, @p_flagged_reason, @p_fraud_event_id)", conn, tx))
+                //{
+                //    var e = result.Event;
+                //    cmd.Parameters.AddWithValue("p_kafka_topic", e.KafkaTopic);
+                //    cmd.Parameters.AddWithValue("p_transaction_id", e.TransactionId);
+                //    cmd.Parameters.AddWithValue("p_customer_id", e.CustomerId);
+                //    cmd.Parameters.AddWithValue("p_account_id", e.AccountId);
+                //    cmd.Parameters.AddWithValue("p_amount", e.Amount);
+                //    cmd.Parameters.AddWithValue("p_currency", e.Currency);
+                //    cmd.Parameters.AddWithValue("p_merchant_name", (object?)e.MerchantName ?? DBNull.Value);
+                //    cmd.Parameters.AddWithValue("p_merchant_category", (object?)e.MerchantCategory ?? DBNull.Value);
+                //    cmd.Parameters.AddWithValue("p_transaction_type", e.TransactionType);
+                //    cmd.Parameters.AddWithValue("p_channel", (object?)e.Channel ?? DBNull.Value);
+                //    cmd.Parameters.AddWithValue("p_country_code", (object?)e.CountryCode ?? DBNull.Value);
+                //    cmd.Parameters.AddWithValue("p_transaction_time", e.TransactionTime);
+                //    cmd.Parameters.AddWithValue("p_is_flagged", result.IsFlagged);
+                //    cmd.Parameters.AddWithValue("p_fraud_score", result.FraudScore);
+                //    cmd.Parameters.AddWithValue("p_flagged_reason", (object?)result.FlaggedReason ?? DBNull.Value);
+
+                //    var outParam = new NpgsqlParameter("p_fraud_event_id", NpgsqlTypes.NpgsqlDbType.Bigint)
+                //    {
+                //        Direction = System.Data.ParameterDirection.InputOutput,
+                //        Value = -1
+                //    };
+                //    cmd.Parameters.Add(outParam);
+
+                //    await cmd.ExecuteNonQueryAsync();
+                //    fraudEventId = (long)outParam.Value!;
+                //}
 
                 foreach (var ruleResult in result.RuleResults)
                 {

@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
@@ -62,7 +63,7 @@ namespace fraud_poc_project_repo.Kafka
                 .SetErrorHandler((_, error) => LogKafkaError(error))
                 .Build();
 
-            _logger.LogInformation("FraudKafkaProducer initialized for application: {ApplicationName}",
+            _logger.LogInformationOnly("FraudKafkaProducer initialized for application: {ApplicationName}",
                     _appSettings.ApplicationName);
         }
 
@@ -248,7 +249,7 @@ namespace fraud_poc_project_repo.Kafka
             {
                 Flush(TimeSpan.FromSeconds(10));
                 _producer?.Dispose();
-                _logger.LogInformation("FraudKafkaProducer disposed");
+                _logger.LogInformationOnly("FraudKafkaProducer disposed");
             }
             catch (Exception ex)
             {

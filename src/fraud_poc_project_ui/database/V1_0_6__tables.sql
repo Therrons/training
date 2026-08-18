@@ -22,7 +22,6 @@ ALTER TABLE IF EXISTS "${Schema}".dlt_kafka
 /**================================**=================================================================**/
 CREATE TABLE IF NOT EXISTS "${Schema}".fraud_event (
     id                  bigint       NOT NULL DEFAULT nextval('"${Schema}".fraud_event_id_seq'::regclass),
-    -- Kafka envelope fields
     kafka_topic         VARCHAR(250) NOT NULL,
     transaction_id      UUID         NOT NULL,
     customer_id         VARCHAR(100) NOT NULL,
@@ -65,7 +64,7 @@ CREATE TABLE IF NOT EXISTS "${Schema}".fraud_rule_result (
     rule_code       VARCHAR(100) NOT NULL,   -- e.g. HIGH_AMOUNT, VELOCITY, GEO_ANOMALY
     rule_description VARCHAR(500),
     is_triggered    BOOLEAN      NOT NULL DEFAULT FALSE,
-    score_contribution NUMERIC(5,2) NOT NULL DEFAULT 0
+    score_contribution NUMERIC(5,2) NOT NULL DEFAULT 0,
     CONSTRAINT fraud_rule_result_pkey PRIMARY KEY (id),
     CONSTRAINT fk_fraud_rule_result_event
         FOREIGN KEY (fraud_event_id) REFERENCES "${Schema}".fraud_event (id)

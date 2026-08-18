@@ -10,9 +10,15 @@ namespace fraud_poc_project_repo.Kafka
     public interface ITransactionEventHandler
     {
         // Handle one transaction event on its own.
-        Task HandleAsync((TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits) consumeResult, CancellationToken cancellationToken);
+        Task HandleTransactionAsync((TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits) consumeResult, CancellationToken cancellationToken);
 
-        // Handle a whole batch of transaction events at once (used by the batching consumer).
-        Task HandleBatchAsync(List<(TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits)> batch, CancellationToken cancellationToken);
+        // Handle a whole batch of transaction events at once (used by the batching consumer), order of items is important.
+        // This method may be slower than HandleBatchTransactionNonSequentialAsync because it may need to process items in order,
+        // but it may be necessary for certain use cases where order matters.
+        Task HandleBatchTransactionSequentialAsync(List<(TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits)> messages, CancellationToken cancellationToken);
+
+        // Handle a whole batch of transaction events at once (used by the batching consumer), order of items is not important.
+        // Depending on the batch this method is generally faster than the HandleBatchTransactionSequentialAsync
+        Task HandleBatchTransactionNonSequentialAsync(List<(TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits)> messages, int concurrency, CancellationToken cancellationToken);
     }
 }

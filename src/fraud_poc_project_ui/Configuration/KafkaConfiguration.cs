@@ -13,8 +13,12 @@ using System.Linq;
 
 namespace fraud_poc_project.Configuration
 {
+
+
+
     // Loads all the Kafka-related settings from config, and can create any Kafka
     // topics that don't exist yet (only when auto-create is turned on).
+    // Setup Consumer events
     public static class KafkaConfiguration
     {
         public static IServiceCollection AddKafkaConfigurations(
@@ -76,12 +80,12 @@ namespace fraud_poc_project.Configuration
                 SaslMechanism = brokerSettings.SaslMechanism,
                 SecurityProtocol = brokerSettings.SecurityProtocol
             });
-            CreateMissingKafkaTopics(adminClientBuilder, kafkaAdminSettings);
+            CreateKafkaTopics(adminClientBuilder, kafkaAdminSettings);
         }
 
         // Compares the topics we need (from config) against the topics that already
         // exist on the Kafka broker, and creates only the ones that are missing.
-        private static void CreateMissingKafkaTopics(AdminClientBuilder adminClientBuilder, KafkaAdminOptions kafkaAdminSettings)
+        private static void CreateKafkaTopics(AdminClientBuilder adminClientBuilder, KafkaAdminOptions kafkaAdminSettings)
         {
             using var adminClient = adminClientBuilder.Build();
 
