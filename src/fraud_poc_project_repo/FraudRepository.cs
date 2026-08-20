@@ -34,31 +34,6 @@ namespace fraud_poc_project_repo
             _dbConnection = dbConnection;
         }
 
-        // Records a dead-letter error by calling the sp_insert_dlt_error stored procedure.
-        public async Task<bool> CaptureErrorAsync(string correlationID, DLT_Kafka model)
-        {
-            var dbConnector = _dbConnection.DB_Connector;
-            if (dbConnector.State == ConnectionState.Closed) await dbConnector.OpenAsync().ConfigureAwait(false);
-
-            try
-            {
-                await using var command = new NpgsqlCommand($"CALL {_dbConnection.DB_Schema}.sp_insert_dlt_error(@topic_data, @topic_schema, @topic_name, @topic_dlt_name, @message_data, @error);", dbConnector);
-                command.Parameters.AddWithValue("@topic_data", model.Topic_Data);
-                command.Parameters.AddWithValue("@topic_schema", model.Topic_Schema);
-                command.Parameters.AddWithValue("@topic_name", model.Topic_Name);
-                command.Parameters.AddWithValue("@topic_dlt_name", model.Topic_DLT_Name);
-                command.Parameters.AddWithValue("@message_data", model.MessageData);
-                command.Parameters.AddWithValue("@error", model.Error);
-                await command.ExecuteScalarAsync().ConfigureAwait(false);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Correlation ID: {correlationID} - Failed to write Error to Database for error Model={model}", Guid.NewGuid(), JsonConvert.SerializeObject(model));
-                throw;
-            }
-        }
-
         // Saves one fraud evaluation result to the database:
         //   1. Insert the transaction + its overall score/flag into fraud_event.
         //   2. Insert one row per rule result into fraud_rule_result, linked to that event.
@@ -95,7 +70,7 @@ namespace fraud_poc_project_repo
                     cmd.Parameters.Add("p_transaction_time", NpgsqlTypes.NpgsqlDbType.TimestampTz).Value = e.TransactionTime;
                     cmd.Parameters.Add("p_is_flagged", NpgsqlTypes.NpgsqlDbType.Boolean).Value = result.IsFlagged;
                     cmd.Parameters.Add("p_fraud_score", NpgsqlTypes.NpgsqlDbType.Numeric).Value = result.FraudScore;
-                    cmd.Parameters.Add("p_flagged_reason", NpgsqlTypes.NpgsqlDbType.Text).Value = (object?)result.FlaggedReason?? DBNull.Value;
+                    cmd.Parameters.Add("p_flagged_reason", NpgsqlTypes.NpgsqlDbType.Text).Value = (object?)result.FlaggedReason ?? DBNull.Value;
 
                     var outParam = new NpgsqlParameter("p_fraud_event_id", NpgsqlTypes.NpgsqlDbType.Bigint)
                     {
@@ -107,40 +82,6 @@ namespace fraud_poc_project_repo
                     await cmd.ExecuteNonQueryAsync();
                     fraudEventId = (long)cmd.Parameters["p_fraud_event_id"].Value;
                 }
-
-                //await using (var cmd = new NpgsqlCommand($"CALL \"{_schema}\".sp_insert_fraud_event(" +
-                //    "@p_kafka_topic, @p_transaction_id, @p_customer_id, @p_account_id, " +
-                //    "@p_amount, @p_currency, @p_merchant_name, @p_merchant_category, " +
-                //    "@p_transaction_type, @p_channel, @p_country_code, @p_transaction_time, " +
-                //    "@p_is_flagged, @p_fraud_score, @p_flagged_reason, @p_fraud_event_id)", conn, tx))
-                //{
-                //    var e = result.Event;
-                //    cmd.Parameters.AddWithValue("p_kafka_topic", e.KafkaTopic);
-                //    cmd.Parameters.AddWithValue("p_transaction_id", e.TransactionId);
-                //    cmd.Parameters.AddWithValue("p_customer_id", e.CustomerId);
-                //    cmd.Parameters.AddWithValue("p_account_id", e.AccountId);
-                //    cmd.Parameters.AddWithValue("p_amount", e.Amount);
-                //    cmd.Parameters.AddWithValue("p_currency", e.Currency);
-                //    cmd.Parameters.AddWithValue("p_merchant_name", (object?)e.MerchantName ?? DBNull.Value);
-                //    cmd.Parameters.AddWithValue("p_merchant_category", (object?)e.MerchantCategory ?? DBNull.Value);
-                //    cmd.Parameters.AddWithValue("p_transaction_type", e.TransactionType);
-                //    cmd.Parameters.AddWithValue("p_channel", (object?)e.Channel ?? DBNull.Value);
-                //    cmd.Parameters.AddWithValue("p_country_code", (object?)e.CountryCode ?? DBNull.Value);
-                //    cmd.Parameters.AddWithValue("p_transaction_time", e.TransactionTime);
-                //    cmd.Parameters.AddWithValue("p_is_flagged", result.IsFlagged);
-                //    cmd.Parameters.AddWithValue("p_fraud_score", result.FraudScore);
-                //    cmd.Parameters.AddWithValue("p_flagged_reason", (object?)result.FlaggedReason ?? DBNull.Value);
-
-                //    var outParam = new NpgsqlParameter("p_fraud_event_id", NpgsqlTypes.NpgsqlDbType.Bigint)
-                //    {
-                //        Direction = System.Data.ParameterDirection.InputOutput,
-                //        Value = -1
-                //    };
-                //    cmd.Parameters.Add(outParam);
-
-                //    await cmd.ExecuteNonQueryAsync();
-                //    fraudEventId = (long)outParam.Value!;
-                //}
 
                 foreach (var ruleResult in result.RuleResults)
                 {
@@ -161,6 +102,7 @@ namespace fraud_poc_project_repo
             }
             catch
             {
+                _logger.LogError("Correlation ID: {correlationID} - Failed to write Fraud data to Database for Model={model}", result?.Event?.CorrelationId ?? Guid.NewGuid(), JsonConvert.SerializeObject(result));
                 await tx.RollbackAsync();
                 throw;
             }
@@ -170,96 +112,125 @@ namespace fraud_poc_project_repo
         // topic name, message text, and error message (no full DLT_Kafka model).
         public async Task SavedltErrorAsync(string topic, string messageData, string error)
         {
-            await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
-            await using var cmd = new NpgsqlCommand(
-                $"CALL \"{_schema}\".sp_insert_dlt_error(@topic_data, @topic_schema, @topic_name, @topic_dlt_name, @message_data, @error)",
-                conn);
-            cmd.Parameters.AddWithValue("topic_data", topic);
-            cmd.Parameters.AddWithValue("topic_schema", _schema);
-            cmd.Parameters.AddWithValue("topic_name", topic);
-            cmd.Parameters.AddWithValue("topic_dlt_name", topic + ".dlt");
-            cmd.Parameters.AddWithValue("message_data", messageData);
-            cmd.Parameters.AddWithValue("error", error.Length > 2000 ? error[..2000] : error);
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                await using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync();
+                await using var cmd = new NpgsqlCommand(
+                    $"CALL \"{_schema}\".sp_insert_dlt_error(@topic_data, @topic_schema, @topic_name, @topic_dlt_name, @message_data, @error)",
+                    conn);
+                cmd.Parameters.AddWithValue("topic_data", topic);
+                cmd.Parameters.AddWithValue("topic_schema", _schema);
+                cmd.Parameters.AddWithValue("topic_name", topic);
+                cmd.Parameters.AddWithValue("topic_dlt_name", topic + ".dlt");
+                cmd.Parameters.AddWithValue("message_data", messageData);
+                cmd.Parameters.AddWithValue("error", error.Length > 2000 ? error[..2000] : error);
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch
+            {
+                _logger.LogError("Failed to write Error to DLT for message={msg}", messageData);
+                throw;
+            }
         }
 
         // Looks up transactions matching the given filters (date range, customer, etc).
         public async Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query)
         {
-            var results = new List<FraudEventRecord>();
-
-            await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
-
-            await using var cmd = new NpgsqlCommand(
-                $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
-                "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
-                conn);
-            cmd.Parameters.AddWithValue("date_from", query.DateFrom);
-            cmd.Parameters.AddWithValue("date_to", query.DateTo);
-            cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("is_flagged_only", (object?)query.IsFlaggedOnly ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
-
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            try
             {
-                results.Add(MapFraudEventRecord(reader));
-            }
+                var results = new List<FraudEventRecord>();
 
-            return results;
+                await using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync();
+
+                await using var cmd = new NpgsqlCommand(
+                    $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
+                    "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
+                    conn);
+                cmd.Parameters.AddWithValue("date_from", query.DateFrom);
+                cmd.Parameters.AddWithValue("date_to", query.DateTo);
+                cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("is_flagged_only", (object?)query.IsFlaggedOnly ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
+
+                await using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    results.Add(MapFraudEventRecord(reader));
+                }
+                return results;
+            }
+            catch
+            {
+                _logger.LogError("Customer ID: {customerid} - Failed to retrieve data for Query={msg}", query.CustomerId, JsonConvert.SerializeObject(query));
+                throw;
+            }
         }
 
         // Same as QueryFraudEventsAsync, but always forces is_flagged_only = true,
         // so only the transactions that were flagged as fraud come back.
         public async Task<IEnumerable<FraudEventRecord>> QueryFlaggedOnlyFraudEventsAsync(FraudQueryDto query)
         {
-            var results = new List<FraudEventRecord>();
-
-            await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
-
-            await using var cmd = new NpgsqlCommand(
-                $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
-                "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
-                conn);
-            cmd.Parameters.AddWithValue("date_from", query.DateFrom);
-            cmd.Parameters.AddWithValue("date_to", query.DateTo);
-            cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("is_flagged_only", true);
-            cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
-
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            try
             {
-                results.Add(MapFraudEventRecord(reader));
-            }
+                var results = new List<FraudEventRecord>();
 
-            return results;
+                await using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync();
+
+                await using var cmd = new NpgsqlCommand(
+                    $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
+                    "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
+                    conn);
+                cmd.Parameters.AddWithValue("date_from", query.DateFrom);
+                cmd.Parameters.AddWithValue("date_to", query.DateTo);
+                cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("is_flagged_only", true);
+                cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
+
+                await using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    results.Add(MapFraudEventRecord(reader));
+                }
+                return results;
+            }
+            catch
+            {
+                _logger.LogError("Customer ID: {customerid} - Failed to retrieve only fraud data for Query={msg}", query.CustomerId, JsonConvert.SerializeObject(query));
+                throw;
+            }
         }
 
         // Looks up every rule result that was recorded for one specific fraud event.
         public async Task<IEnumerable<FraudRuleSetRecord>> GetRuleResultsForEventAsync(long fraudEventId)
         {
-            var results = new List<FraudRuleSetRecord>();
-
-            await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
-
-            await using var cmd = new NpgsqlCommand(
-                $"SELECT * FROM \"{_schema}\".fn_select_fraud_rule_results(@fraud_event_id)", conn);
-            cmd.Parameters.AddWithValue("fraud_event_id", fraudEventId);
-
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            try
             {
-                results.Add(MapFraudRuleResultRecord(reader));
-            }
+                var results = new List<FraudRuleSetRecord>();
 
-            return results;
+                await using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync();
+
+                await using var cmd = new NpgsqlCommand(
+                    $"SELECT * FROM \"{_schema}\".fn_select_fraud_rule_results(@fraud_event_id)", conn);
+                cmd.Parameters.AddWithValue("fraud_event_id", fraudEventId);
+
+                await using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    results.Add(MapFraudRuleResultRecord(reader));
+                }
+                return results;
+            }
+            catch
+            {
+                _logger.LogError("Failed to retrieve rule results for fraud event={fraudid}", fraudEventId);
+                throw;
+            }
         }
 
         // Turns one database row into a FraudRuleSetRecord object.

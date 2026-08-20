@@ -113,8 +113,8 @@ namespace fraud_poc_project_repo.Kafka
         private async Task RunConsumerLoopAsync(CancellationToken cancellationToken)
         {
             var batch = new List<ConsumeResult<string, byte[]>>();
-            var lastBatchTime = DateTime.UtcNow;
-            var batchTimeout = TimeSpan.FromSeconds(_consumerOptions.BatchTimeoutSeconds);
+            var startBatchTime = DateTime.UtcNow;
+            var stopBatchTime = startBatchTime.AddSeconds(_consumerOptions.BatchTimeoutSeconds);
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -137,18 +137,19 @@ namespace fraud_poc_project_repo.Kafka
 
                     // Time to process the batch if it's full, or if it's non-empty and has
                     // been waiting around longer than the configured timeout.
-                    var timeSinceLastBatch = DateTime.UtcNow - lastBatchTime;
+                    var timeExpired = DateTime.Compare(stopBatchTime, DateTime.UtcNow) >= 0? true: false;
                     var shouldProcessBatch = batch.Count >= _consumerOptions.BatchSize ||
-                                            (batch.Count > 0 && timeSinceLastBatch >= batchTimeout);
+                                            (batch.Count > 0 && timeExpired) ;
 
                     if (shouldProcessBatch)
                     {
+                        await ProcessBatchAsync(batch, cancellationToken);
+
                         _logger.LogInformationOnly(
                             "Processing batch of {Count} messages (trigger: {Trigger})",
                             batch.Count,
                             batch.Count >= _consumerOptions.BatchSize ? "size" : "timeout");
-
-                        await ProcessBatchAsync(batch, cancellationToken);
+                        
 
                         // Commit the last offset after successful processing
                         if (batch.Count > 0)
@@ -158,7 +159,7 @@ namespace fraud_poc_project_repo.Kafka
                         }
 
                         batch.Clear();
-                        lastBatchTime = DateTime.UtcNow;
+                        startBatchTime = DateTime.UtcNow;
                     }
                 }
                 catch (ConsumeException ex)

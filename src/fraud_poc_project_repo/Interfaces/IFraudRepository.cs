@@ -22,8 +22,5 @@ namespace fraud_poc_project_repo.Interfaces
 
         // Look up which rules fired (and why) for one specific fraud event.
         Task<IEnumerable<FraudRuleSetRecord>> GetRuleResultsForEventAsync(long fraudEventId);
-
-        // Record a dead-letter error using the older DLT_Kafka model shape.
-        Task<bool> CaptureErrorAsync(string correlationID, DLT_Kafka model);
     }
 }

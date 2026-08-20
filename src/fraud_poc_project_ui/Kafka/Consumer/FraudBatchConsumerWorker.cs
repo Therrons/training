@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Polly.Registry;
 
 namespace fraud_poc_project.Kafka.Consumer
 {
@@ -23,6 +24,9 @@ namespace fraud_poc_project.Kafka.Consumer
         private readonly IFraudEvaluationService _evaluationService;
         private readonly IFraudRepository _fraudRepository;
         private readonly IServiceScopeFactory _serviceLocator;
+
+        private readonly ResiliencePipelineProvider<string> _resilienceProvider;
+
 
         public FraudBatchConsumerWorker(
             IServiceScopeFactory serviceLocator,
@@ -44,11 +48,7 @@ namespace fraud_poc_project.Kafka.Consumer
         {
             try
             {
-                var result = _evaluationService.Evaluate(consumeResult.transactionEvent);
-                await _fraudRepository.SaveFraudEvaluationAsync(result);
-
-                _logger.LogInformationOnly("Processed transaction {TransactionId}: flagged={IsFlagged}, score={FraudScore}",
-                        consumeResult.transactionEvent.TransactionId.ToString(), result.IsFlagged, result.FraudScore);
+                await ProcessTransaction(consumeResult);
             }
             catch (Exception ex)
             {
@@ -57,14 +57,34 @@ namespace fraud_poc_project.Kafka.Consumer
             }
         }
 
-        
+        private async Task ProcessTransaction((TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits) consumeResult)
+        {
+            var model = JsonConvert.SerializeObject(consumeResult.transactionEvent);
+
+            if (model != null)
+            {
+                var result = _evaluationService.Evaluate(consumeResult.transactionEvent);
+
+                if (result != null)
+                {
+                    var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
+                    await pipeLineRetry.ExecuteAsync(async _ =>
+                    {
+                        await _fraudRepository.SaveFraudEvaluationAsync(result);
+                    });
+                    _logger.LogInformationOnly("Processed transaction {TransactionId}: flagged={IsFlagged}, score={FraudScore}",
+                        consumeResult.transactionEvent.TransactionId.ToString(), result.IsFlagged, result.FraudScore);
+                }
+                else
+                    _logger.LogInformationOnly("No Fraud Event Records found for Transaction Event={event}", model);
+            }
+        }
 
         // Process batch of Transactions - the total items in the batch 
         // is defined in the ConsumerSettings
         public async Task HandleBatchTransactionSequentialAsync(List<(TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits)> messages, CancellationToken cancellationToken)
         {
             using var scope = _serviceLocator.CreateScope();
-            var batchEvaluationService = scope.ServiceProvider.GetRequiredService<IFraudEvaluationService>();
             var batchFraudRepository = scope.ServiceProvider.GetRequiredService<IFraudRepository>();
             int iTotal = messages?.Count ?? 0;
 
@@ -77,8 +97,7 @@ namespace fraud_poc_project.Kafka.Consumer
                     {
                         if (msg != null)
                         {
-                            var result = batchEvaluationService.Evaluate(messages[i].transactionEvent);
-                            await batchFraudRepository.SaveFraudEvaluationAsync(result);
+                            await ProcessTransaction(messages[i]);
                             _logger.LogSensitiveData("Processed transaction: {data}", JsonConvert.SerializeObject(msg));
                         }
                     }
@@ -114,16 +133,14 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 // Create a new scope per parallel task for thread-safety
                 using var scope = _serviceLocator.CreateScope();
-                var evaluationService = scope.ServiceProvider.GetRequiredService<IFraudEvaluationService>();
                 var fraudRepository = scope.ServiceProvider.GetRequiredService<IFraudRepository>();
 
                 try
                 {
                     if (msg.transactionEvent != null)
                     {
-                        var result = evaluationService.Evaluate(msg.transactionEvent);
-                        await fraudRepository.SaveFraudEvaluationAsync(result);
-                        _logger.LogInformationOnly("Processed transaction: {data}", JsonConvert.SerializeObject(msg));
+                        await ProcessTransaction(msg);
+                        _logger.LogSensitiveData("Processed transaction: {data}", JsonConvert.SerializeObject(msg));
                     }
                 }
                 catch (Exception ex)
@@ -143,7 +160,11 @@ namespace fraud_poc_project.Kafka.Consumer
         {
             try
             {
-                await repository.SavedltErrorAsync(topic, messageData, error);
+                var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
+                await pipeLineRetry.ExecuteAsync(async _ =>
+                {
+                    await repository.SavedltErrorAsync(topic, messageData, error);
+                });
             }
             catch (Exception ex)
             {

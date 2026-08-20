@@ -46,18 +46,5 @@
             Produce a single synthetic transaction event and return it as a preview.
             </summary>
         </member>
-        <member name="T:fraud_poc_project.Controllers.UserInputController">
-            <summary>
-            A grab-bag of manual test endpoints - not part of the real fraud detection
-            feature. Only registered with the DI container in Debug builds (see
-            ServiceConfiguration.cs), so these endpoints aren't available in production.
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.UserInputController.ValidateKafka(System.String)">
-            <summary>
-            Placeholder endpoint left over from an earlier version of this test controller.
-            It doesn't actually talk to Kafka right now - it just always returns "success".
-            </summary>
-        </member>
     </members>
 </doc>

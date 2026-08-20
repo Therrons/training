@@ -38,3 +38,4 @@ terraform.tfvars
 # Misc
 /src/Kafka/src/nuget-packages
 /.claude-flow
+/Traefik Kakfa Installation/run traefik kafka ui.txt

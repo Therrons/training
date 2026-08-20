@@ -141,7 +141,7 @@ namespace fraud_poc_project.Configuration
         {
             if (Model_Extensions_Helper.IsDebugMode)
             {
-                builder.Services.AddTransient<UserInputController>();
+                //builder.Services.AddTransient<UserInputController>();
                 builder.Services.AddTransient<LoadSimulatorController>();
                 builder.Services.AddTransient<FraudController>();
             }
