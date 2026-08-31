@@ -102,3 +102,6 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
+
+serviceAccount:
+  iamRoleArn: "arn:aws:iam::YOUR_DEV_ACCOUNT_ID:role/fraud-poc-api-dev-service-role"  # Replace with your AWS dev account role

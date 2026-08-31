@@ -3,6 +3,7 @@ using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
+using fraud_poc_project_repo.Kafka.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
@@ -59,8 +60,8 @@ namespace fraud_poc_project_repo.Kafka
                 ApiVersionRequestTimeoutMs = _producerOptions.ApiVersionRequestTimeoutMs
             };
             _producer = new ProducerBuilder<string, byte[]>(producerConfig)
-                .SetLogHandler((_, message) => LogKafkaMessage(message))
-                .SetErrorHandler((_, error) => LogKafkaError(error))
+                .SetLogHandler((_, message) => KafkaLoggingHelper.LogKafkaMessage(_logger, message))
+                .SetErrorHandler((_, error) => KafkaLoggingHelper.LogKafkaError(_logger, error))
                 .Build();
 
             _logger.LogInformationOnly("FraudKafkaProducer initialized for application: {ApplicationName}",
@@ -85,19 +86,18 @@ namespace fraud_poc_project_repo.Kafka
             T message,
             CancellationToken cancellationToken = default) where T : TransactionEvent
         {
-            string _topic = message.KafkaTopic;
-            string _key = message.CustomerId;
+            string topic = message.KafkaTopic;
+            string key = message.CustomerId;
             try
             {
                 var kafkaMessage = BuildKafkaMessage(message);
-
-                var deliveryResult = await _producer.ProduceAsync(_topic, kafkaMessage, cancellationToken);
+                var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage, cancellationToken);
 
                 if (deliveryResult.Status == PersistenceStatus.Persisted)
                 {
                     _logger.LogDebug(
                         "Successfully produced message to topic: {Topic}, partition: {Partition}, offset: {Offset}, correlationId: {CorrelationId}",
-                        _topic,
+                        topic,
                         deliveryResult.Partition.Value,
                         deliveryResult.Offset.Value,
                         message.CorrelationId);
@@ -106,58 +106,32 @@ namespace fraud_poc_project_repo.Kafka
 
                 _logger.LogError(
                     "Failed to persist message to topic: {Topic}, status: {Status}, correlationId: {CorrelationId}",
-                    _topic,
+                    topic,
                     deliveryResult.Status,
                     message.CorrelationId);
                 return false;
             }
-            catch (ProduceException<string, byte[]> ex)
-            {
-                _logger.LogError(ex,
-                    "Kafka produce exception for topic: {Topic}, key: {Key}, correlationId: {CorrelationId}, error: {Error}",
-                    _topic,
-                    _key,
-                    message.CorrelationId,
-                    ex.Error.Reason);
-                return false;
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Unhandled exception producing message to topic: {Topic}, correlationId: {CorrelationId}",
-                     _topic,
-                    message.CorrelationId);
+                HandleProduceException(ex, message, topic, key);
                 return false;
             }
         }
 
         public bool Produce<T>(T message) where T : TransactionEvent
         {
-            string _topic = message.KafkaTopic;
-            string _key = message.CustomerId;
+            string topic = message.KafkaTopic;
+            string key = message.CustomerId;
 
             try
             {
                 var kafkaMessage = BuildKafkaMessage(message);
-                _producer.Produce(message.KafkaTopic, kafkaMessage);
+                _producer.Produce(topic, kafkaMessage);
                 return true;
-            }
-            catch (ProduceException<string, byte[]> ex)
-            {
-                _logger.LogError(ex,
-                    "Kafka produce exception for topic: {Topic}, key: {Key}, correlationId: {CorrelationId}, error: {Error}",
-                    _topic,
-                    _key,
-                    message.CorrelationId,
-                    ex.Error.Reason);
-                return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Unhandled exception producing message to topic: {Topic}, correlationId: {CorrelationId}",
-                    _key,
-                    message.CorrelationId);
+                HandleProduceException(ex, message, topic, key);
                 return false;
             }
         }
@@ -170,22 +144,9 @@ namespace fraud_poc_project_repo.Kafka
                 _producer.Produce(message.KafkaTopic, kafkaMessage);
                 return true;
             }
-            catch (ProduceException<string, byte[]> ex)
-            {
-                _logger.LogError(ex,
-                    "Kafka produce exception for topic: {Topic}, key: {Key}, correlationId: {CorrelationId}, error: {Error}",
-                    message.KafkaTopic,
-                    message.CustomerId,
-                    message.CorrelationId,
-                    ex.Error.Reason);
-                return false;
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Unhandled exception producing message to topic: {Topic}, correlationId: {CorrelationId}",
-                     message.KafkaTopic,
-                    message.CorrelationId);
+                HandleProduceException(ex, message, message.KafkaTopic, message.CustomerId);
                 return false;
             }
         }
@@ -216,28 +177,26 @@ namespace fraud_poc_project_repo.Kafka
             }
         }
 
-        private void LogKafkaMessage(LogMessage logMessage)
+        /// <summary>
+        /// Handles exceptions during produce operations with consistent logging.
+        /// </summary>
+        private void HandleProduceException<T>(Exception ex, T message, string topic, string key) where T : TransactionEvent
         {
-            var level = logMessage.Level switch
+            if (ex is ProduceException<string, byte[]> produceEx)
             {
-                SyslogLevel.Emergency or SyslogLevel.Alert or SyslogLevel.Critical or SyslogLevel.Error => LogLevel.Error,
-                SyslogLevel.Warning => LogLevel.Warning,
-                SyslogLevel.Notice or SyslogLevel.Info => LogLevel.Information,
-                _ => LogLevel.Debug
-            };
-
-            _logger.Log(level, "Kafka log: {Message}", logMessage.Message);
-        }
-
-        private void LogKafkaError(Error error)
-        {
-            if (error.IsFatal)
-            {
-                _logger.LogCritical("Kafka fatal error: {Code} - {Reason}", error.Code, error.Reason);
+                _logger.LogError(produceEx,
+                    "Kafka produce exception for topic: {Topic}, key: {Key}, correlationId: {CorrelationId}, error: {Error}",
+                    topic,
+                    key,
+                    message.CorrelationId,
+                    produceEx.Error.Reason);
             }
             else
             {
-                _logger.LogError("Kafka error: {Code} - {Reason}", error.Code, error.Reason);
+                _logger.LogError(ex,
+                    "Unhandled exception producing message to topic: {Topic}, correlationId: {CorrelationId}",
+                    topic,
+                    message.CorrelationId);
             }
         }
 

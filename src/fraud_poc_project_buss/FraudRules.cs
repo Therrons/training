@@ -147,38 +147,6 @@ namespace fraud_poc_project_buss
     }
 
     /// <summary>
-    /// Flags transactions that occur at unusual hours (midnight to 4 AM local time).
-    /// </summary>
-    public class UnusualHoursRule : IFraudRule
-    {
-        private readonly int _startHour;
-        private readonly int _endHour;
-
-        public UnusualHoursRule(int startHour = 0, int endHour = 4)
-        {
-            _startHour = startHour;
-            _endHour = endHour;
-        }
-
-        public string RuleCode => "UNUSUAL_HOURS";
-        public string RuleDescription => $"Transaction occurred between {_startHour:D2}:00 and {_endHour:D2}:00";
-
-        public FraudRuleSetRecord Evaluate(TransactionEvent tx)
-        {
-            // Look at just the hour (0-23) the transaction happened at.
-            var hour = tx.TransactionTime.Hour;
-            var triggered = hour >= _startHour && hour < _endHour;
-            return new FraudRuleSetRecord
-            {
-                RuleCode = RuleCode,
-                RuleDescription = RuleDescription,
-                IsTriggered = triggered,
-                ScoreContribution = triggered ? 15m : 0m
-            };
-        }
-    }
-
-    /// <summary>
     /// Flags transactions with a round-number amount, which is a common indicator of fraud.
     /// </summary>
     public class RoundAmountRule : IFraudRule

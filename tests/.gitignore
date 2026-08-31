@@ -1,0 +1,40 @@
+# Test-specific build output
+bin/
+obj/
+*.csproj.user
+
+# Test coverage reports
+coverage/
+coveragereport/
+*.trx
+
+# Test artifacts
+TestResults/
+.testcache/
+
+# Visual Studio cache
+.vs/
+*.suo
+*.sln.docstates
+
+# NUnit, MsTest, xUnit test runner
+nunit-results.xml
+test-results.xml
+xunit-results.xml
+
+# Code coverage
+OpenCover/
+CodeCoverage/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+~*
+*.bak
+*.tmp

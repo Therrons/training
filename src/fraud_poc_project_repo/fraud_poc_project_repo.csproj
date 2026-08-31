@@ -7,8 +7,12 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <RestorePackagesPath>../src/nuget-packages</RestorePackagesPath>
+        <RestorePackagesPath>../nuget-packages</RestorePackagesPath>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Kafka\FraudConsumer.cs" />
+    </ItemGroup>
       
     <ItemGroup>
         <PackageReference Include="AWSSDK.RDS" Version="4.0.21.6" />

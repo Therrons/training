@@ -24,6 +24,10 @@ namespace fraud_poc_project.Controllers
         /// <summary>
         /// Query fraud-evaluated transaction events by date range and optional filters.
         /// </summary>
+        /// <remarks>
+        /// The DateFrom and DateTo formats expects the following format: 2024-01-01 09:00:00
+        /// </remarks>
+
         [HttpGet("events")]
         public async Task<ActionResult<IEnumerable<FraudEventRecord>>> QueryEvents([FromQuery] FraudQueryDto query)
         {

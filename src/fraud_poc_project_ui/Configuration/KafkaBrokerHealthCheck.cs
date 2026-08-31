@@ -1,6 +1,7 @@
 using Confluent.Kafka;
-using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Helper;
+using fraud_poc_project_buss.Models.Kafka;
+using fraud_poc_project_repo.Kafka.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -73,16 +74,11 @@ namespace fraud_poc_project.Configuration
             {
                 try
                 {
-                    using (var adminClient = new AdminClientBuilder(new AdminClientConfig
-                    {
-                        BootstrapServers = _brokerSettings.BootstrapServers,
-                        SaslUsername = _brokerSettings.SaslUserName,
-                        SaslPassword = _brokerSettings.SaslPassword,
-                        SaslMechanism = _brokerSettings.SaslMechanism,
-                        SecurityProtocol = _brokerSettings.SecurityProtocol,
-                        SocketTimeoutMs = 5000,
-                        ConnectionsMaxIdleMs = 5000
-                    }).Build())
+                    var adminConfig = KafkaAdminClientFactory.CreateAdminClientConfig(_brokerSettings);
+                    adminConfig.SocketTimeoutMs = 5000;
+                    adminConfig.ConnectionsMaxIdleMs = 5000;
+
+                    using (var adminClient = new AdminClientBuilder(adminConfig).Build())
                     {
                         var metadata = adminClient.GetMetadata(TimeSpan.FromMilliseconds(coordinatorTimeoutMs));
 

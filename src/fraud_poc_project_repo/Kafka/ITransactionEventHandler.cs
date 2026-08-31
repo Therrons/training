@@ -19,6 +19,6 @@ namespace fraud_poc_project_repo.Kafka
 
         // Handle a whole batch of transaction events at once (used by the batching consumer), order of items is not important.
         // Depending on the batch this method is generally faster than the HandleBatchTransactionSequentialAsync
-        Task HandleBatchTransactionNonSequentialAsync(List<(TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits)> messages, int concurrency, CancellationToken cancellationToken);
+        Task HandleBatchTransactionNonSequentialAsync(List<(TransactionEvent transactionEvent, ConsumeResult<string, byte[]> transactionEventAsBits)> messages, CancellationToken cancellationToken);
     }
 }

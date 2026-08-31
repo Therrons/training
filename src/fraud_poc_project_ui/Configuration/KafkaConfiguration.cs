@@ -1,8 +1,9 @@
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using fraud_poc_project_buss.Configuration;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
-using fraud_poc_project_buss.Models.Settings;
+using fraud_poc_project_repo.Kafka.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -13,9 +14,6 @@ using System.Linq;
 
 namespace fraud_poc_project.Configuration
 {
-
-
-
     // Loads all the Kafka-related settings from config, and can create any Kafka
     // topics that don't exist yet (only when auto-create is turned on).
     // Setup Consumer events
@@ -25,25 +23,10 @@ namespace fraud_poc_project.Configuration
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            var brokerSettings = services.AddOptions<FraudKafkaBrokerSettings>()
-                .BindConfiguration("KafkaSettings:BrokerSettings")
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-
-            services.AddOptions<FraudKafkaProducerSettings>()
-                .BindConfiguration("KafkaSettings:ProducerSettings")
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-
-            services.AddOptions<FraudKafkaConsumerSettings>()
-                .BindConfiguration("KafkaSettings:ConsumerSettings")
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-
-            services.AddOptions<KafkaAdminOptions>()
-                .BindConfiguration("KafkaAdminOptions")
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
+            services.AddAndValidateOptions<FraudKafkaBrokerSettings>("KafkaSettings:BrokerSettings");
+            services.AddAndValidateOptions<FraudKafkaProducerSettings>("KafkaSettings:ProducerSettings");
+            services.AddAndValidateOptions<FraudKafkaConsumerSettings>("KafkaSettings:ConsumerSettings");
+            services.AddAndValidateOptions<KafkaAdminOptions>("KafkaAdminOptions");
 
             services.AddSingleton<KafkaBrokerHealthCheck>();
 
@@ -69,17 +52,13 @@ namespace fraud_poc_project.Configuration
             Model_Extensions_Helper.ValidateOptions(kafkaAdminSettings);
 
             var noTopicsConfigured = kafkaAdminSettings.TopicOptions == null || !kafkaAdminSettings.TopicOptions.Any();
-            if (!brokerSettings.AllowAutoCreateTopics || noTopicsConfigured)
+
+            // we use AllowAutoCreateTopics = false in the broker settings, so we need to create any topics that don't exist yet. If there are no topics configured, we don't need to do anything.
+            if (brokerSettings.AllowAutoCreateTopics || noTopicsConfigured)
                 return;
 
-            var adminClientBuilder = new AdminClientBuilder(new AdminClientConfig
-            {
-                BootstrapServers = brokerSettings.BootstrapServers,
-                SaslUsername = brokerSettings.SaslUserName,
-                SaslPassword = brokerSettings.SaslPassword,
-                SaslMechanism = brokerSettings.SaslMechanism,
-                SecurityProtocol = brokerSettings.SecurityProtocol
-            });
+            AdminClientConfig adminConfig = KafkaAdminClientFactory.CreateAdminClientConfig(brokerSettings);
+            var adminClientBuilder = new AdminClientBuilder(adminConfig);
             CreateKafkaTopics(adminClientBuilder, kafkaAdminSettings);
         }
 

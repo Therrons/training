@@ -20,7 +20,7 @@ namespace KafkaSetup
             PartitionAssignmentStrategy = consumerSettings.PartitionAssignmentStrategy;
             MaxPollIntervalMs = consumerSettings.MaxPollIntervalMs;
             SessionTimeoutMs = consumerSettings.SessionTimeoutMs;
-            EnableAutoCommit = consumerSettings.EnableAutoCommit;
+            EnableAutoCommit = false;
             FetchMinBytes = consumerSettings.FetchMinBytes;
             FetchMaxBytes = consumerSettings.FetchMaxBytes;
         }

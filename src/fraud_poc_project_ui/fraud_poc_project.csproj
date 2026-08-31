@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <RestorePackagesPath>../src/nuget-packages</RestorePackagesPath>
+        <RestorePackagesPath>../nuget-packages</RestorePackagesPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,6 +22,7 @@
 
     <ItemGroup>
       <Compile Remove="Controllers\UserInputController.cs" />
+      <Compile Remove="Kafka\Consumer\FraudBatchConsumerWorker.cs" />
     </ItemGroup>
     
     <ItemGroup>

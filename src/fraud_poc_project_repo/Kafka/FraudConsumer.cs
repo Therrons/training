@@ -1,11 +1,13 @@
 using Confluent.Kafka;
+using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
-using fraud_poc_project_buss.Helper;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OptionsModels.KafkaOptions;
 using System.Text.Json;
 
 namespace fraud_poc_project_repo.Kafka
@@ -19,8 +21,12 @@ namespace fraud_poc_project_repo.Kafka
         private readonly ITransactionEventHandler _eventHandler;
         private readonly IFraudProducer _deadLetterProducer;
         private readonly FraudKafkaConsumerSettings _consumerOptions;
-        private readonly AppSettings _appSettings;
+        private readonly KafkaAdminOptions _kafkaAdminOptionsSettings;
         private readonly ILogger<FraudConsumer> _logger;
+        private readonly ILoggerFactory _loggerFactory;
+
+        private readonly string consumerTopic = "";
+        private readonly int consumerCount = 0;   
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -31,59 +37,66 @@ namespace fraud_poc_project_repo.Kafka
         public FraudConsumer(
             IOptions<FraudKafkaBrokerSettings> brokerOptions,
             IOptions<FraudKafkaConsumerSettings> consumerOptions,
-            IOptions<AppSettings> appSettings,
+            IOptions<KafkaAdminOptions> kafkaAdminOptionsSettings,
             ITransactionEventHandler eventHandler,
             IFraudProducer deadLetterProducer,
+            ILoggerFactory loggerFactory,
             ILogger<FraudConsumer> logger)
         {
             _logger = logger;
+            _loggerFactory = loggerFactory;
             _consumerOptions = consumerOptions.Value;
             _eventHandler = eventHandler;
             _deadLetterProducer = deadLetterProducer;
-            _appSettings = appSettings.Value;
+            _kafkaAdminOptionsSettings = kafkaAdminOptionsSettings.Value;
 
-            // Translate our own settings objects into the config class the Kafka client library expects.
-            var config = new ConsumerConfig
-            {
-                BootstrapServers = brokerOptions.Value.BootstrapServers,
-                SaslUsername = brokerOptions.Value.SaslUserName,
-                SaslPassword = brokerOptions.Value.SaslPassword,
-                SaslMechanism = brokerOptions.Value.SaslMechanism,
-                SecurityProtocol = brokerOptions.Value.SecurityProtocol,
-                AutoOffsetReset = _consumerOptions.AutoOffsetReset,
-                PartitionAssignmentStrategy = _consumerOptions.PartitionAssignmentStrategy,
-                EnableAutoCommit = _consumerOptions.EnableAutoCommit,
-                MaxPollIntervalMs = _consumerOptions.MaxPollIntervalMs,
-                SessionTimeoutMs = _consumerOptions.SessionTimeoutMs,
-                AllowAutoCreateTopics = brokerOptions.Value.AllowAutoCreateTopics,
-                EnablePartitionEof = false,
-                SslEndpointIdentificationAlgorithm = SslEndpointIdentificationAlgorithm.None,
-                // Batch optimization settings
-                FetchMinBytes = _consumerOptions.FetchMinBytes,
-                FetchMaxBytes = _consumerOptions.FetchMaxBytes,
-                GroupId = _appSettings.GroupId
-            };
+            consumerTopic = _consumerOptions.TransactionTopic.ToLower().Trim();
 
-            _consumer = new ConsumerBuilder<string, byte[]>(config)
-                .SetLogHandler((_, message) => LogKafkaMessage(message))
-                .SetErrorHandler((_, error) => LogKafkaError(error))
-                .SetPartitionsAssignedHandler((c, partitions) =>
-                {
-                    _logger.LogInformationOnly("Partitions assigned: {Partitions}",
-                        string.Join(", ", partitions));
-                })
-                .SetPartitionsRevokedHandler((c, partitions) =>
-                {
-                    _logger.LogInformationOnly("Partitions revoked: {Partitions}",
-                        string.Join(", ", partitions));
-                })
-                .Build();
+            var consumerInstances = _kafkaAdminOptionsSettings.TopicOptions.FirstOrDefault(t => t.Topic.ToLower().Trim() == consumerTopic) ?? new KafkaTopicOptions();
+            consumerCount = consumerInstances?.Partitions ?? 0;
 
-            _logger.LogInformationOnly(
-                "FraudKafkaConsumer initialized for topic: {Topic}, batchSize: {BatchSize}, batchTimeout: {BatchTimeout}s",
-                _consumerOptions.TransactionTopic,
-                _consumerOptions.BatchSize,
-                _consumerOptions.BatchTimeoutSeconds);
+            //// Translate our own settings objects into the config class the Kafka client library expects.
+            //var config = new ConsumerConfig
+            //{
+            //    BootstrapServers = brokerOptions.Value.BootstrapServers,
+            //    SaslUsername = brokerOptions.Value.SaslUserName,
+            //    SaslPassword = brokerOptions.Value.SaslPassword,
+            //    SaslMechanism = brokerOptions.Value.SaslMechanism,
+            //    SecurityProtocol = brokerOptions.Value.SecurityProtocol,
+            //    AutoOffsetReset = _consumerOptions.AutoOffsetReset,
+            //    PartitionAssignmentStrategy = _consumerOptions.PartitionAssignmentStrategy,
+            //    EnableAutoCommit = false,  // We want to commit offsets manually after processing each batch, so we don't lose messages if the app crashes.
+            //    MaxPollIntervalMs = _consumerOptions.MaxPollIntervalMs,
+            //    SessionTimeoutMs = _consumerOptions.SessionTimeoutMs,
+            //    AllowAutoCreateTopics = brokerOptions.Value.AllowAutoCreateTopics, // this is set to false in the broker settings, we create topics manually in the setup phase
+            //    EnablePartitionEof = true, // allow the consumer to receive an EOF (end-of-file) event when it reaches the end of a partition.  
+            //    SslEndpointIdentificationAlgorithm = SslEndpointIdentificationAlgorithm.None,
+            //    // Batch optimization settings
+            //    FetchMinBytes = _consumerOptions.FetchMinBytes,
+            //    FetchMaxBytes = _consumerOptions.FetchMaxBytes,
+            //    GroupId = _appSettings.GroupId
+            //};
+
+            //_consumer = new ConsumerBuilder<string, byte[]>(config)
+            //    .SetLogHandler((_, message) => LogKafkaMessage(message))
+            //    .SetErrorHandler((_, error) => LogKafkaError(error))
+            //    .SetPartitionsAssignedHandler((c, partitions) =>
+            //    {
+            //        _logger.LogInformationOnly("Partitions assigned: {Partitions}",
+            //            string.Join(", ", partitions));
+            //    })
+            //    .SetPartitionsRevokedHandler((c, partitions) =>
+            //    {
+            //        _logger.LogInformationOnly("Partitions revoked: {Partitions}",
+            //            string.Join(", ", partitions));
+            //    })
+            //    .Build();
+
+            //_logger.LogInformationOnly(
+            //    "FraudKafkaConsumer initialized for topic: {Topic}, batchSize: {BatchSize}, batchTimeout: {BatchTimeout}s",
+            //    _consumerOptions.TransactionTopic,
+            //    _consumerOptions.BatchSize,
+            //    _consumerOptions.BatchTimeoutSeconds);
         }
 
         // This runs automatically when the app starts, and keeps running until the app
@@ -98,7 +111,22 @@ namespace fraud_poc_project_repo.Kafka
 
             try
             {
-                await Task.Run(async () => await RunConsumerLoopAsync(stoppingToken));
+                for (int i = 1; i <= consumerCount; i++)
+                {
+                    var workerLogger = _loggerFactory.CreateLogger<FraudConsumerWorker>();
+                    var worker = new FraudConsumerWorker("worker-" + i, workerLogger, _batchConsumerOptions, _brokerOptions, _serviceScopeFactory, _kafkaAuthHandler, _batchConsumerOptions.GroupId);
+                    _workerInstances.Add(worker);
+                    Service_Enable_Toggle().ConfigureAwait(false);
+
+                    var thread = new Thread(() => MonitorWorkerSync(worker, stoppingToken))
+                    {
+                        IsBackground = true,
+                        Name = GetCurrentThreadId().ToString()
+                    };
+
+                    _workerThreads.Add(thread);
+                    thread.Start();
+                }
             }
             finally
             {
@@ -112,87 +140,89 @@ namespace fraud_poc_project_repo.Kafka
         // waiting too long (reached BatchTimeoutSeconds), process it and start a new batch.
         private async Task RunConsumerLoopAsync(CancellationToken cancellationToken)
         {
-            var batch = new List<ConsumeResult<string, byte[]>>();
-            var startBatchTime = DateTime.UtcNow;
-            var stopBatchTime = startBatchTime.AddSeconds(_consumerOptions.BatchTimeoutSeconds);
+            // get specific topic
 
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                try
-                {
-                    // Check for one new message, but don't wait long - we need to keep
-                    // checking the batch-timeout condition below even if nothing new arrives.
-                    var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(100));
+            //var batch = new List<ConsumeResult<string, byte[]>>();
+            //var startBatchTime = DateTime.UtcNow;
+            //var stopBatchTime = startBatchTime.AddSeconds(_consumerOptions.BatchTimeoutSeconds);
 
-                    if (consumeResult?.Message != null)
-                    {
-                        batch.Add(consumeResult);
+            //while (!cancellationToken.IsCancellationRequested)
+            //{
+            //    try
+            //    {
+            //        // Check for one new message, but don't wait long - we need to keep
+            //        // checking the batch-timeout condition below even if nothing new arrives.
+            //        var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(100));
 
-                        _logger.LogTrace(
-                            "Added message to batch from partition: {Partition}, offset: {Offset}, current batch size: {BatchSize}",
-                            consumeResult.Partition.Value,
-                            consumeResult.Offset.Value,
-                            batch.Count);
-                    }
+            //        if (consumeResult?.Message != null)
+            //        {
+            //            batch.Add(consumeResult);
 
-                    // Time to process the batch if it's full, or if it's non-empty and has
-                    // been waiting around longer than the configured timeout.
-                    var timeExpired = DateTime.Compare(stopBatchTime, DateTime.UtcNow) >= 0? true: false;
-                    var shouldProcessBatch = batch.Count >= _consumerOptions.BatchSize ||
-                                            (batch.Count > 0 && timeExpired) ;
+            //            _logger.LogTrace(
+            //                "Added message to batch from partition: {Partition}, offset: {Offset}, current batch size: {BatchSize}",
+            //                consumeResult.Partition.Value,
+            //                consumeResult.Offset.Value,
+            //                batch.Count);
+            //        }
 
-                    if (shouldProcessBatch)
-                    {
-                        await ProcessBatchAsync(batch, cancellationToken);
+            //        // Time to process the batch if it's full, or if it's non-empty and has
+            //        // been waiting around longer than the configured timeout.
+            //        var timeExpired = DateTime.Compare(stopBatchTime, DateTime.UtcNow) >= 0 ? true : false;
+            //        var shouldProcessBatch = batch.Count >= _consumerOptions.BatchSize ||
+            //                                (batch.Count > 0 && timeExpired);
 
-                        _logger.LogInformationOnly(
-                            "Processing batch of {Count} messages (trigger: {Trigger})",
-                            batch.Count,
-                            batch.Count >= _consumerOptions.BatchSize ? "size" : "timeout");
-                        
+            //        if (shouldProcessBatch)
+            //        {
+            //            await ProcessBatchAsync(batch, cancellationToken);
 
-                        // Commit the last offset after successful processing
-                        if (batch.Count > 0)
-                        {
-                            _consumer.Commit(batch[^1]);
-                            _logger.LogDebug("Committed offset: {Offset}", batch[^1].Offset.Value);  // batch[^1] is the new way of saying batch[batch.Count - 1]
-                        }
+            //            _logger.LogInformationOnly(
+            //                "Processing batch of {Count} messages (trigger: {Trigger})",
+            //                batch.Count,
+            //                batch.Count >= _consumerOptions.BatchSize ? "size" : "timeout");
 
-                        batch.Clear();
-                        startBatchTime = DateTime.UtcNow;
-                    }
-                }
-                catch (ConsumeException ex)
-                {
-                    _logger.LogError(ex, "Consume error: {Error}", ex.Error.Reason);
 
-                    if (ex.Error.IsFatal)
-                    {
-                        _logger.LogCritical("Fatal consume error, stopping consumer");
-                        break;
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    _logger.LogInformationOnly("Consumer operation cancelled");
+            //            // Commit the last offset after successful processing
+            //            if (batch.Count > 0)
+            //            {
+            //                _consumer.Commit(batch[^1]);
+            //                _logger.LogDebug("Committed offset: {Offset}", batch[^1].Offset.Value);  // batch[^1] is the new way of saying batch[batch.Count - 1]
+            //            }
 
-                    // Process remaining messages in batch before stopping
-                    if (batch.Count > 0)
-                    {
-                        _logger.LogInformationOnly("Processing remaining {Count} messages before shutdown", batch.Count);
-                        await ProcessBatchAsync(batch, CancellationToken.None);
-                        if (batch.Count > 0)
-                        {
-                            _consumer.Commit(batch[^1]);  // batch[^1] is the new way of saying batch[batch.Count - 1]
-                        }
-                    }
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Unexpected error in batch consumption loop");
-                }
-            }
+            //            batch.Clear();
+            //            startBatchTime = DateTime.UtcNow;
+            //        }
+            //    }
+            //    catch (ConsumeException ex)
+            //    {
+            //        _logger.LogError(ex, "Consume error: {Error}", ex.Error.Reason);
+
+            //        if (ex.Error.IsFatal)
+            //        {
+            //            _logger.LogCritical("Fatal consume error, stopping consumer");
+            //            break;
+            //        }
+            //    }
+            //    catch (OperationCanceledException)
+            //    {
+            //        _logger.LogInformationOnly("Consumer operation cancelled");
+
+            //        // Process remaining messages in batch before stopping
+            //        if (batch.Count > 0)
+            //        {
+            //            _logger.LogInformationOnly("Processing remaining {Count} messages before shutdown", batch.Count);
+            //            await ProcessBatchAsync(batch, CancellationToken.None);
+            //            if (batch.Count > 0)
+            //            {
+            //                _consumer.Commit(batch[^1]);  // batch[^1] is the new way of saying batch[batch.Count - 1]
+            //            }
+            //        }
+            //        break;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        _logger.LogError(ex, "Unexpected error in batch consumption loop");
+            //    }
+            //}
         }
 
         // Takes one batch of raw Kafka messages and turns them into fraud results:

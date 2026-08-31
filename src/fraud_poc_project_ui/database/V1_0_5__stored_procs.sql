@@ -26,6 +26,10 @@ ALTER PROCEDURE "${Schema}".sp_insert_dlt_error(text, varchar, varchar, varchar,
 /**================================**===================================================**/
 -- sp_insert_fraud_event - persist a processed fraud event and its rule results
 /**================================**===================================================**/
+/**================================**===================================================**/
+-- sp_insert_fraud_event - persist a processed fraud event and its rule results
+-- Modified with UPSERT logic to handle duplicate transaction_ids gracefully
+/**================================**===================================================**/
 CREATE OR REPLACE PROCEDURE "${Schema}".sp_insert_fraud_event(
     IN p_kafka_topic        varchar(250),
     IN p_transaction_id     uuid,
@@ -47,6 +51,7 @@ CREATE OR REPLACE PROCEDURE "${Schema}".sp_insert_fraud_event(
 LANGUAGE 'plpgsql'
 AS $BODY$
 BEGIN
+    -- Use INSERT...ON CONFLICT to upsert: insert if new, update fraud evaluation if duplicate exists
     INSERT INTO "${Schema}".fraud_event (
         kafka_topic, transaction_id, customer_id, account_id,
         amount, currency, merchant_name, merchant_category,
@@ -59,6 +64,11 @@ BEGIN
         p_transaction_type, p_channel, p_country_code, p_transaction_time,
         p_is_flagged, p_fraud_score, p_flagged_reason
     )
+    -- If transaction_id already exists (conflict on unique constraint), update only the fraud evaluation fields
+    ON CONFLICT (transaction_id) DO UPDATE SET
+        is_flagged = EXCLUDED.is_flagged,
+        fraud_score = EXCLUDED.fraud_score,
+        flagged_reason = EXCLUDED.flagged_reason
     RETURNING id INTO p_fraud_event_id;
 END;
 $BODY$;

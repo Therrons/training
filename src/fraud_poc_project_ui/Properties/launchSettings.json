@@ -2,7 +2,7 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "commandLineArgs": "write-dir=/repo/data",
+      "commandLineArgs": "write-dir=./data",
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {

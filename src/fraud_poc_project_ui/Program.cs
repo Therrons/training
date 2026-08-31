@@ -1,19 +1,16 @@
 using fraud_poc_project.Configuration;
-using fraud_poc_project_buss.Models.Kafka;
 using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
+using Microsoft.AspNetCore.Http.Json;  // Add this line
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -30,13 +27,21 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.Configure<JsonOptions>(options =>
+        {
+        });
+
         // Step 1: set up logging (Serilog) so everything below can log to the console
         // and to a rolling daily log file.
+        var logPath = builder.Configuration["Logging:FilePath"]
+            ?? Environment.GetEnvironmentVariable("LOG_PATH")
+            ?? Path.Combine(AppContext.BaseDirectory, "logs/app-.log");
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
             .Enrich.FromLogContext()
-            .WriteTo.File("/repo/data/logs/app-.log", rollingInterval: RollingInterval.Day)
+            .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
 
@@ -66,7 +71,7 @@ public class Program
         var writeDir =
             builder.Configuration["write-dir"] ??
             Environment.GetEnvironmentVariable("write_dir") ??
-            "/repo/data"; // Default write directory once running in K8s -  if not specified in configuration or environment variable
+            Path.Combine(AppContext.BaseDirectory, "data"); // Default write directory - if not specified in configuration or environment variable
 
         var version_docker_build = Environment.GetEnvironmentVariable("Build_Version") ??
             "Docker Build Version: UNKNOWN";
@@ -86,6 +91,9 @@ public class Program
         builder.Services.AddEndpointsApiExplorer(); // Add API explorer services to the DI container
         builder.Services.AddHealthChecks();         // Add health check services to the DI container
 
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(builder.Environment.ContentRootPath, xmlFile);
+
         if (!isLocal)
         {
             builder.Services.AddSwaggerGen(c =>
@@ -101,14 +109,11 @@ public class Program
                         Name = "Centralised Systems"
                     }
                 });
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(builder.Environment.ContentRootPath, xmlFile);
+
                 if (File.Exists(xmlPath))
                     c.IncludeXmlComments(xmlPath);
             });
         }
-        else
-            builder.Services.AddSwaggerGen();
 
         builder.Services.Configure<HostFilteringOptions>(options =>
         {
@@ -128,7 +133,7 @@ public class Program
         if (!isLocal)
             app.UseSwaggerUI(settings => settings.SupportedSubmitMethods(Array.Empty<SubmitMethod>())); // Read-only documentation in production
         else
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(c => c.DefaultModelRendering(ModelRendering.Example));
 
         app.ConfigureHealthChecks();
 
@@ -140,5 +145,5 @@ public class Program
             app.Run();
     }
 
-    
+
 }

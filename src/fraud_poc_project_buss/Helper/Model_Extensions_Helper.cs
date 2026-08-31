@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,6 +17,16 @@ namespace fraud_poc_project_buss.Helper
 #else
         return false;
 #endif
+        }
+
+        // Converts a Kafka message with a byte[] value into a Kafka message with a string value.
+        public static Message<string, string> Stream_Byte_Key_Value_To_String_Key_Value(this Message<string, byte[]> kvp)
+        {
+            return new Message<string, string>
+            {
+                Key = kvp?.Key ?? "",
+                Value = System.Text.Encoding.UTF8.GetString(kvp?.Value ?? new byte[0]) ?? ""
+            };
         }
 
 

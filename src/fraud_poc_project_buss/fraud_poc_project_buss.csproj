@@ -7,20 +7,15 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <RestorePackagesPath>../src/nuget-packages</RestorePackagesPath>
+        <RestorePackagesPath>../nuget-packages</RestorePackagesPath>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
       <PackageReference Include="Npgsql" Version="8.0.3" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-        <HintPath>..\src\nuget-packages\microsoft.extensions.dependencyinjection.abstractions\8.0.2\lib\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-      </Reference>
-      <Reference Include="Serilog">
-        <HintPath>..\src\nuget-packages\serilog\3.1.1\lib\net7.0\Serilog.dll</HintPath>
-      </Reference>
     </ItemGroup>
 </Project>

@@ -1,14 +1,12 @@
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Fraud;
-using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_repo.Connection;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Npgsql;
-using System.Data;
 
 namespace fraud_poc_project_repo
 {

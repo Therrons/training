@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Retry;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,9 +39,26 @@ namespace fraud_poc_project.Configuration
             RegisterDatabaseAccess(builder, connectionString);
             RegisterFraudRules(builder);
             RegisterTestOnlyControllers(builder);
+            RegisterRetryPipeline(builder);
             RegisterKafka(builder);
 
             builder.ConfigureSwagger();
+        }
+
+        private static void RegisterRetryPipeline(WebApplicationBuilder builder)
+        {
+            builder.Services.AddResiliencePipeline("exception", x =>
+            {
+                x.AddRetry(
+                    new RetryStrategyOptions
+                    {
+                        BackoffType = DelayBackoffType.Constant,
+                        Delay = TimeSpan.FromMilliseconds(15),
+                        MaxRetryAttempts = 2,
+                        UseJitter = true,
+                        ShouldHandle = new PredicateBuilder().Handle<Exception>()
+                    });
+            });
         }
 
         // Lets the app fetch secrets (like database passwords) from AWS Secrets Manager.
@@ -102,7 +121,6 @@ namespace fraud_poc_project.Configuration
         private static void RegisterDatabaseAccess(WebApplicationBuilder builder, string connectionString)
         {
             builder.Services.AddDbContextPool<IDBConnection, DBConnection>(options => options.UseNpgsql(connectionString));
-            builder.Services.AddScoped<ITransactionEventHandler, FraudBatchConsumerWorker>();
             builder.Services.AddScoped<IFraudRepository, FraudRepository>();
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
         }
@@ -115,12 +133,10 @@ namespace fraud_poc_project.Configuration
                 .AddSingleton<IFraudRule, ForeignCnpRule>()
                 .AddSingleton<IFraudRule, AtmWithdrawalLimitRule>()
                 .AddSingleton<IFraudRule, HighRiskMerchantCategoryRule>()
-                .AddSingleton<IFraudRule, UnusualHoursRule>()
                 .AddSingleton<IFraudRule, RoundAmountRule>();
 
             builder.Services
-                .AddSingleton<IFraudEvaluationService, FraudEvaluationService>()
-                .AddTransient<FraudBatchConsumerWorker>();
+                .AddSingleton<IFraudEvaluationService, FraudEvaluationService>();
         }
 
         // Registers Kafka configuration, creates any missing topics, and wires up the
@@ -133,6 +149,7 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddSingleton<IFraudProducer, FraudProducer>();
             builder.Services.AddSingleton<FraudConsumer>();
             builder.Services.AddHostedService(sp => sp.GetRequiredService<FraudConsumer>());
+            builder.Services.AddTransient<ITransactionEventHandler, FraudConsumerWorker>();
         }
 
         // UserInputController only exists to help with manual testing, so it's only

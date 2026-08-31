@@ -50,12 +50,12 @@ namespace fraud_poc_project_buss.Models.Kafka
         public PartitionAssignmentStrategy PartitionAssignmentStrategy { get; set; } = PartitionAssignmentStrategy.CooperativeSticky;
         public int MaxPollIntervalMs { get; set; } = 300000; // 5 minutes
         public int SessionTimeoutMs { get; set; } = 45000; // 45 seconds
-        public bool EnableAutoCommit { get; set; } = false; // Manual commit for better control
         public int Concurrency { get; set; } = 1;
+        public bool SequentialProcessing { get; set; } = true;
 
         // Batch processing settings
         public int BatchSize { get; set; } = 100; // Process 100 messages at once
-        public int BatchTimeoutSeconds { get; set; } = 5; // Or wait max 5 seconds
+        public int BatchProcessTimeout { get; set; } = 5; // Or wait max 5 seconds
         public int FetchMinBytes { get; set; } = 1024; // Minimum data to fetch
         public int FetchMaxBytes { get; set; } = 52428800; // 50 MB
     }

@@ -106,4 +106,4 @@ resources:
 serviceAccount:
   create: true
   name: fraud-poc-api-sa
-  iamRoleArn: arn:aws:iam::570097405109:role/eksctl-fraud-poc-api-dev-us-east-1-clus-ServiceRole-ze4VrvS0Oq6X
+  iamRoleArn: ""  # Set via environment-specific values file (values-dev.yaml, values-prod.yaml, etc.)

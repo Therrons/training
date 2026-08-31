@@ -1,7 +1,7 @@
 using fraud_poc_project.Models;
+using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
-using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -97,6 +97,7 @@ namespace fraud_poc_project.Controllers
         /// <summary>
         /// Produce a single synthetic transaction event and return it as a preview.
         /// </summary>
+        /// <param name="fraudulent">Retrieve Fraudulent event if true, otherwise a normal event.</param>
         [HttpGet("preview")]
         public ActionResult<TransactionEvent> Preview([FromQuery] bool fraudulent = false)
         {
@@ -114,7 +115,7 @@ namespace fraud_poc_project.Controllers
             decimal amount;
             string? merchantCategory;
             string? countryCode;
-            DateTime transactionTime;
+            DateTime transactionTime = DateTime.UtcNow;
 
             if (fraudulent)
             {
@@ -124,9 +125,6 @@ namespace fraud_poc_project.Controllers
                 amount = Pick(rng, new[] { 60000m, 10000m, 15000m, 100000m, 5000m });
                 merchantCategory = Pick(rng, new[] { "gambling", "crypto", "money_transfer" });
                 countryCode = Pick(rng, new[] { "US", "NG", "GB" });        // non-ZA
-                // Unusual hours: midnight–4 AM
-                var baseDate = DateTime.UtcNow.Date.AddHours(2);
-                transactionTime = baseDate.AddMinutes(rng.Next(0, 120));
             }
             else
             {
@@ -135,8 +133,6 @@ namespace fraud_poc_project.Controllers
                 amount = Math.Round((decimal)(rng.NextDouble() * 4900 + 100), 2);
                 merchantCategory = Pick(rng, MerchantCategories);
                 countryCode = rng.NextDouble() < 0.9 ? "ZA" : Pick(rng, CountryCodes);
-                // Normal daytime hours
-                transactionTime = DateTime.UtcNow.AddHours(-rng.Next(0, 48));
             }
 
             var correlationId = Guid.NewGuid();

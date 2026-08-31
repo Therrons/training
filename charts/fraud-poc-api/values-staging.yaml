@@ -79,3 +79,6 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
+
+serviceAccount:
+  iamRoleArn: "arn:aws:iam::YOUR_STAGING_ACCOUNT_ID:role/fraud-poc-api-staging-service-role"  # Replace with your AWS staging account role
