@@ -94,16 +94,6 @@ namespace fraud_poc_project.Controllers
             });
         }
 
-        /// <summary>
-        /// Produce a single synthetic transaction event and return it as a preview.
-        /// </summary>
-        /// <param name="fraudulent">Retrieve Fraudulent event if true, otherwise a normal event.</param>
-        [HttpGet("preview")]
-        public ActionResult<TransactionEvent> Preview([FromQuery] bool fraudulent = false)
-        {
-            return Ok(BuildEvent(new Random(), fraudulent));
-        }
-
         private TransactionEvent BuildEvent(Random rng, bool fraudulent)
         {
             // Pick a random customer from a pool so some customers appear repeatedly

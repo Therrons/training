@@ -1,3 +1,4 @@
+using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,10 +15,7 @@ namespace KafkaSetup.Extensions
             string sectionName = "KafkaSettings")
         {
             // Load and validate the Kafka settings from config (e.g. appsettings.json).
-            services.AddOptions<KafkaSettings>()
-              .BindConfiguration(sectionName)
-              .ValidateDataAnnotations()
-              .ValidateOnStart();
+            services.AddAndValidateOptions<KafkaSettings>(sectionName);
 
             services.AddSingleton<KafkaBroker>(sp =>
             {

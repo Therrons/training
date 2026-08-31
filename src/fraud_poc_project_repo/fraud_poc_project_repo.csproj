@@ -11,6 +11,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Kafka\Helpers\**" />
+      <EmbeddedResource Remove="Kafka\Helpers\**" />
+      <None Remove="Kafka\Helpers\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Compile Remove="Kafka\FraudConsumer.cs" />
     </ItemGroup>
       

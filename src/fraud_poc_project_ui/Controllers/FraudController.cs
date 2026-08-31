@@ -36,16 +36,6 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Query only flagged transaction events by date range and optional filters.
-        /// </summary>
-        [HttpGet("events/flagged")]
-        public async Task<ActionResult<IEnumerable<FraudEventRecord>>> QueryFlaggedEvents([FromQuery] FraudQueryDto query)
-        {
-            var records = await _repository.QueryFlaggedOnlyFraudEventsAsync(query);
-            return Ok(records);
-        }
-
-        /// <summary>
         /// Retrieve all fraud rule results for a specific fraud event.
         /// </summary>
         [HttpGet("events/{fraudEventId:long}/rules")]

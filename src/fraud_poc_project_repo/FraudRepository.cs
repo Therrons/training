@@ -146,8 +146,8 @@ namespace fraud_poc_project_repo
                     $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
                     "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
                     conn);
-                cmd.Parameters.AddWithValue("date_from", query.DateFrom);
-                cmd.Parameters.AddWithValue("date_to", query.DateTo);
+                cmd.Parameters.AddWithValue("date_from", query.DateFrom.ToDateTimeFrom_yyyyMMddHHmmss());
+                cmd.Parameters.AddWithValue("date_to", query.DateTo.ToDateTimeFrom_yyyyMMddHHmmss());
                 cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("is_flagged_only", (object?)query.IsFlaggedOnly ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
@@ -182,8 +182,8 @@ namespace fraud_poc_project_repo
                     $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
                     "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
                     conn);
-                cmd.Parameters.AddWithValue("date_from", query.DateFrom);
-                cmd.Parameters.AddWithValue("date_to", query.DateTo);
+                cmd.Parameters.AddWithValue("date_from", query.DateFrom.ToDateTimeFrom_yyyyMMddHHmmss());
+                cmd.Parameters.AddWithValue("date_to", query.DateTo.ToDateTimeFrom_yyyyMMddHHmmss());
                 cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("is_flagged_only", true);
                 cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);

@@ -21,11 +21,6 @@
             The DateFrom and DateTo formats expects the following format: 2024-01-01 09:00:00
             </remarks>
         </member>
-        <member name="M:fraud_poc_project.Controllers.FraudController.QueryFlaggedEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
-            <summary>
-            Query only flagged transaction events by date range and optional filters.
-            </summary>
-        </member>
         <member name="M:fraud_poc_project.Controllers.FraudController.GetRuleResults(System.Int64)">
             <summary>
             Retrieve all fraud rule results for a specific fraud event.
@@ -43,12 +38,6 @@
             <param name="count">Number of events to produce (1–1000, default 50).</param>
             <param name="highFraudRatio">Fraction of events that should look fraudulent (0.0–1.0, default 0.2).</param>
             <param name="cancellationToken">Cancellation token.</param>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.LoadSimulatorController.Preview(System.Boolean)">
-            <summary>
-            Produce a single synthetic transaction event and return it as a preview.
-            </summary>
-            <param name="fraudulent">Retrieve Fraudulent event if true, otherwise a normal event.</param>
         </member>
     </members>
 </doc>

@@ -6,6 +6,7 @@ using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Database;
+using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
 using fraud_poc_project_repo;
@@ -79,15 +80,8 @@ namespace fraud_poc_project.Configuration
         private static void RegisterAppSettings(WebApplicationBuilder builder)
         {
             // AppSettings is bound here so the Kafka configuration (added later) can resolve it.
-            builder.Services.AddOptions<AppSettings>()
-               .BindConfiguration("AppSettings")
-               .ValidateDataAnnotations()
-               .ValidateOnStart();
-
-            builder.Services.AddOptions<Database>()
-              .BindConfiguration("Database")
-              .ValidateDataAnnotations()
-              .ValidateOnStart();
+            builder.Services.AddAndValidateOptions<AppSettings>("AppSettings");
+            builder.Services.AddAndValidateOptions<Database>("Database");
         }
 
         // Builds the PostgreSQL connection string from environment variables (falling
@@ -156,7 +150,7 @@ namespace fraud_poc_project.Configuration
         // registered in Debug builds.
         private static void RegisterTestOnlyControllers(WebApplicationBuilder builder)
         {
-            if (Model_Extensions_Helper.IsDebugMode)
+            if (Extensions_Helper.IsDebugMode)
             {
                 //builder.Services.AddTransient<UserInputController>();
                 builder.Services.AddTransient<LoadSimulatorController>();

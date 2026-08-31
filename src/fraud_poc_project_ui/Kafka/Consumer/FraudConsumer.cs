@@ -137,11 +137,6 @@ namespace fraud_poc_project.Kafka.Consumer
             base.Dispose();
         }
 
-        //protected override Task ExecuteAsync(CancellationToken stoppingToken)
-        //{
-        //    throw new System.NotImplementedException();
-        //}
-
         ~FraudConsumer()
         {
             _logger.LogInformationOnly("Stopping FraudConsumer...");

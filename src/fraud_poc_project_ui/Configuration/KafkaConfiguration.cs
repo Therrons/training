@@ -1,9 +1,7 @@
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
-using fraud_poc_project_buss.Configuration;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
-using fraud_poc_project_repo.Kafka.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -48,8 +46,8 @@ namespace fraud_poc_project.Configuration
                 return;
 
             // Make sure the required settings were actually filled in before we try to use them.
-            Model_Extensions_Helper.ValidateOptions(brokerSettings);
-            Model_Extensions_Helper.ValidateOptions(kafkaAdminSettings);
+            Extensions_Helper.ValidateOptions(brokerSettings);
+            Extensions_Helper.ValidateOptions(kafkaAdminSettings);
 
             var noTopicsConfigured = kafkaAdminSettings.TopicOptions == null || !kafkaAdminSettings.TopicOptions.Any();
 
@@ -57,7 +55,7 @@ namespace fraud_poc_project.Configuration
             if (brokerSettings.AllowAutoCreateTopics || noTopicsConfigured)
                 return;
 
-            AdminClientConfig adminConfig = KafkaAdminClientFactory.CreateAdminClientConfig(brokerSettings);
+            AdminClientConfig adminConfig = brokerSettings.CreateAdminClientConfig();    
             var adminClientBuilder = new AdminClientBuilder(adminConfig);
             CreateKafkaTopics(adminClientBuilder, kafkaAdminSettings);
         }

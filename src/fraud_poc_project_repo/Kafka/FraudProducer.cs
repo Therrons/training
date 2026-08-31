@@ -3,7 +3,6 @@ using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
-using fraud_poc_project_repo.Kafka.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
@@ -60,8 +59,8 @@ namespace fraud_poc_project_repo.Kafka
                 ApiVersionRequestTimeoutMs = _producerOptions.ApiVersionRequestTimeoutMs
             };
             _producer = new ProducerBuilder<string, byte[]>(producerConfig)
-                .SetLogHandler((_, message) => KafkaLoggingHelper.LogKafkaMessage(_logger, message))
-                .SetErrorHandler((_, error) => KafkaLoggingHelper.LogKafkaError(_logger, error))
+                .SetLogHandler((_, message) => _logger.LogKafkaMessage(message))
+                .SetErrorHandler((_, error) => _logger.LogKafkaError(error))
                 .Build();
 
             _logger.LogInformationOnly("FraudKafkaProducer initialized for application: {ApplicationName}",

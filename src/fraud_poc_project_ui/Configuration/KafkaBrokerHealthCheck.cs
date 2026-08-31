@@ -1,7 +1,6 @@
 using Confluent.Kafka;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
-using fraud_poc_project_repo.Kafka.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -74,7 +73,7 @@ namespace fraud_poc_project.Configuration
             {
                 try
                 {
-                    var adminConfig = KafkaAdminClientFactory.CreateAdminClientConfig(_brokerSettings);
+                    var adminConfig = _brokerSettings.CreateAdminClientConfig();
                     adminConfig.SocketTimeoutMs = 5000;
                     adminConfig.ConnectionsMaxIdleMs = 5000;
 

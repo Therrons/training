@@ -6,7 +6,6 @@ using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
 using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
-using fraud_poc_project_repo.Kafka.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -89,8 +88,8 @@ namespace fraud_poc_project.Kafka.Consumer
             };
 
             _consumer = new ConsumerBuilder<string, byte[]>(config)
-                .SetLogHandler((_, message) => KafkaLoggingHelper.LogKafkaMessage(_logger, message))
-                .SetErrorHandler((_, error) => KafkaLoggingHelper.LogKafkaError(_logger, error))
+                .SetLogHandler((_, message) =>_logger.LogKafkaMessage(message))
+                .SetErrorHandler((_, error) => _logger.LogKafkaError(error))
                 .SetPartitionsAssignedHandler((c, partitions) =>
                 {
                     _logger.LogInformationOnly("Partitions assigned: {Partitions}",
@@ -121,10 +120,10 @@ namespace fraud_poc_project.Kafka.Consumer
 
         private async Task Consume(CancellationToken stoppingToken)
         {
+            _consumer!.Subscribe(_topic);
             ConsumeResult<string, byte[]> lastProcessedResult = null;
             var startBatchTime = DateTime.UtcNow;
             var stopBatchTime = startBatchTime.AddSeconds(_consumerOptions.BatchProcessTimeout);
-            _consumer!.Subscribe(_topic);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -133,12 +132,8 @@ namespace fraud_poc_project.Kafka.Consumer
                     // Consume a message from Kafka with a timeout of XXX milliseconds
                     var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(_consumerOptions.ConsumeMessageIntervalMs));
 
-                    // Skip if null, or if it's a message-less EOF event
-                    if (consumeResult is null || (consumeResult.Message is null && consumeResult.IsPartitionEOF))
-                        continue;
-
                     // Only add actual messages to batch, not EOF events
-                    if (consumeResult.Message is not null)
+                    if (consumeResult?.Message is not null)
                     {
                         _batch.Add(consumeResult);
                         lastProcessedResult = consumeResult;
@@ -157,7 +152,7 @@ namespace fraud_poc_project.Kafka.Consumer
                     var timeExpired = DateTime.UtcNow >= stopBatchTime;
                     var shouldProcessBatch = _batch.Count >= _consumerOptions.BatchSize ||
                                             (_batch.Count > 0 && timeExpired) ||
-                                            (consumeResult.IsPartitionEOF && _batch.Count > 0);
+                                            (consumeResult is not null && consumeResult.IsPartitionEOF && _batch.Count > 0);
 
                     if (shouldProcessBatch)
                     {

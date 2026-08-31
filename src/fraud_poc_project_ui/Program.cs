@@ -32,16 +32,11 @@ public class Program
         });
 
         // Step 1: set up logging (Serilog) so everything below can log to the console
-        // and to a rolling daily log file.
-        var logPath = builder.Configuration["Logging:FilePath"]
-            ?? Environment.GetEnvironmentVariable("LOG_PATH")
-            ?? Path.Combine(AppContext.BaseDirectory, "logs/app-.log");
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
             .Enrich.FromLogContext()
-            .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
 
