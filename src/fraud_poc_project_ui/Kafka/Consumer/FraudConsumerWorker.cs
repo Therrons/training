@@ -130,9 +130,8 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 try
                 {
-                    // Check for one new message, but don't wait long - we need to keep
-                    // checking the batch-timeout condition below even if nothing new arrives.
-                    var consumeResult = _consumer.Consume(_consumerOptions.BatchProcessTimeout);
+                    // Consume a message from Kafka with a timeout of XXX milliseconds
+                    var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(_consumerOptions.ConsumeMessageIntervalMs));
 
                     // Skip if null, or if it's a message-less EOF event
                     if (consumeResult is null || (consumeResult.Message is null && consumeResult.IsPartitionEOF))

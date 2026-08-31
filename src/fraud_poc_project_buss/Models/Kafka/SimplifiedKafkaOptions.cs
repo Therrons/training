@@ -56,6 +56,7 @@ namespace fraud_poc_project_buss.Models.Kafka
         // Batch processing settings
         public int BatchSize { get; set; } = 100; // Process 100 messages at once
         public int BatchProcessTimeout { get; set; } = 5; // Or wait max 5 seconds
+        public int ConsumeMessageIntervalMs { get; set; } = 100; // Interval to consume messages    
         public int FetchMinBytes { get; set; } = 1024; // Minimum data to fetch
         public int FetchMaxBytes { get; set; } = 52428800; // 50 MB
     }
