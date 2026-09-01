@@ -6,7 +6,6 @@ using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Database;
-using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
 using fraud_poc_project_repo;
@@ -31,6 +30,8 @@ namespace fraud_poc_project.Configuration
     // see, at a glance, everything the app is wired up to use.
     public static class ServiceConfiguration
     {
+        // This is the main entry point for registering services. It calls each of the
+        // smaller methods below to register specific services.
         public static void AddServices_AddDI(this WebApplicationBuilder builder)
         {
             RegisterAwsSecrets(builder);
@@ -42,6 +43,7 @@ namespace fraud_poc_project.Configuration
             RegisterTestOnlyControllers(builder);
             RegisterRetryPipeline(builder);
             RegisterKafka(builder);
+            SetupDatabase(builder);
 
             builder.ConfigureSwagger();
         }
@@ -84,6 +86,7 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddAndValidateOptions<Database>("Database");
         }
 
+        #region Database Operations
         // Builds the PostgreSQL connection string from environment variables (falling
         // back to config values), then adds it to the app's configuration so anything
         // that asks for "ConnectionStrings:PostgreSQL" can find it.
@@ -118,6 +121,18 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddScoped<IFraudRepository, FraudRepository>();
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
         }
+
+        // If the app is configured to create the database on startup, this method
+        // sets up the necessary services.
+        private static void SetupDatabase(WebApplicationBuilder builder)
+        {
+            var createDbFlag = builder.Configuration["Database:CreateDatabaseOnStartup"]?.ToLowerInvariant();
+            if (createDbFlag == "yes" || createDbFlag == "true")
+            {
+                builder.Services.ConfigureDatabaseServices(builder, builder.Configuration);
+            }
+        }
+        #endregion
 
         // Registers every fraud rule (see FraudRules.cs) and the service that runs them.
         private static void RegisterFraudRules(WebApplicationBuilder builder)

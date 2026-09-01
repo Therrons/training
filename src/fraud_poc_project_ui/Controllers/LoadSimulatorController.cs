@@ -50,8 +50,8 @@ namespace fraud_poc_project.Controllers
             [FromQuery] double highFraudRatio = 0.2,
             CancellationToken cancellationToken = default)
         {
-            if (count < 1 || count > 1000)
-                return BadRequest("count must be between 1 and 1000.");
+            if (count < 1 || count > 10000)
+                return BadRequest("count must be between 1 and 10000.");
 
             if (highFraudRatio < 0.0 || highFraudRatio > 1.0)
                 return BadRequest("highFraudRatio must be between 0.0 and 1.0.");

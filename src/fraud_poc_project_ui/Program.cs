@@ -1,38 +1,27 @@
 using fraud_poc_project.Configuration;
+using fraud_poc_project.Middleware;
 using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
-using Microsoft.AspNetCore.Http.Json;  // Add this line
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 
-// This is the app's starting point - it runs once when the app boots up.
-// It wires everything together, in order: logging, secrets, configuration,
-// application services (database, Kafka, fraud rules), then starts the web server.
 public class Program
 {
     public static string file_Path_Name = "";
     private const string FileName = "input.txt";
 
-    // Main must be async so we can await Secrets Manager before the web server starts.
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.Configure<JsonOptions>(options =>
-        {
-        });
-
         // Step 1: set up logging (Serilog) so everything below can log to the console
-
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
@@ -53,16 +42,7 @@ public class Program
         if (args != null && args.Length > 0)
             builder.Configuration.AddCommandLine(args);
 
-        // Step 3: optionally run the database setup scripts before anything else starts.
-        // ── Database initialization ───────────────────────────
-        var createDbFlag = builder.Configuration["Database:CreateDatabaseOnStartup"]?.ToLowerInvariant();
-        if (createDbFlag == "yes" || createDbFlag == "true")
-        {
-            builder.Services.ConfigureDatabaseServices(builder, builder.Configuration);
-        }
-
-        var time_docker_build = DateTime.Now.ToString();
-
+        // Step 3: determine the write directory for the app, and create it if it doesn't exist.
         var writeDir =
             builder.Configuration["write-dir"] ??
             Environment.GetEnvironmentVariable("write_dir") ??
@@ -86,30 +66,6 @@ public class Program
         builder.Services.AddEndpointsApiExplorer(); // Add API explorer services to the DI container
         builder.Services.AddHealthChecks();         // Add health check services to the DI container
 
-        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        var xmlPath = Path.Combine(builder.Environment.ContentRootPath, xmlFile);
-
-        if (!isLocal)
-        {
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Fraud Detection API",
-                    Version = "v1",
-                    Description = "Consumes categorized transaction events from Kafka, applies fraud rules, stores results in PostgreSQL, and exposes them via this API.",
-                    Contact = new OpenApiContact
-                    {
-                        Email = "centralisedsystems@capitecbank.co.za",
-                        Name = "Centralised Systems"
-                    }
-                });
-
-                if (File.Exists(xmlPath))
-                    c.IncludeXmlComments(xmlPath);
-            });
-        }
-
         builder.Services.Configure<HostFilteringOptions>(options =>
         {
             options.AllowedHosts = new[] { "*" };
@@ -122,9 +78,17 @@ public class Program
 
         // Step 6: build the app and start handling web requests.
         var app = builder.Build();
+
         app.UseRouting();
+
+        // Validate incoming requests for XSS attacks.
+        // Applied only to endpoints marked with [ValidateXss] attribute.
+        // Must be after UseRouting() so endpoint metadata is available.
+        app.UseMiddleware<CheckForXssMiddleware>();
+
         app.UseSwagger();
 
+        // Step 7: configure Swagger UI based on the environment (local vs production).
         if (!isLocal)
             app.UseSwaggerUI(settings => settings.SupportedSubmitMethods(Array.Empty<SubmitMethod>())); // Read-only documentation in production
         else

@@ -67,9 +67,6 @@ namespace fraud_poc_project_repo.Kafka
                     _appSettings.ApplicationName);
         }
 
-        // Turns a transaction event into the raw Kafka message format: JSON bytes as the
-        // value, customer id as the key (so all of one customer's events land on the same
-        // partition), and the transaction time as the message timestamp.
         private static Message<string, byte[]> BuildKafkaMessage<T>(T message) where T : TransactionEvent
         {
             var payload = JsonSerializer.SerializeToUtf8Bytes(message, _jsonOptions);
@@ -150,8 +147,6 @@ namespace fraud_poc_project_repo.Kafka
             }
         }
 
-        // Same idea as ProduceAsync, but first checks that a dead-letter topic was
-        // actually set on the message before trying to send it.
         public async Task<bool> ProduceDltAsync<T>(T message, CancellationToken cancellationToken = default) where T : TransactionEvent
         {
             string _topic = message.KafkaTopic;
@@ -176,9 +171,6 @@ namespace fraud_poc_project_repo.Kafka
             }
         }
 
-        /// <summary>
-        /// Handles exceptions during produce operations with consistent logging.
-        /// </summary>
         private void HandleProduceException<T>(Exception ex, T message, string topic, string key) where T : TransactionEvent
         {
             if (ex is ProduceException<string, byte[]> produceEx)

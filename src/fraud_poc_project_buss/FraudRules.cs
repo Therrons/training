@@ -10,13 +10,10 @@ namespace fraud_poc_project_buss
 
     public interface IFraudRule
     {
-        // A short code that identifies this rule, e.g. "HIGH_AMOUNT".
         string RuleCode { get; }
 
-        // A human-readable sentence explaining what this rule checks for.
         string RuleDescription { get; }
 
-        // Looks at one transaction and returns whether this rule was triggered.
         FraudRuleSetRecord Evaluate(TransactionEvent transaction);
     }
 
@@ -70,7 +67,6 @@ namespace fraud_poc_project_buss
             var isCnp = string.Equals(tx.TransactionType, "CNP", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(tx.Channel, "Online", StringComparison.OrdinalIgnoreCase);
 
-            // "Foreign" means the transaction's country isn't our home country.
             var isForeign = !string.IsNullOrWhiteSpace(tx.CountryCode)
                             && !string.Equals(tx.CountryCode, _homeCountry, StringComparison.OrdinalIgnoreCase);
 
@@ -106,7 +102,7 @@ namespace fraud_poc_project_buss
             var isAtm = string.Equals(tx.TransactionType, "ATM", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(tx.Channel, "ATM", StringComparison.OrdinalIgnoreCase);
 
-            // Triggered only for ATM withdrawals over the limit - not other transaction types.
+            // Triggered only for ATM withdrawals over the limit
             var triggered = isAtm && Math.Abs(tx.Amount) > _limit;
             return new FraudRuleSetRecord
             {

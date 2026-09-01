@@ -18,10 +18,8 @@ namespace fraud_poc_project_buss.Service
     {
         private readonly IEnumerable<IFraudRule> _rules;
 
-        // A transaction is flagged once its total score reaches this many points.
         private const decimal FlagThreshold = 40m;
 
-        // The highest possible score, even if the rules would add up to more.
         private const decimal MaxScore = 100m;
 
         public FraudEvaluationService(IEnumerable<IFraudRule> rules)
@@ -58,8 +56,6 @@ namespace fraud_poc_project_buss.Service
             };
         }
 
-        // Same as Evaluate, but runs on a background thread so callers can await it
-        // without blocking.
         public async Task<FraudEventRecord> EvaluateAsync(TransactionEvent kafkaEvent)
          => await Task.Run(() => Evaluate(kafkaEvent));
     }

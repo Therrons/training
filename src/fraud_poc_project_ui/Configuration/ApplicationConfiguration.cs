@@ -4,9 +4,6 @@ using System.IO;
 
 namespace fraud_poc_project.Configuration
 {
-    // Sets up where the app reads its settings from: appsettings.json, an
-    // environment-specific settings file (e.g. appsettings.PROD.json), then
-    // environment variables (which can override anything above).
     public static class ApplicationConfiguration
     {
         public static void AddConfigurations(this WebApplicationBuilder builder)

@@ -8,9 +8,6 @@ using Npgsql;
 
 namespace fraud_poc_project_repo.Connection
 {
-    // Opens and holds one connection to the PostgreSQL database when the app starts.
-    // If "UseRdsToken" is turned on, it uses a short-lived AWS login token that
-    // refreshes itself automatically instead of a fixed password.
     public class DBConnection : DbContext, IDBConnection
     {
         private readonly NpgsqlConnection _dbConnector;

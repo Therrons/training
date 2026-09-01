@@ -23,6 +23,7 @@
     <ItemGroup>
       <Compile Remove="Controllers\UserInputController.cs" />
       <Compile Remove="Kafka\Consumer\FraudBatchConsumerWorker.cs" />
+      <Compile Remove="Middleware\CheckForXssMiddleware2.cs" />
     </ItemGroup>
     
     <ItemGroup>
@@ -57,5 +58,9 @@
       <Reference Include="Newtonsoft.Json">
         <HintPath>..\src\nuget-packages\newtonsoft.json\13.0.4\lib\net6.0\Newtonsoft.Json.dll</HintPath>
       </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="data\" />
     </ItemGroup>
 </Project>

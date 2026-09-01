@@ -3,9 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace fraud_poc_project_buss.Models.Kafka
 {
-    /// <summary>
-    /// How to connect to the Kafka broker: its address and login details.
-    /// </summary>
     public record FraudKafkaBrokerSettings
     {
         [Required(ErrorMessage = "BootstrapServers cannot be emptpy")]
@@ -18,10 +15,6 @@ namespace fraud_poc_project_buss.Models.Kafka
         public bool AllowAutoCreateTopics { get; set; } = false;
     }
 
-    /// <summary>
-    /// Settings for sending ("producing") messages to Kafka, like how to compress them
-    /// and how long to wait before giving up.
-    /// </summary>
     public record FraudKafkaProducerSettings
     {
         public CompressionType CompressionType { get; set; } = CompressionType.Snappy;
@@ -33,10 +26,6 @@ namespace fraud_poc_project_buss.Models.Kafka
         public int ApiVersionRequestTimeoutMs { get; set; } = 10000;
     }
 
-    /// <summary>
-    /// Settings for reading ("consuming") transaction messages from Kafka, including
-    /// how many messages to batch together before processing them.
-    /// </summary>
     public record FraudKafkaConsumerSettings
     {
         // The Kafka topic to read incoming transactions from.
@@ -47,7 +36,7 @@ namespace fraud_poc_project_buss.Models.Kafka
         public required string TransactionTopicDtl { get; set; }
 
         public AutoOffsetReset AutoOffsetReset { get; set; } = AutoOffsetReset.Earliest;
-        public PartitionAssignmentStrategy PartitionAssignmentStrategy { get; set; } = PartitionAssignmentStrategy.CooperativeSticky;
+        public PartitionAssignmentStrategy PartitionAssignmentStrategy { get; set; } = PartitionAssignmentStrategy.RoundRobin;
         public int MaxPollIntervalMs { get; set; } = 300000; // 5 minutes
         public int SessionTimeoutMs { get; set; } = 45000; // 45 seconds
         public int Concurrency { get; set; } = 1;

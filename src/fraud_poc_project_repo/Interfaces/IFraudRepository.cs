@@ -3,8 +3,6 @@ using fraud_poc_project_buss.Models.Fraud;
 
 namespace fraud_poc_project_repo.Interfaces
 {
-    // Everything the rest of the app can do with the fraud data in the database:
-    // save results, look them up again, and record errors.
     public interface IFraudRepository
     {
         // Save the result of evaluating one transaction (and each rule's result) to the database.

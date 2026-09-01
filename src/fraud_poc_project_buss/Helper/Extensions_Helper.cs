@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace fraud_poc_project_buss.Helper
 {
-    // Small shared helper functions used in a few places around the codebase.
+
     public static class Extensions_Helper
     {
         public static readonly bool IsDebugMode = IsDebugBuild();
@@ -33,8 +33,7 @@ namespace fraud_poc_project_buss.Helper
         }
 
         // Checks that a settings object (e.g. loaded from appsettings.json) has all its
-        // required fields filled in. If something is missing, this throws an error that
-        // explains exactly what's wrong, instead of failing later in a confusing way.
+        // required fields filled in. 
         public static void ValidateOptions<T>(T options)
         {
             var validationContext = new ValidationContext(options);
@@ -56,12 +55,14 @@ namespace fraud_poc_project_buss.Helper
             return r.IsDBNull(ord) ? null : r.GetString(ord);
         }
 
+        // Logs an information message only if the logger is enabled for information level.
         public static void LogInformationOnly<T>(this ILogger<T> logger, string message, params object[] args)
         {
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation(message, args);
         }
 
+        // Logs sensitive data only if the application is running in debug mode and the logger is enabled for information level.
         public static void LogSensitiveData<T>(this ILogger<T> logger, string message, params object[] args)
         {
 
@@ -69,6 +70,7 @@ namespace fraud_poc_project_buss.Helper
                 logger.LogInformation(message, args);
         }
 
+        // Converts a string in the format "yyyy-MM-dd HH:mm:ss" to a nullable DateTime.
         public static DateTime? ToDateTimeFrom_yyyyMMddHHmmss(this string dateString)
         {
             if (string.IsNullOrWhiteSpace(dateString))
@@ -86,14 +88,7 @@ namespace fraud_poc_project_buss.Helper
             return null;
         }
 
-        /// <summary>
-        /// Registers and configures options with automatic binding from configuration,
-        /// data annotation validation, and startup validation.
-        /// </summary>
-        /// <typeparam name="T">The options class to register</typeparam>
-        /// <param name="services">The service collection</param>
-        /// <param name="configurationSection">The configuration section name to bind to</param>
-        /// <returns>The service collection for chaining</returns>
+        // Adds options of type T to the service collection, binds them to a configuration section, and validates them using data annotations.
         public static IServiceCollection AddAndValidateOptions<T>(
             this IServiceCollection services,
             string configurationSection) where T : class
@@ -106,6 +101,7 @@ namespace fraud_poc_project_buss.Helper
             return services;
         }
 
+        // Converts a FraudKafkaBrokerSettings object into an AdminClientConfig object for Kafka administration.
         public static AdminClientConfig CreateAdminClientConfig(this FraudKafkaBrokerSettings brokerSettings)
         {
             return new AdminClientConfig
@@ -120,9 +116,7 @@ namespace fraud_poc_project_buss.Helper
             };
         }
 
-        /// <summary>
-        /// Converts a raw Kafka log entry into appropriate log levels for consistent logging.
-        /// </summary>
+        // Logs a Kafka message with the appropriate log level based on the SyslogLevel of the message.
         public static void LogKafkaMessage<T>(this ILogger<T> logger, LogMessage logMessage)
         {
             var level = logMessage.Level switch
@@ -136,9 +130,7 @@ namespace fraud_poc_project_buss.Helper
             logger.Log(level, "Kafka (librdkafka): {Message}", logMessage.Message);
         }
 
-        /// <summary>
-        /// Logs a Kafka client error. Fatal errors indicate the connection is broken and recovery is unlikely.
-        /// </summary>
+        // Logs a Kafka error with the appropriate log level based on whether the error is fatal or not.
         public static void LogKafkaError<T>(this ILogger<T> logger, Error error)
         {
             if (error.IsFatal)

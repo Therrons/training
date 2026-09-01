@@ -66,9 +66,7 @@ namespace fraud_poc_project.Kafka.Consumer
             consumerCount = consumerInstances?.Partitions ?? 0;
         }
 
-        // This runs automatically when the app starts, and keeps running until the app
-        // shuts down. (We override ExecuteAsync, which BackgroundService calls for us,
-        // instead of StartAsync.)
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
@@ -117,10 +115,6 @@ namespace fraud_poc_project.Kafka.Consumer
                         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
                 }
             }
-        }
-        private static int GetCurrentThreadId()
-        {
-            return Thread.CurrentThread.ManagedThreadId;
         }
 
         public override void Dispose()

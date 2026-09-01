@@ -55,7 +55,7 @@ namespace fraud_poc_project.Configuration
             if (brokerSettings.AllowAutoCreateTopics || noTopicsConfigured)
                 return;
 
-            AdminClientConfig adminConfig = brokerSettings.CreateAdminClientConfig();    
+            AdminClientConfig adminConfig = brokerSettings.CreateAdminClientConfig();
             var adminClientBuilder = new AdminClientBuilder(adminConfig);
             CreateKafkaTopics(adminClientBuilder, kafkaAdminSettings);
         }

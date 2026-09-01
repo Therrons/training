@@ -3,10 +3,6 @@ using fraud_poc_project_buss.Models.Fraud;
 
 namespace fraud_poc_project_repo.Kafka
 {
-    /// <summary>
-    /// What to do with transaction events once they've been read from Kafka - run them
-    /// through fraud evaluation and save the results.
-    /// </summary>
     public interface ITransactionEventHandler
     {
         // Handle one transaction event on its own.

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 
@@ -7,13 +8,8 @@ namespace fraud_poc_project.Configuration
 {
     public static class ConfigureSwaggerForRancher
     {
-        /// <summary>
-        /// Registers Swagger (the API documentation/testing page) so it keeps working
-        /// when the app is hosted behind Rancher/Kubernetes.
-        /// Note: Program.cs also registers Swagger separately with a bit more detail
-        /// (contact info, XML comments). Both run - this one just adds a second,
-        /// simpler registration on top.
-        /// </summary>
+        // This method sets up the Swagger documentation and UI, including the 
+        // title, version, description, and contact information. It also includes XML comments for better documentation.
         public static void ConfigureSwagger(this WebApplicationBuilder builder)
         {
             builder.Services.AddSwaggerGen(c =>
@@ -22,7 +18,12 @@ namespace fraud_poc_project.Configuration
                 {
                     Title = "Fraud Detection API",
                     Version = "v1",
-                    Description = "API for Fraud Detection Service"
+                    Description = "Consumes categorized transaction events from Kafka, applies fraud rules, stores results in PostgreSQL, and exposes them via this API.",
+                    Contact = new OpenApiContact
+                    {
+                        Email = "centralisedsystems@capitecbank.co.za",
+                        Name = "Centralised Systems"
+                    }
                 });
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";

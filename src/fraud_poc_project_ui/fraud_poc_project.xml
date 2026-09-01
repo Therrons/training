@@ -4,15 +4,6 @@
         <name>fraud_poc_project</name>
     </assembly>
     <members>
-        <member name="M:fraud_poc_project.Configuration.ConfigureSwaggerForRancher.ConfigureSwagger(Microsoft.AspNetCore.Builder.WebApplicationBuilder)">
-            <summary>
-            Registers Swagger (the API documentation/testing page) so it keeps working
-            when the app is hosted behind Rancher/Kubernetes.
-            Note: Program.cs also registers Swagger separately with a bit more detail
-            (contact info, XML comments). Both run - this one just adds a second,
-            simpler registration on top.
-            </summary>
-        </member>
         <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
             <summary>
             Query fraud-evaluated transaction events by date range and optional filters.

@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KafkaSetup.Extensions
 {
-    // A one-call helper for wiring up all the Kafka-related pieces (broker, producer,
+    // A Program Startup helper for wiring up all the Kafka-related pieces (broker, producer,
     // consumer config) into the app's dependency injection container.
     public static class KafkaServiceCollectionExtensions
     {

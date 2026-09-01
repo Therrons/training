@@ -88,7 +88,7 @@ namespace fraud_poc_project.Kafka.Consumer
             };
 
             _consumer = new ConsumerBuilder<string, byte[]>(config)
-                .SetLogHandler((_, message) =>_logger.LogKafkaMessage(message))
+                .SetLogHandler((_, message) => _logger.LogKafkaMessage(message))
                 .SetErrorHandler((_, error) => _logger.LogKafkaError(error))
                 .SetPartitionsAssignedHandler((c, partitions) =>
                 {

@@ -1,3 +1,4 @@
+using fraud_poc_project.CustomAttributes;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_repo.Interfaces;
@@ -7,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Controllers
 {
-    // The read-only API for looking up fraud results that have already been saved to
-    // the database. This doesn't evaluate anything itself - that happens automatically
-    // in the background via FraudConsumer/FraudBatchConsumerWorker.
+    // 
+    [ValidateXss]
     [ApiController]
     [Route("api/fraud")]
     public class FraudController : ControllerBase

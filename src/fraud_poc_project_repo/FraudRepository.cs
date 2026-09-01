@@ -10,10 +10,6 @@ using Npgsql;
 
 namespace fraud_poc_project_repo
 {
-    // Talks directly to the PostgreSQL database for everything fraud-related: saving
-    // evaluation results, recording errors, and answering search queries from the API.
-    // Each method opens its own database connection, runs one SQL stored procedure or
-    // function, and closes the connection again.
     public class FraudRepository : IFraudRepository
     {
         private readonly string _connectionString;
