@@ -162,7 +162,7 @@ jobs:
             -e DB_NAME="$DB_NAME" \
             -e AWSSecretName="$SECRET_NAME" \
             -e AWSRegion="${{ env.AWS_REGION }}" \
-            -e ASPNETCORE_ENVIRONMENT="LOC" \
+            -e ASPNETCORE_ENVIRONMENT="RELEASE" \
             -p 8080:8080 \
             --name api-test \
             -d \

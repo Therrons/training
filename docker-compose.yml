@@ -34,7 +34,7 @@ services:
         condition: service_healthy  # Wait for DB to be ready
     environment:
       ASPNETCORE_URLS: "http://0.0.0.0:8080"
-      ASPNETCORE_ENVIRONMENT: "LOC"
+      ASPNETCORE_ENVIRONMENT: "RELEASE"
       # PostgreSQL credentials – injected as individual env vars so Program.cs
       # picks them up directly (no Secrets Manager call needed locally).
       # Values come from .env via ${...} substitution.

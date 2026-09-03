@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{2056362F-E
 	ProjectSection(SolutionItems) = preProject
 		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
 		..\.github\workflows\deploy.yml = ..\.github\workflows\deploy.yml
+		..\docker-compose.yml = ..\docker-compose.yml
 		..\.github\workflows\docker-publish.yml = ..\.github\workflows\docker-publish.yml
 		..\Dockerfile = ..\Dockerfile
 		NuGet.config = NuGet.config

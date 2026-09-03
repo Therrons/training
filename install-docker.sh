@@ -171,7 +171,7 @@ run_container() {
         --name "${CONTAINER_NAME}" \
         -p "${HOST_PORT}:${APP_PORT}" \
         -e "ASPNETCORE_URLS=http://0.0.0.0:${APP_PORT}" \
-        -e "ASPNETCORE_ENVIRONMENT=LOC" \
+        -e "ASPNETCORE_ENVIRONMENT=RELEASE" \
         -e "DB_HOST=${DB_HOST}" \
         -e "DB_PORT=${DB_PORT}" \
         -e "DB_NAME=${DB_NAME}" \
