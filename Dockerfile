@@ -36,7 +36,7 @@ RUN update-ca-certificates || true
 
 # ASP.NET Core configuration
 ENV ASPNETCORE_URLS="http://0.0.0.0:${APP_PORT}" \
-    ASPNETCORE_ENVIRONMENT="LOC" \
+    ASPNETCORE_ENVIRONMENT="RELEASE" \
     DOTNET_RUNNING_IN_CONTAINER=true \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
@@ -69,10 +69,10 @@ COPY . .
 #RUN echo "printing nuget-config image tree structure" && ls -la /repo/nuget-config
 
 # Restore & build
-RUN dotnet restore /repo/src/fraud_poc_project.csproj --configfile /repo/nuget-config/NuGet.config
+RUN dotnet restore /repo/nuget-config/fraud_poc_project_K8s.sln --configfile /repo/nuget-config/NuGet.config
 
 # explicitly switch off restore otherwise it will try to restore again and fail due to missing credentials (since we won't have access to the secret at build time)
-RUN dotnet publish /repo/src/fraud_poc_project.csproj -c Release -o /repo/publish --no-restore /p:UseAppHost=false
+RUN dotnet publish /repo/nuget-config/fraud_poc_project_K8s.sln -c Release -o /repo/publish --no-restore /p:UseAppHost=false
 
 ############################################################
 # 3. Final runtime image
