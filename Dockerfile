@@ -74,6 +74,9 @@ RUN dotnet restore /repo/nuget-config/fraud_poc_project_K8s.sln --configfile /re
 # explicitly switch off restore otherwise it will try to restore again and fail due to missing credentials (since we won't have access to the secret at build time)
 RUN dotnet publish /repo/nuget-config/fraud_poc_project_K8s.sln -c Release -o /repo/publish --no-restore /p:UseAppHost=false
 
+# Remove LOC config file to ensure only RELEASE config is used
+RUN rm -f /repo/publish/appsettings.LOC.json
+
 ############################################################
 # 3. Final runtime image
 ############################################################

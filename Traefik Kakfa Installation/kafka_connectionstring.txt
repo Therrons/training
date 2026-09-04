@@ -1,1 +1,5 @@
-bootstrap.servers=kafka:9092
+local:
+localhost:9094
+
+rancher:
+host.docker.internal:9094

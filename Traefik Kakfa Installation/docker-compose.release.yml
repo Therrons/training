@@ -1,0 +1,5 @@
+services:
+  kafka:
+    environment:
+      # Override for production - advertise host.docker.internal for Docker containers
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka:9092,EXTERNAL://host.docker.internal:9094

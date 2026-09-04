@@ -6,14 +6,8 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_buss", "..\src\fraud_poc_project_buss\fraud_poc_project_buss.csproj", "{974E67AB-EFCF-7F7F-40B4-0B57063D1526}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_repo", "..\src\fraud_poc_project_repo\fraud_poc_project_repo.csproj", "{D39EF5F5-6899-125C-FDEE-D56B734FEC82}"
-	ProjectSection(ProjectDependencies) = postProject
-		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17} = {65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project", "..\src\fraud_poc_project_ui\fraud_poc_project.csproj", "{91B3831A-B9CB-FE88-1002-2F2ED41228B9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17} = {65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI_Fraud_POC", "UI_Fraud_POC", "{93FA5A22-354B-4739-8498-0C432612534D}"
 EndProject
@@ -30,12 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{2056362F-E
 		..\Dockerfile = ..\Dockerfile
 		NuGet.config = NuGet.config
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Kafka", "Kafka", "{69FE2493-2796-4BCE-AE7E-D0B679148868}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaSetup", "..\src\Kafka\KafkaSetup\KafkaSetup.csproj", "{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{5F082A9A-5423-44BF-8C6E-6DB2B5B432F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,10 +43,6 @@ Global
 		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,7 +51,6 @@ Global
 		{974E67AB-EFCF-7F7F-40B4-0B57063D1526} = {DACC9459-7B66-4A5D-91C0-72010843C421}
 		{D39EF5F5-6899-125C-FDEE-D56B734FEC82} = {A579AA0B-DD30-43C6-81B2-F773C8F7B96E}
 		{91B3831A-B9CB-FE88-1002-2F2ED41228B9} = {93FA5A22-354B-4739-8498-0C432612534D}
-		{65972F86-9F41-4D7A-BDC7-6EC6D5B56E17} = {69FE2493-2796-4BCE-AE7E-D0B679148868}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EE756345-170B-431A-AE8A-88F135C4D787}
