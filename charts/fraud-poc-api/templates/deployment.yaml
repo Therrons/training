@@ -38,6 +38,27 @@ spec:
             - name: BUILD_VERSION
               value: {{ .Values.env.BUILD_VERSION | quote }}
             {{- end }}
+            # Database configuration for Kubernetes
+            {{- if .Values.env.DB_HOST }}
+            - name: DB_HOST
+              value: {{ .Values.env.DB_HOST | quote }}
+            {{- end }}
+            {{- if .Values.env.DB_PORT }}
+            - name: DB_PORT
+              value: {{ .Values.env.DB_PORT | quote }}
+            {{- end }}
+            {{- if .Values.env.DB_NAME }}
+            - name: DB_NAME
+              value: {{ .Values.env.DB_NAME | quote }}
+            {{- end }}
+            {{- if .Values.env.DB_USERNAME }}
+            - name: DB_USERNAME
+              value: {{ .Values.env.DB_USERNAME | quote }}
+            {{- end }}
+            {{- if .Values.env.DB_PASSWORD }}
+            - name: DB_PASSWORD
+              value: {{ .Values.env.DB_PASSWORD | quote }}
+            {{- end }}
             {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.k8sSecretName }}
             - name: DB_Id
               valueFrom:

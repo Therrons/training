@@ -6,23 +6,29 @@ namespace:
 image:
   # You are using offline images loaded into the cluster (containerd).
   # Keep these as-is if you've loaded fraud-poc-api:offline with nerdctl.
-  repository: fraud-poc-api
+  repository: fraud-poc-project
   tag: offline
   pullPolicy: IfNotPresent
 
 replicaCount: 1   # default; overridden per environment below
 
 env:
-  ASPNETCORE_URLS: "http://0.0.0.0:8080"
-  ASPNETCORE_ENVIRONMENT: "LOC"
+  ASPNETCORE_URLS: "http://0.0.0.0:8083"
+  ASPNETCORE_ENVIRONMENT: "RELEASE"
   ASPNETCORE_ALLOWEDHOSTS: "*"
   BUILD_DATE: ""
   BUILD_VERSION: ""
+  # Kubernetes service names for internal communication
+  DB_HOST: "fraud-poc-project-postgres"
+  DB_PORT: "5432"
+  DB_NAME: "fraud_db"
+  DB_USERNAME: "therrons"
+  DB_PASSWORD: "therrons"
 
-containerPort: 8080
+containerPort: 8083
 service:
   type: ClusterIP
-  port: 8080
+  port: 8083
 
 # Probes – you've added readiness & liveness in code; set the paths you expose
 probes:

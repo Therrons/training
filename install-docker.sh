@@ -25,9 +25,9 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-IMAGE_NAME="fraud-poc-api"
-IMAGE_TAG="local"
-CONTAINER_NAME="fraud-poc-api-dev"
+IMAGE_NAME="fraud-poc-project"
+IMAGE_TAG="offline"
+CONTAINER_NAME="fraud-poc-project"
 APP_PORT="8080"
 HOST_PORT="8080"
 DB_PORT="5432"

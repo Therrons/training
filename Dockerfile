@@ -5,7 +5,7 @@
 ARG APP_DLL=fraud_poc_project.dll
 
 # pass default value for argument to avoid build-time errors, can be overridden at runtime
-ARG APP_PORT=8080
+ARG APP_PORT=8083
 
 ############################################################
 # 1. Base runtime image
@@ -47,7 +47,7 @@ ENV ASPNETCORE_URLS="http://0.0.0.0:${APP_PORT}" \
 # If left empty at runtime, Program.cs falls back to the Secrets Manager SDK.
 ENV DB_USERNAME="" \
     DB_PASSWORD="" \
-    DB_HOST="localhost" \
+    DB_HOST="host.docker.internal" \
     DB_PORT="5432" \
     DB_NAME="fraud_db" \
     AWSRegion=""
@@ -68,14 +68,11 @@ COPY . .
 #RUN echo "printing src image tree structure" && ls -la /repo/src
 #RUN echo "printing nuget-config image tree structure" && ls -la /repo/nuget-config
 
-# Restore & build
-RUN dotnet restore /repo/nuget-config/fraud_poc_project_K8s.sln --configfile /repo/nuget-config/NuGet.config
+# Restore & build - use only the main UI project to skip test package dependencies
+RUN dotnet restore /repo/src/fraud_poc_project_ui/fraud_poc_project.csproj --configfile /repo/nuget-config/NuGet.config
 
 # explicitly switch off restore otherwise it will try to restore again and fail due to missing credentials (since we won't have access to the secret at build time)
-RUN dotnet publish /repo/nuget-config/fraud_poc_project_K8s.sln -c Release -o /repo/publish --no-restore /p:UseAppHost=false
-
-# Remove LOC config file to ensure only RELEASE config is used
-RUN rm -f /repo/publish/appsettings.LOC.json
+RUN dotnet publish /repo/src/fraud_poc_project_ui/fraud_poc_project.csproj -c Release -o /repo/publish --no-restore /p:UseAppHost=false
 
 ############################################################
 # 3. Final runtime image

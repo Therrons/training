@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud POC - Load Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .result.success {
+            display: block;
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+            color: #166534;
+        }
+
+        .result.error {
+            display: block;
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+            color: #991b1b;
+        }
+
+        .result.info {
+            display: block;
+            background: #f0f9ff;
+            border: 2px solid #93c5fd;
+            color: #1e40af;
+        }
+
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .result-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .result-label {
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: inherit;
+            opacity: 0.8;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .presets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            padding: 10px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔴 Load Simulator</h1>
+        <p class="subtitle">Simulate fraudulent transactions for testing</p>
+
+        <div class="presets">
+            <button class="preset-btn" onclick="setPreset(10, 0.2)">Small Test (10)</button>
+            <button class="preset-btn" onclick="setPreset(100, 0.2)">Medium Test (100)</button>
+            <button class="preset-btn" onclick="setPreset(500, 0.5)">Large Test (500)</button>
+            <button class="preset-btn" onclick="setPreset(1000, 0.3)">Heavy Load (1000)</button>
+        </div>
+
+        <form id="simulatorForm" onsubmit="submitForm(event)">
+            <div class="form-group">
+                <label for="count">Transaction Count</label>
+                <input
+                    type="number"
+                    id="count"
+                    name="count"
+                    value="50"
+                    min="1"
+                    max="10000"
+                    required
+                >
+                <div class="help-text">Number of synthetic transactions to produce (1-10,000)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="fraudRatio">Fraud Ratio</label>
+                <input
+                    type="number"
+                    id="fraudRatio"
+                    name="fraudRatio"
+                    value="0.2"
+                    min="0.0"
+                    max="1.0"
+                    step="0.1"
+                    required
+                >
+                <div class="help-text">Fraction of events that should look fraudulent (0.0 - 1.0)</div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-primary" id="submitBtn">Start Simulation</button>
+                <button type="reset" class="btn-secondary">Reset Form</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <span class="spinner"></span>
+                <span>Simulating transactions...</span>
+            </div>
+        </form>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function setPreset(count, fraudRatio) {
+            document.getElementById('count').value = count;
+            document.getElementById('fraudRatio').value = fraudRatio;
+        }
+
+        async function submitForm(event) {
+            event.preventDefault();
+
+            const count = document.getElementById('count').value;
+            const fraudRatio = document.getElementById('fraudRatio').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+
+            // Validation
+            if (count < 1 || count > 10000) {
+                showResult('error', 'Validation Error', 'Count must be between 1 and 10,000');
+                return;
+            }
+
+            if (fraudRatio < 0 || fraudRatio > 1) {
+                showResult('error', 'Validation Error', 'Fraud ratio must be between 0.0 and 1.0');
+                return;
+            }
+
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            resultDiv.style.display = 'none';
+
+            try {
+                // Construct the API URL
+                const apiUrl = `/api/load/simulate?count=${count}&highFraudRatio=${fraudRatio}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                loading.style.display = 'none';
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    showResult('error', 'API Error', `Status ${response.status}: ${errorText}`);
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                const data = await response.json();
+
+                // Show success result
+                const resultHtml = `
+                    <div class="result-row">
+                        <span class="result-label">Requested:</span>
+                        <span class="result-value">${data.requested} transactions</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Produced:</span>
+                        <span class="result-value">${data.produced} ✓</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Failed:</span>
+                        <span class="result-value">${data.failed}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Topic:</span>
+                        <span class="result-value">${data.topic}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Success Rate:</span>
+                        <span class="result-value">${((data.produced / data.requested) * 100).toFixed(1)}%</span>
+                    </div>
+                `;
+
+                showResult('success', '✓ Simulation Complete', resultHtml);
+                submitBtn.disabled = false;
+            } catch (error) {
+                loading.style.display = 'none';
+                showResult('error', 'Network Error', `Failed to connect to API: ${error.message}`);
+                submitBtn.disabled = false;
+            }
+        }
+
+        function showResult(type, title, content) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `
+                <div class="result-title">${title}</div>
+                <div class="result-content">${content}</div>
+            `;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>

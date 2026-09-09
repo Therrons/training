@@ -66,6 +66,17 @@ public class Program
         builder.Services.AddEndpointsApiExplorer(); // Add API explorer services to the DI container
         builder.Services.AddHealthChecks();         // Add health check services to the DI container
 
+        // Add CORS support
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
+
         builder.Services.Configure<HostFilteringOptions>(options =>
         {
             options.AllowedHosts = new[] { "*" };
@@ -80,6 +91,8 @@ public class Program
         var app = builder.Build();
 
         app.UseRouting();
+
+        app.UseCors();
 
         // Validate incoming requests for XSS attacks.
         // Applied only to endpoints marked with [ValidateXss] attribute.
@@ -99,7 +112,7 @@ public class Program
         app.MapControllers();
 
         if (!isLocal)
-            app.Run("http://0.0.0.0:8080");
+            app.Run("http://0.0.0.0:8083");
         else
             app.Run();
     }

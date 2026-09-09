@@ -1,17 +1,152 @@
+# Rancher Desktop Docker Compose - Full Stack
+# Deploys everything for testing: Traefik, Kafka, PostgreSQL, and C# API
+#
+# This is the complete stack that can be deployed to Rancher Desktop
+# It includes all necessary services and networking.
+#
+# Usage:
+#   docker-compose up -d
+#   docker-compose -f docker-compose.yml up -d
+#
+# Access:
+#   - Traefik Dashboard: http://localhost:8080
+#   - API: http://localhost/api
+#   - API Health: http://localhost/api/health
+#   - Swagger: http://localhost/swagger
+#   - Load Simulator: http://localhost/load-simulator.html
+#   - Kafka UI: http://localhost/kafka
+#   - Direct API bypass: http://localhost:8085
+
+version: '3.9'
+
+networks:
+  traefik:
+    name: traefik
+  edge:
+    driver: bridge
+
+volumes:
+  kafka-data:
+  postgres_data:
+
 services:
+  # ========================================
+  # INFRASTRUCTURE: Traefik (Main Ingress)
+  # ========================================
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"  # ⚠️ Remove for production
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"        # Main HTTP entry point
+      - "8080:8080"    # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # INFRASTRUCTURE: Kafka
+  # ========================================
+  kafka:
+    image: bitnamilegacy/kafka:3.9.0
+    container_name: kafka
+    networks:
+      - traefik
+    ports:
+      - "9094:9094"
+    volumes:
+      - kafka-data:/bitnami/kafka
+    environment:
+      # === KRaft Broker Configuration ===
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_KRAFT_CLUSTER_ID: "abcdefghijklmnopqrstuv"
+
+      # === Network Listeners ===
+      KAFKA_CFG_LISTENERS: "INTERNAL://:9092,EXTERNAL://:9094,CONTROLLER://:9093"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "INTERNAL://kafka:9092,EXTERNAL://host.docker.internal:9094"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+
+      # === SASL Authentication ===
+      KAFKA_CFG_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-256"
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-256"
+
+      # === Users ===
+      KAFKA_CLIENT_USERS: "kafka-user"
+      KAFKA_CLIENT_PASSWORDS: "kafka-user-pass"
+      KAFKA_CFG_SUPER_USERS: "User:kafka-admin"
+      KAFKA_BROKER_USER: "kafka-admin"
+      KAFKA_BROKER_PASSWORD: "kafka-admin-pass"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # INFRASTRUCTURE: Kafka UI
+  # ========================================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    networks:
+      - traefik
+    ports:
+      - "8081:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "SASL_PLAINTEXT"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "SCRAM-SHA-256"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"kafka-admin\" password=\"kafka-admin-pass\";"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kafka-ui.rule=PathPrefix(`/kafka`)"
+      - "traefik.http.routers.kafka-ui.entrypoints=web"
+      - "traefik.http.services.kafka-ui.loadbalancer.server.port=8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # DATABASE: PostgreSQL
+  # ========================================
   postgres:
     image: postgres:16-alpine
     container_name: fraud_poc_project_postgres
     env_file:
       - .env
     ports:
-      - "5432:5432"  # Expose to host for local dev/debugging
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persist data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - edge
+    environment:
+      POSTGRES_USER: "therrons"
+      POSTGRES_PASSWORD: "therrons"
+      POSTGRES_DB: "fraud_db"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U therrons"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,47 +154,70 @@ services:
       driver: json-file
       options:
         max-size: "10m"
-        max-file: "5"
+        max-file: "3"
 
+  # ========================================
+  # APPLICATION: Fraud Detection API
+  # ========================================
   api:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         APP_DLL: "fraud_poc_project.dll"
-    image: fraud_poc_project:offline
+    image: fraud-poc-project:offline
     container_name: fraud_poc_project
     depends_on:
       postgres:
-        condition: service_healthy  # Wait for DB to be ready
+        condition: service_healthy
     environment:
+      # ASP.NET Core
       ASPNETCORE_URLS: "http://0.0.0.0:8080"
       ASPNETCORE_ENVIRONMENT: "RELEASE"
-      # PostgreSQL credentials – injected as individual env vars so Program.cs
-      # picks them up directly (no Secrets Manager call needed locally).
-      # Values come from .env via ${...} substitution.
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_HOST: postgres          # Docker Compose service name
+      ASPNETCORE_ALLOWEDHOSTS: "*"
+
+      # Database
+      DB_USERNAME: "therrons"
+      DB_PASSWORD: "therrons"
+      DB_HOST: "postgres"
       DB_PORT: "5432"
-      DB_NAME: ${POSTGRES_DB}
+      DB_NAME: "fraud_db"
+
+      # Kafka (internal service name)
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+
     expose:
       - "8080"
     networks:
       - edge
+      - traefik
+    labels:
+      # Traefik routing configuration
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`) || PathPrefix(`/swagger`) || PathPrefix(`/health`) || PathPrefix(`/load-simulator`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.services.api.loadbalancer.server.port=8080"
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # ========================================
+  # NETWORKING: Nginx (Optional - Direct Access)
+  # ========================================
   nginx:
     image: nginx:alpine
     container_name: nginx
     depends_on:
-      - api    # simplified, no health condition
+      - api
     ports:
-      - "8085:8085" # docker-compose port 8085 maps to nginx port 8085
+      - "8085:8085"  # Direct access bypass (optional)
     volumes:
       - ./nginx.conf/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
@@ -68,11 +226,94 @@ services:
       driver: json-file
       options:
         max-size: "10m"
-        max-file: "5"
+        max-file: "3"
+    profiles:
+      - "optional"  # Only run if explicitly enabled: docker-compose --profile optional up
 
-networks:
-  edge:
-    driver: bridge
 
-volumes:
-  postgres_data:  # Named volume for PostgreSQL data persistence
+# ============================================================================
+# RANCHER DESKTOP DEPLOYMENT WORKFLOW:
+#
+# 1. PREREQUISITES:
+#    - Rancher Desktop is running and Docker is enabled
+#    - .env file exists with database credentials
+#    - Docker image is built: docker build -t fraud-poc-project:offline .
+#
+# 2. START SERVICES:
+#    docker-compose up -d
+#
+# 3. WAIT FOR SERVICES:
+#    docker-compose ps
+#    (Wait for all containers to be healthy, ~30 seconds)
+#
+# 4. TEST EXTERNAL ACCESS:
+#    - Traefik Dashboard: http://localhost:8080
+#    - API: http://localhost/api/health
+#    - Swagger: http://localhost/swagger
+#    - Load Simulator: http://localhost/load-simulator.html
+#    - Kafka UI: http://localhost/kafka
+#
+# 5. TEST API FUNCTIONALITY:
+#    curl http://localhost/api/health
+#    curl http://localhost/swagger
+#
+# 6. MONITOR:
+#    docker-compose logs -f api
+#    docker-compose logs -f kafka
+#
+# 7. STOP:
+#    docker-compose down
+#
+# 8. CLEAN UP (if needed):
+#    docker-compose down -v
+#
+# ============================================================================
+# EXTERNAL TESTING:
+#
+# From any browser or external tool:
+#   - Access API: http://<your-machine-ip>/api
+#   - Access Swagger: http://<your-machine-ip>/swagger
+#   - Access Kafka UI: http://<your-machine-ip>/kafka
+#
+# From Windows host:
+#   - Use: http://localhost/api
+#
+# From other machines on network:
+#   - Use: http://<your-machine-hostname>/api
+#   - Or: http://<your-machine-ip>/api
+#
+# ============================================================================
+# SERVICES OVERVIEW:
+#
+# Traefik (Port 80):
+#   - Ingress controller
+#   - Routes all HTTP traffic
+#   - Dashboard on 8080
+#   - Auto-discovers services via labels
+#
+# Kafka (Port 9094):
+#   - Message broker
+#   - Listens on 9092 internally
+#   - Advertises host.docker.internal:9094 externally
+#   - SASL authentication enabled
+#
+# Kafka UI (Port 8081):
+#   - Visual interface to Kafka
+#   - Routed via Traefik at /kafka
+#
+# PostgreSQL (Port 5432):
+#   - Relational database
+#   - Stores fraud events
+#   - Persistent volume for data
+#
+# API (Port 8080):
+#   - Your C# fraud detection application
+#   - Connects to PostgreSQL and Kafka
+#   - Routed via Traefik for external access
+#
+# Nginx (Port 8085):
+#   - Optional reverse proxy
+#   - Use if you need direct access bypass
+#   - Enable with: docker-compose --profile optional up
+#
+# ============================================================================

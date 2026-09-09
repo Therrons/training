@@ -19,11 +19,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{2056362F-E
 	ProjectSection(SolutionItems) = preProject
 		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
 		..\.github\workflows\deploy.yml = ..\.github\workflows\deploy.yml
-		..\docker-compose.yml = ..\docker-compose.yml
+		..\charts\fraud-poc-api\templates\deployment.yaml = ..\charts\fraud-poc-api\templates\deployment.yaml
 		..\.github\workflows\docker-publish.yml = ..\.github\workflows\docker-publish.yml
 		..\Dockerfile = ..\Dockerfile
 		NuGet.config = NuGet.config
+		..\charts\fraud-poc-api\values.yaml = ..\charts\fraud-poc-api\values.yaml
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0ABE57BD-2017-493B-B78B-4CC906C7D8FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project.Tests", "..\tests\fraud_poc_project.Tests\fraud_poc_project.Tests.csproj", "{C68EA50D-38B0-B1CA-0F34-70B721C7360A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_buss.Tests", "..\tests\fraud_poc_project_buss.Tests\fraud_poc_project_buss.Tests.csproj", "{5C51ACB2-F621-7F2E-5F3D-863DE6003960}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fraud_poc_project_repo.Tests", "..\tests\fraud_poc_project_repo.Tests\fraud_poc_project_repo.Tests.csproj", "{556E5892-C400-F153-17D4-5ECF94D34500}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +52,18 @@ Global
 		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91B3831A-B9CB-FE88-1002-2F2ED41228B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C68EA50D-38B0-B1CA-0F34-70B721C7360A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C68EA50D-38B0-B1CA-0F34-70B721C7360A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C68EA50D-38B0-B1CA-0F34-70B721C7360A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C68EA50D-38B0-B1CA-0F34-70B721C7360A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C51ACB2-F621-7F2E-5F3D-863DE6003960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C51ACB2-F621-7F2E-5F3D-863DE6003960}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C51ACB2-F621-7F2E-5F3D-863DE6003960}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C51ACB2-F621-7F2E-5F3D-863DE6003960}.Release|Any CPU.Build.0 = Release|Any CPU
+		{556E5892-C400-F153-17D4-5ECF94D34500}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{556E5892-C400-F153-17D4-5ECF94D34500}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{556E5892-C400-F153-17D4-5ECF94D34500}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{556E5892-C400-F153-17D4-5ECF94D34500}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +72,9 @@ Global
 		{974E67AB-EFCF-7F7F-40B4-0B57063D1526} = {DACC9459-7B66-4A5D-91C0-72010843C421}
 		{D39EF5F5-6899-125C-FDEE-D56B734FEC82} = {A579AA0B-DD30-43C6-81B2-F773C8F7B96E}
 		{91B3831A-B9CB-FE88-1002-2F2ED41228B9} = {93FA5A22-354B-4739-8498-0C432612534D}
+		{C68EA50D-38B0-B1CA-0F34-70B721C7360A} = {0ABE57BD-2017-493B-B78B-4CC906C7D8FF}
+		{5C51ACB2-F621-7F2E-5F3D-863DE6003960} = {0ABE57BD-2017-493B-B78B-4CC906C7D8FF}
+		{556E5892-C400-F153-17D4-5ECF94D34500} = {0ABE57BD-2017-493B-B78B-4CC906C7D8FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EE756345-170B-431A-AE8A-88F135C4D787}

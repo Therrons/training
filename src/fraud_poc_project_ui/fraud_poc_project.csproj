@@ -15,9 +15,13 @@
 
     <ItemGroup>
       <Compile Remove="Fraud\**" />
+      <Compile Remove="wwwroot\**" />
       <Content Remove="Fraud\**" />
+      <Content Remove="wwwroot\**" />
       <EmbeddedResource Remove="Fraud\**" />
+      <EmbeddedResource Remove="wwwroot\**" />
       <None Remove="Fraud\**" />
+      <None Remove="wwwroot\**" />
     </ItemGroup>
 
     <ItemGroup>

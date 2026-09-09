@@ -20,6 +20,8 @@
 
         // How often (in seconds) to retry refreshing the RDS login token after a failure.
         public int FailureRefreshInterval { get; init; }
+
+        public string Host { get; init; }
     }
 }
 

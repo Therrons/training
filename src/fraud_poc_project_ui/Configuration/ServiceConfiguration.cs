@@ -93,7 +93,8 @@ namespace fraud_poc_project.Configuration
         private static string BuildDatabaseConnectionString(WebApplicationBuilder builder)
         {
             var envVariables = new Environment_Variables().Get_Environment_Values(builder);
-            var isLocal = builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
+            var isLocal = true; // builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
+            var isRancher = true; // builder.Environment.EnvironmentName.Equals("RELEASE", StringComparison.InvariantCultureIgnoreCase);
 
             var connectionString = new StringBuilder();
             connectionString.Append($"Server={envVariables.DBHost};");
@@ -102,7 +103,8 @@ namespace fraud_poc_project.Configuration
             connectionString.Append($"Password={envVariables.DBPassword};");
             connectionString.Append($"Pooling=true;");
             connectionString.Append($"Connection Lifetime=0;");
-            connectionString.Append(!isLocal ? "SSLMode=Require;" : "SSLMode=Disable;");
+            // Disable SSL for local or Rancher deployments (no SSL in Docker/K8s)
+            connectionString.Append((isLocal || isRancher) ? "SSLMode=Disable;" : "SSLMode=Require;");
             connectionString.Append("Trust Server Certificate = true;");
 
             var result = connectionString.ToString();
@@ -161,15 +163,13 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddTransient<ITransactionEventHandler, FraudConsumerWorker>();
         }
 
-        // UserInputController only exists to help with manual testing, so it's only
-        // registered in Debug builds.
         private static void RegisterTestOnlyControllers(WebApplicationBuilder builder)
         {
             if (Extensions_Helper.IsDebugMode)
             {
-                //builder.Services.AddTransient<UserInputController>();
                 builder.Services.AddTransient<LoadSimulatorController>();
                 builder.Services.AddTransient<FraudController>();
+                builder.Services.AddTransient<ValuesController>();
             }
         }
     }

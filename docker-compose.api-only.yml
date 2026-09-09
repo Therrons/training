@@ -1,0 +1,110 @@
+# API-Only Docker Compose - For testing API changes
+# Run this AFTER docker-compose.local.yml is running
+# This deploys only the C# API, connecting to existing PostgreSQL, Kafka, and Traefik services
+#
+# Prerequisites:
+#   - docker-compose -f docker-compose.local.yml up -d
+#   - All services (postgres, kafka, traefik) are running and healthy
+#
+# Usage:
+#   docker-compose -f docker-compose.api-only.yml up -d
+#   docker-compose -f docker-compose.api-only.yml logs -f api
+#   docker-compose -f docker-compose.api-only.yml down
+#
+# This file reuses the "local" network created by docker-compose.local.yml
+# and assumes the other services are already running on that network
+
+# networks:
+  # local:
+    # name: training_local  # match the network from docker-compose.local.yml
+    # external: false
+    
+networks:
+  local:
+    driver: bridge
+
+services:
+  # ========================================
+  # APPLICATION: C# Fraud Detection API Only
+  # ========================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_DLL: "fraud_poc_project.dll"
+    image: fraud-poc-project:offline
+    container_name: fraud_poc_project_local
+    environment:
+      ASPNETCORE_URLS: "http://0.0.0.0:8083"
+      ASPNETCORE_ENVIRONMENT: "RELEASE"
+
+      # Database configuration (connects to existing postgres service)
+      DB_USERNAME: "therrons"
+      DB_PASSWORD: "therrons"
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_NAME: "fraud_db"
+
+      # Kafka configuration (connects to existing kafka service)
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      KAFKA_SECURITY_PROTOCOL: "SASL_PLAINTEXT"
+      KAFKA_SASL_MECHANISM: "SCRAM-SHA-256"
+      KAFKA_SASL_USERNAME: "kafka-admin"
+      KAFKA_SASL_PASSWORD: "kafka-admin-pass"
+
+    ports:
+      - "8083:8083"
+    networks:
+      - local
+    restart: on-failure:5
+    labels:
+      # Traefik routing configuration (connects to existing traefik service)
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix('/api') || PathPrefix('/swagger') || PathPrefix('/health') || PathPrefix('/load-simulator')"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.services.api.loadbalancer.server.port=8083"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+# ============================================================================
+# WORKFLOW FOR TESTING API CHANGES:
+#
+# 1. START INFRASTRUCTURE (postgres, kafka, traefik):
+#    docker-compose -f docker-compose.local.yml up -d
+#    (wait 30 seconds for services to be healthy)
+#
+# 2. TEST INITIAL API:
+#    curl http://localhost:8080/api/health
+#    curl http://localhost/api/health  (via Traefik)
+#
+# 3. MAKE CHANGES TO C# CODE
+#
+# 4. REBUILD & RESTART JUST THE API (faster than full stack):
+#    docker-compose -f docker-compose.api-only.yml down
+#    docker-compose -f docker-compose.api-only.yml build --no-cache api
+#    docker-compose -f docker-compose.api-only.yml up -d
+#    docker-compose -f docker-compose.api-only.yml logs -f api
+#
+# 5. TEST UPDATED API:
+#    curl http://localhost:8080/api/health
+#
+# 6. WHEN DONE, CLEAN UP:
+#    docker-compose -f docker-compose.api-only.yml down
+#    docker-compose -f docker-compose.local.yml down
+#
+# ============================================================================
+# NOTES:
+#
+# - This file references the "local" network as external, so it must already exist
+# - If the network doesn't exist, run docker-compose.local.yml first
+# - All service names (postgres, kafka, traefik) are the same as in docker-compose.local.yml
+# - The API will auto-discover and route through the existing Traefik instance
+# - Logs persist in volumes created by docker-compose.local.yml
+# - Database data is preserved between API restarts
+#
+# ============================================================================
+

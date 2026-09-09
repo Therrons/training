@@ -1,0 +1,269 @@
+# Local Development Docker Compose - Complete Stack
+# Self-contained local testing environment
+# Everything runs locally - no need for Rancher Desktop K8s
+#
+# Includes:
+# - Traefik (reverse proxy + routing)
+# - Kafka (message broker)
+# - Kafka UI (visual interface)
+# - PostgreSQL (database)
+# - C# API (your application)
+#
+# Usage:
+#   docker-compose -f docker-compose.local.yml up -d
+#
+# Access:
+#   - Traefik Dashboard: http://localhost:8080
+#   - API: http://localhost/api
+#   - Swagger: http://localhost/swagger
+#   - Load Simulator: http://localhost/load-simulator.html
+#   - Kafka UI: http://localhost/kafka
+#   - Direct API: http://localhost:8085 (via Nginx, optional)
+
+networks:
+  local:
+    driver: bridge
+
+volumes:
+  kafka_data_local:
+  postgres_data_local:
+
+services:
+  # ========================================
+  # INFRASTRUCTURE: Traefik (Local)
+  # ========================================
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik-local
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"        # Main HTTP entry point
+      - "8080:8080"    # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - local
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # INFRASTRUCTURE: Kafka (Local)
+  # ========================================
+  kafka:
+    image: bitnamilegacy/kafka:3.9.0
+    container_name: kafka-local
+    networks:
+      - local
+    ports:
+      - "9094:9094"
+    volumes:
+      - kafka_data_local:/bitnami/kafka
+    environment:
+      # === KRaft Broker Configuration ===
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_KRAFT_CLUSTER_ID: "abcdefghijklmnopqrstuv"
+
+      # === Network Listeners ===
+      KAFKA_CFG_LISTENERS: "INTERNAL://:9092,EXTERNAL://:9094,CONTROLLER://:9093"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "INTERNAL://kafka:9092,EXTERNAL://localhost:9094"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+
+      # === SASL Authentication ===
+      KAFKA_CFG_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-256"
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-256"
+
+      # === Users ===
+      KAFKA_CLIENT_USERS: "kafka-user"
+      KAFKA_CLIENT_PASSWORDS: "kafka-user-pass"
+      KAFKA_CFG_SUPER_USERS: "User:kafka-admin"
+      KAFKA_BROKER_USER: "kafka-admin"
+      KAFKA_BROKER_PASSWORD: "kafka-admin-pass"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--version"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # INFRASTRUCTURE: Kafka UI (Local)
+  # ========================================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui-local
+    depends_on:
+      - kafka
+    networks:
+      - local
+    ports:
+      - "8081:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "SASL_PLAINTEXT"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "SCRAM-SHA-256"
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"kafka-admin\" password=\"kafka-admin-pass\";"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kafka-ui.rule=PathPrefix('/kafka')"
+      - "traefik.http.routers.kafka-ui.entrypoints=web"
+      - "traefik.http.services.kafka-ui.loadbalancer.server.port=8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # DATABASE: PostgreSQL (Local)
+  # ========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: fraud_poc_project_postgres_local
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "therrons"
+      POSTGRES_PASSWORD: "therrons"
+      POSTGRES_DB: "fraud_db"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U therrons"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - local
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # APPLICATION: C# Fraud Detection API
+  # ========================================
+  # api:
+    # build:
+      # context: .
+      # dockerfile: Dockerfile
+      # args:
+        # APP_DLL: "fraud_poc_project.dll"
+    # image: fraud-poc-project:offline
+    # container_name: fraud_poc_project_local
+    # depends_on:
+      # postgres:
+        # condition: service_healthy
+      # kafka:
+        # condition: service_healthy
+    # environment:
+      # ASPNETCORE_URLS: "http://0.0.0.0:8083"
+      # ASPNETCORE_ENVIRONMENT: "LOC"
+
+      # # Database configuration (local - disable SSL for Docker)
+      # DB_USERNAME: "therrons"
+      # DB_PASSWORD: "therrons"
+      # DB_HOST: "postgres"
+      # DB_PORT: "5432"
+      # DB_NAME: "fraud_db"
+
+      # # Kafka configuration (local Kafka service on same network)
+      # KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      # KAFKA_SECURITY_PROTOCOL: "SASL_PLAINTEXT"
+      # KAFKA_SASL_MECHANISM: "SCRAM-SHA-256"
+      # KAFKA_SASL_USERNAME: "kafka-admin"
+      # KAFKA_SASL_PASSWORD: "kafka-admin-pass"
+
+    # ports:
+      # - "8083:8083"
+    # networks:
+      # - local
+    # restart: on-failure:5
+    # labels:
+      # # Traefik routing configuration
+      # - "traefik.enable=true"
+      # - "traefik.http.routers.api.rule=PathPrefix('/api') || PathPrefix('/swagger') || PathPrefix('/health') || PathPrefix('/load-simulator')"
+      # - "traefik.http.routers.api.entrypoints=web"
+      # - "traefik.http.services.api.loadbalancer.server.port=8083"
+    # logging:
+      # driver: json-file
+      # options:
+        # max-size: "10m"
+        # max-file: "5"
+
+# ============================================================================
+# LOCAL DEVELOPMENT WORKFLOW:
+#
+# 1. START EVERYTHING:
+#    docker-compose -f docker-compose.local.yml up -d
+#
+# 2. WAIT FOR SERVICES (30-60 seconds):
+#    docker-compose -f docker-compose.local.yml ps
+#    (Wait until all containers show "Up")
+#
+# 3. ACCESS SERVICES:
+#    - Traefik Dashboard:  http://localhost:8080
+#    - API:                http://localhost/api
+#    - API Health:         http://localhost/api/health
+#    - Swagger:            http://localhost/swagger
+#    - Load Simulator:     http://localhost/load-simulator.html
+#    - Kafka UI:           http://localhost/kafka
+#    - Direct API:         http://localhost:8080/api
+#
+# 4. TEST API:
+#    curl http://localhost/api/health
+#    curl http://localhost/swagger
+#    curl -X POST "http://localhost/api/load/simulate?count=50&highFraudRatio=0.2"
+#
+# 5. VIEW LOGS:
+#    docker-compose -f docker-compose.local.yml logs -f api
+#    docker-compose -f docker-compose.local.yml logs -f kafka
+#    docker-compose -f docker-compose.local.yml logs -f postgres
+#
+# 6. STOP EVERYTHING:
+#    docker-compose -f docker-compose.local.yml down
+#
+# SERVICES INCLUDED:
+#
+# - Traefik: Reverse proxy, routes traffic to services
+# - Kafka: Message broker for fraud events
+# - Kafka UI: Visual interface to view Kafka topics and messages
+# - PostgreSQL: Database for storing fraud evaluation results
+# - C# API: Your fraud detection application
+#
+# ARCHITECTURE:
+#
+#   HTTP Request (port 80)
+#         ↓
+#   Traefik (localhost:8080 dashboard)
+#         ↓
+#   ┌─────┴──────┬──────────┐
+#   ↓            ↓          ↓
+#  /api         /kafka    /health
+#   ↓            ↓          ↓
+#  API       Kafka-UI      API
+#   ↓            ↓          ↓
+# Kafka      Kafka-UI      Health
+# & DB
+#
+# ============================================================================
