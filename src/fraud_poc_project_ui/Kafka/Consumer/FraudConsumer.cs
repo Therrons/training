@@ -93,7 +93,7 @@ namespace fraud_poc_project.Kafka.Consumer
 
         private async Task RunWorkerWithRetryAsync(FraudConsumerWorker worker, CancellationToken stoppingToken)
         {
-            const int maxRetries = 5;
+            int maxRetries = _consumerOptions.Value.StartWorkerRetry;
             int retryCount = 0;
 
             while (retryCount < maxRetries && !stoppingToken.IsCancellationRequested)

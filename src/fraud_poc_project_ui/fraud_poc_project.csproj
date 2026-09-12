@@ -67,4 +67,25 @@
     <ItemGroup>
       <Folder Include="data\" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Update="database\V1_0_1__pre_user.sql">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="database\V1_0_2__pre_schema.sql">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="database\V1_0_3__sequence.sql">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="database\V1_0_4__functions.sql">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="database\V1_0_5__stored_procs.sql">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="database\V1_0_6__tables.sql">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

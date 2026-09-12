@@ -103,7 +103,7 @@ public class Program
 
         // Step 7: configure Swagger UI based on the environment (local vs production).
         if (!isLocal)
-            app.UseSwaggerUI(settings => settings.SupportedSubmitMethods(Array.Empty<SubmitMethod>())); // Read-only documentation in production
+            app.UseSwaggerUI(settings => settings.SupportedSubmitMethods([SubmitMethod.Get, SubmitMethod.Post, SubmitMethod.Put])); // in production only allow these methods to be submitted via Swagger UI
         else
             app.UseSwaggerUI(c => c.DefaultModelRendering(ModelRendering.Example));
 

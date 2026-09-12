@@ -169,7 +169,6 @@ namespace fraud_poc_project.Configuration
             {
                 builder.Services.AddTransient<LoadSimulatorController>();
                 builder.Services.AddTransient<FraudController>();
-                builder.Services.AddTransient<ValuesController>();
             }
         }
     }
