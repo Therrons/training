@@ -11,7 +11,11 @@ namespace fraud_poc_project.Configuration
     {
         public static void ConfigureSecrets(this WebApplicationBuilder builder)
         {
-            var isLocal = builder.Environment.EnvironmentName.Equals("LOC", StringComparison.InvariantCultureIgnoreCase);
+            var envName = builder.Environment.EnvironmentName.Trim().ToLower();
+
+            // release is the environment name used in the AWS deployment, so treat it as local for the purposes of loading secrets.
+            var isLocal = (envName == "loc" || envName == "release");
+
             if (!isLocal)
                 return; // in every other environment, secrets come from AWS Secrets Manager instead.
 
