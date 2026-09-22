@@ -70,7 +70,7 @@ namespace fraud_poc_project.Configuration
             var awsOptions = new AWSOptions
             {
                 Region = Amazon.RegionEndpoint.GetBySystemName(
-                    builder.Configuration["AWSRegion"] ?? "eu-west-1")
+                    builder.Configuration["AWSRegion"] ?? "af-south-1")
             };
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(awsOptions)

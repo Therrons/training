@@ -1,9 +1,13 @@
+using Amazon.SecretsManager;
+using fraud_poc_project.Configuration;
 using fraud_poc_project.Models;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
+using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -28,14 +32,20 @@ namespace fraud_poc_project.Controllers
         private readonly FraudKafkaConsumerSettings _consumerSettings;
         private readonly ILogger<LoadSimulatorController> _logger;
 
+
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+
         public LoadSimulatorController(
             IFraudProducer producer,
             IOptions<FraudKafkaConsumerSettings> consumerSettings,
-            ILogger<LoadSimulatorController> logger)
+            ILogger<LoadSimulatorController> logger,
+            IServiceScopeFactory serviceScopeFactor)
         {
             _producer = producer;
             _consumerSettings = consumerSettings.Value;
             _logger = logger;
+
+            _serviceScopeFactory = serviceScopeFactor;  
         }
 
         /// <summary>
@@ -50,6 +60,13 @@ namespace fraud_poc_project.Controllers
             [FromQuery] double highFraudRatio = 0.2,
             CancellationToken cancellationToken = default)
         {
+
+            using var scope = _serviceScopeFactory.CreateScope();
+            var batchFraudRepository = scope.ServiceProvider.GetRequiredService<AWSSecretsConfiguration>();
+
+            var output = await batchFraudRepository.GetAWSSecretAsync("fraud_poc_secrets");
+
+
             if (count < 1 || count > 10000)
                 return BadRequest("count must be between 1 and 10000.");
 
