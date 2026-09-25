@@ -61,10 +61,10 @@ namespace fraud_poc_project.Controllers
             CancellationToken cancellationToken = default)
         {
 
-            using var scope = _serviceScopeFactory.CreateScope();
-            var batchFraudRepository = scope.ServiceProvider.GetRequiredService<AWSSecretsConfiguration>();
+            //using var scope = _serviceScopeFactory.CreateScope();
+            //var batchFraudRepository = scope.ServiceProvider.GetRequiredService<AWSSecretsConfiguration>();
 
-            var output = await batchFraudRepository.GetAWSSecretAsync("fraud_poc_secrets");
+            //var output = await batchFraudRepository.GetAWSSecretAsync("fraud_poc_secrets");
 
 
             if (count < 1 || count > 10000)

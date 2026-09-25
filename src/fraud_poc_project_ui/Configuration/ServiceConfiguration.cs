@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
+using Polly.CircuitBreaker;
 using Polly.Retry;
 using System;
 using System.Collections.Generic;
@@ -55,12 +56,15 @@ namespace fraud_poc_project.Configuration
                 x.AddRetry(
                     new RetryStrategyOptions
                     {
-                        BackoffType = DelayBackoffType.Constant,
-                        Delay = TimeSpan.FromMilliseconds(15),
+                        BackoffType = DelayBackoffType.Exponential,
+                        Delay = TimeSpan.FromMilliseconds(1),
                         MaxRetryAttempts = 2,
                         UseJitter = true,
                         ShouldHandle = new PredicateBuilder().Handle<Exception>()
-                    });
+                    }).AddCircuitBreaker(new CircuitBreakerStrategyOptions()
+                    {
+                        SamplingDuration = TimeSpan.FromSeconds(30)
+                    }).AddTimeout(TimeSpan.FromSeconds(30));
             });
         }
 
