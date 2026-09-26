@@ -9,7 +9,7 @@ on:
 env:
   IMAGE_NAME: fraud-poc-api
   IMAGE_TAG: cith3rn5@gmail.demo
-  CHART_PATH: charts/fraud-poc-api
+  CHART_PATH: charts
   NAMESPACE: fraud-poc-api
 
 jobs:

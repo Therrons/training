@@ -10,7 +10,7 @@ on:
 env:
   IMAGE_NAME: fraud-poc-api
   IMAGE_TAG: ci
-  CHART_PATH: charts/fraud-poc-api
+  CHART_PATH: charts
   NAMESPACE: fraud-poc-api
 
 jobs:

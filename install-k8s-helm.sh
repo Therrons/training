@@ -9,7 +9,7 @@
 # Prerequisites:
 #   - kubectl configured and connected to K8s cluster
 #   - Helm 3.x installed
-#   - Helm chart at ./charts/fraud-poc-api/
+#   - Helm chart at ./charts/
 #
 # Usage:
 #   ./install-k8s-helm.sh [command] [environment]
@@ -32,7 +32,7 @@ NC='\033[0m'
 
 # Configuration
 CHART_NAME="fraud-poc-api"
-CHART_PATH="./charts/fraud-poc-api"
+CHART_PATH="./charts"
 NAMESPACE="fraud-poc-api"
 RELEASE_NAME="${CHART_NAME}"
 
@@ -103,9 +103,9 @@ ${CYAN}EXAMPLES:${NC}
 
 ${CYAN}CONFIGURATION:${NC}
   Each environment has its own values file:
-    - charts/fraud-poc-api/values-dev.yaml
-    - charts/fraud-poc-api/values-staging.yaml
-    - charts/fraud-poc-api/values-prod.yaml
+    - charts/values-dev.yaml
+    - charts/values-staging.yaml
+    - charts/values-prod.yaml
 
   Update AWS_ACCOUNTS and AWS_REGIONS above with your values.
 

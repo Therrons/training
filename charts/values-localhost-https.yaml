@@ -1,0 +1,101 @@
+# Production-Ready HTTPS Configuration for Localhost (Air-Gapped)
+# Self-signed certificate approach
+
+namespace:
+  create: true
+  name: fraud-poc-api
+
+image:
+  repository: fraud-poc-project
+  tag: offline
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+env:
+  ASPNETCORE_URLS: "http://0.0.0.0:8083"
+  ASPNETCORE_ENVIRONMENT: "RELEASE"
+  ASPNETCORE_ALLOWEDHOSTS: "*"
+  BUILD_DATE: ""
+  BUILD_VERSION: ""
+  # Kubernetes service names for internal communication
+  DB_HOST: "fraud-poc-project-postgres"
+  DB_PORT: "5432"
+  DB_NAME: "fraud_db"
+  DB_USERNAME: "therrons"
+  DB_PASSWORD: "therrons"
+
+containerPort: 8083
+
+service:
+  type: ClusterIP
+  port: 8083
+
+# Probes
+probes:
+  readinessPath: /health/readiness
+  livenessPath: /health/liveness
+  readinessInitialDelaySeconds: 5
+  readinessPeriodSeconds: 5
+  livenessInitialDelaySeconds: 15
+  livenessPeriodSeconds: 10
+
+# Persistence
+persistence:
+  enabled: true
+  mountPath: /repo/data
+  perReplica: false
+  existingClaim: ""
+  accessModes: [ "ReadWriteOnce" ]
+  size: 5Gi
+  storageClassName: ""
+
+# PRODUCTION HTTPS - Self-signed certificate for localhost
+ingress:
+  enabled: true
+  className: traefik
+  host: localhost
+
+  tls:
+    enabled: true
+    secretName: fraud-poc-api-tls
+
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+
+cors:
+  enabled: true
+  allowCredentials: true
+  allowOrigins:
+    - "https://localhost"
+    - "http://localhost:3000"
+    - "http://localhost:3001"
+  allowMethods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+    - OPTIONS
+  allowHeaders:
+    - Authorization
+    - Content-Type
+    - X-Requested-With
+    - Accept
+    - Origin
+
+externalSecrets:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+serviceAccount:
+  create: true
+  name: fraud-poc-api-sa
+  iamRoleArn: ""
