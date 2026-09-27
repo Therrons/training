@@ -31,15 +31,30 @@ if not exist "certs\localhost.key" (
 echo [OK] Certificate files found
 echo.
 
-REM Step 1: Create Namespace
-echo [Step 1] Creating Kubernetes namespace...
-kubectl create namespace fraud-poc-api 2>nul
-echo [OK] Namespace ready
+REM Step 1: Clean up existing deployment
+echo [Step 1] Cleaning up existing deployment...
+kubectl delete namespace fraud-poc-api 2>nul
+REM Wait for deletion to complete
+timeout /t 3 /nobreak >nul
+echo [OK] Namespace cleaned
 echo.
 
-REM Step 2: Create TLS Secret
-echo [Step 2] Creating TLS secret in Kubernetes...
-kubectl delete secret fraud-poc-api-tls -n fraud-poc-api 2>nul
+REM Step 2: Deploy with Helm (creates namespace and resources)
+echo [Step 2] Deploying with Helm...
+helm upgrade --install fraud-poc-api ./charts ^
+  -f charts/values-localhost-https.yaml ^
+  --create-namespace ^
+  -n fraud-poc-api
+if errorlevel 1 (
+    echo ERROR: Helm deployment failed
+    pause
+    exit /b 1
+)
+echo [OK] Helm deployment completed
+echo.
+
+REM Step 3: Create TLS Secret
+echo [Step 3] Creating TLS secret in Kubernetes...
 kubectl create secret tls fraud-poc-api-tls ^
   --cert=certs/localhost.crt ^
   --key=certs/localhost.key ^
@@ -52,11 +67,16 @@ if errorlevel 1 (
 echo [OK] TLS secret created
 echo.
 
-REM Step 3: Deploy with Helm
-echo [Step 3] Deploying with Helm...
-helm upgrade --install fraud-poc-api ./charts ^
-  -f charts/values-localhost-https.yaml ^
-  -n fraud-poc-api
+REM Step 4: Restart deployment to pick up the secret
+echo [Step 4] Restarting deployment to pick up TLS secret...
+kubectl rollout restart deployment/fraud-poc-api -n fraud-poc-api
+if errorlevel 1 (
+    echo ERROR: Failed to restart deployment
+    pause
+    exit /b 1
+)
+echo [OK] Deployment restarted
+echo.
 if errorlevel 1 (
     echo ERROR: Helm deployment failed
     pause
@@ -65,8 +85,8 @@ if errorlevel 1 (
 echo [OK] Helm deployment completed
 echo.
 
-REM Step 4: Wait for deployment
-echo [Step 4] Waiting for deployment to be ready (max 5 minutes)...
+REM Step 5: Wait for deployment
+echo [Step 5] Waiting for deployment to be ready (max 5 minutes)...
 kubectl rollout status deployment/fraud-poc-api -n fraud-poc-api --timeout=5m
 if errorlevel 1 (
     echo WARNING: Deployment status check timed out
@@ -76,8 +96,8 @@ if errorlevel 1 (
 )
 echo.
 
-REM Step 5: Verify
-echo [Step 5] Verifying deployment...
+REM Step 6: Verify
+echo [Step 6] Verifying deployment...
 echo.
 echo Resources in fraud-poc-api namespace:
 kubectl get all -n fraud-poc-api

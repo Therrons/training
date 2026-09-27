@@ -50,7 +50,9 @@ ENV DB_USERNAME="" \
     DB_HOST="host.docker.internal" \
     DB_PORT="5432" \
     DB_NAME="fraud_db" \
-    AWSRegion=""
+    AWS_REGION="" \
+    KAFKA_USER="" \
+    KAFKA_PASSWORD=""
 
 EXPOSE ${APP_PORT}
 
@@ -106,5 +108,5 @@ USER appuser
 ENTRYPOINT ["sh", "-c", "dotnet /repo/${APP_DLL}"]
 
 # CMD can be overridden by K8s args or docker run arguments.
-# DB_USERNAME and DB_PASSWORD are injected run time, not here.
+# DB_USERNAME, DB_PASSWORD, KAFKA_USER, KAFKA_PASSWORD are injected run time, not here.
 CMD ["--write-dir", "/repo/data"]

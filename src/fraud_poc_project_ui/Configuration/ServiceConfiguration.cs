@@ -31,10 +31,14 @@ namespace fraud_poc_project.Configuration
     // see, at a glance, everything the app is wired up to use.
     public static class ServiceConfiguration
     {
+        private static Environment_Variables envVariables;
+
         // This is the main entry point for registering services. It calls each of the
         // smaller methods below to register specific services.
         public static void AddServices_AddDI(this WebApplicationBuilder builder)
         {
+            envVariables = new Environment_Variables().Get_Environment_Values(builder);
+
             RegisterAwsSecrets(builder);
             RegisterAppSettings(builder);
 
@@ -74,7 +78,7 @@ namespace fraud_poc_project.Configuration
             var awsOptions = new AWSOptions
             {
                 Region = Amazon.RegionEndpoint.GetBySystemName(
-                    builder.Configuration["AWSRegion"] ?? "af-south-1")
+                    builder.Configuration["AWS_REGION"] ?? "af-south-1")
             };
 
             builder.Services.AddAWSService<IAmazonSecretsManager>(awsOptions)
@@ -96,7 +100,6 @@ namespace fraud_poc_project.Configuration
         // that asks for "ConnectionStrings:PostgreSQL" can find it.
         private static string BuildDatabaseConnectionString(WebApplicationBuilder builder)
         {
-            var envVariables = new Environment_Variables().Get_Environment_Values(builder);
             var isLocal = true; // builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
             var isRancher = true; // builder.Environment.EnvironmentName.Equals("RELEASE", StringComparison.InvariantCultureIgnoreCase);
 
@@ -107,7 +110,9 @@ namespace fraud_poc_project.Configuration
             connectionString.Append($"Password={envVariables.DBPassword};");
             connectionString.Append($"Pooling=true;");
             connectionString.Append($"Connection Lifetime=0;");
-            // Disable SSL for local or Rancher deployments (no SSL in Docker/K8s)
+
+            // Disable SSL for local or Rancher deployments (no SSL in Docker/K8s) as
+            // these are docker containers and SSL is not needed. For other environments, require SSL for security.
             connectionString.Append((isLocal || isRancher) ? "SSLMode=Disable;" : "SSLMode=Require;");
             connectionString.Append("Trust Server Certificate = true;");
 
@@ -158,7 +163,7 @@ namespace fraud_poc_project.Configuration
         // producer/consumer that use them.
         private static void RegisterKafka(WebApplicationBuilder builder)
         {
-            builder.Services.AddKafkaConfigurations(builder.Configuration)
+            builder.Services.AddKafkaConfigurations(builder.Configuration, envVariables)
                .KafkaSetupTopics();
 
             builder.Services.AddSingleton<IFraudProducer, FraudProducer>();
