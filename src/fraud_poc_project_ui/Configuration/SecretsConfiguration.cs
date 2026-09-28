@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using System;
 
 namespace fraud_poc_project.Configuration
 {
@@ -13,14 +12,9 @@ namespace fraud_poc_project.Configuration
         {
             var envName = builder.Environment.EnvironmentName.Trim().ToLower();
 
-            // release is the environment name used in the AWS deployment, so treat it as local for the purposes of loading secrets.
-            var isLocal = (envName == "loc" || envName == "release");
+            if (envName == "loc")
+                builder.Configuration.AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
 
-            if (!isLocal)
-                return; // in every other environment, secrets come from AWS Secrets Manager instead.
-
-            builder.Configuration.AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
-            builder.Configuration.AddEnvironmentVariables();
         }
     }
 }

@@ -50,7 +50,6 @@ ENV DB_USERNAME="" \
     DB_HOST="host.docker.internal" \
     DB_PORT="5432" \
     DB_NAME="fraud_db" \
-    AWS_REGION="" \
     KAFKA_USER="" \
     KAFKA_PASSWORD=""
 

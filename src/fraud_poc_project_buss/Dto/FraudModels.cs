@@ -1,4 +1,4 @@
-namespace fraud_poc_project_buss.Models.Fraud
+namespace fraud_poc_project_buss.Dto
 {
     /// <summary>
     /// Extra tracking info attached to every Kafka event, so we can tell when a message

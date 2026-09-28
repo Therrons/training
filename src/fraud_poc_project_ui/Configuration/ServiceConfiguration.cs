@@ -1,6 +1,4 @@
-﻿using Amazon.Extensions.NETCore.Setup;
-using Amazon.SecretsManager;
-using fraud_poc_project.Controllers;
+﻿using fraud_poc_project.Controllers;
 using fraud_poc_project.Kafka.Consumer;
 using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
@@ -26,7 +24,7 @@ using System.Text;
 namespace fraud_poc_project.Configuration
 {
     // This is where the app tells its Dependency Injection container about every
-    // service it needs: AWS secrets, app settings, the database, the fraud rules,
+    // service it needs: App settings, the database, the fraud rules,
     // and Kafka. Each piece is split into its own small method below so it's easy to
     // see, at a glance, everything the app is wired up to use.
     public static class ServiceConfiguration
@@ -39,7 +37,6 @@ namespace fraud_poc_project.Configuration
         {
             envVariables = new Environment_Variables().Get_Environment_Values(builder);
 
-            RegisterAwsSecrets(builder);
             RegisterAppSettings(builder);
 
             var connectionString = BuildDatabaseConnectionString(builder);
@@ -72,18 +69,7 @@ namespace fraud_poc_project.Configuration
             });
         }
 
-        // Lets the app fetch secrets (like database passwords) from AWS Secrets Manager.
-        private static void RegisterAwsSecrets(WebApplicationBuilder builder)
-        {
-            var awsOptions = new AWSOptions
-            {
-                Region = Amazon.RegionEndpoint.GetBySystemName(
-                    builder.Configuration["AWS_REGION"] ?? "af-south-1")
-            };
 
-            builder.Services.AddAWSService<IAmazonSecretsManager>(awsOptions)
-                .AddSingleton<AWSSecretsConfiguration>();
-        }
 
         // Loads AppSettings and Database settings from config (e.g. appsettings.json)
         // and checks that all their required fields are filled in.

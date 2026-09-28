@@ -8,16 +8,13 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "LOC",
         "DockerVersion": "0.0",
-        "aws_access_key_id": "",
-        "aws_secret_access_key": "",
-        "aws_session_token": "",
-        "DB_USERNAME": "therrons",
-        "DB_PASSWORD": "therrons",
+        "DB_USERNAME": "",
+        "DB_PASSWORD": "",
         "DB_HOST": "127.0.0.1",
         "DB_PORT": "5432",
         "DB_NAME": "fraud_db",
-        "KAFKA_USER": "kafka-admin",
-        "KAFKA_PASSWORD": "kafka-admin-pass"
+        "KAFKA_USER": "",
+        "KAFKA_PASSWORD": ""
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5237"

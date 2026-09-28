@@ -33,8 +33,8 @@ public class Program
         builder.Host.UseSerilog();      // Use Serilog for logging
 
         // Step 2: load secrets and settings, then register every service the app needs.
-        builder.ConfigureSecrets();     // Load secrets and add them to the configuration
         builder.AddConfigurations();    // Add configurations from appsettings.json, environment variables, and command line arguments
+        builder.ConfigureSecrets();     // Load secrets and add them to the configuration
         builder.AddServices_AddDI();    // Add application services to the DI container
         builder.AddCorsConfiguration(); // Add CORS configuration to the DI container - the alternative would be to add CORS via Nginx
                                         // or native cloud solution, eg AWS API Gateway

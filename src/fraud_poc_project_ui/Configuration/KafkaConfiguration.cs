@@ -3,7 +3,6 @@ using Confluent.Kafka.Admin;
 using fraud_poc_project.Settings;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
-using fraud_poc_project_buss.Models.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -32,7 +31,7 @@ namespace fraud_poc_project.Configuration
             {
                 kafkaBrokerSettingsSection.SaslUserName = environment_Variables.KAFKAUSER;
                 kafkaBrokerSettingsSection.SaslPassword = environment_Variables.KAFKAPASSWORD;
-                
+
                 Extensions_Helper.ValidateOptions(kafkaBrokerSettingsSection);
                 services.AddSingleton<IOptions<FraudKafkaBrokerSettings>>(Options.Create(kafkaBrokerSettingsSection));
             }

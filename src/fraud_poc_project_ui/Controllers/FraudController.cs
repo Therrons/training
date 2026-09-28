@@ -1,6 +1,5 @@
 using fraud_poc_project.CustomAttributes;
 using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
