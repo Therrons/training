@@ -62,14 +62,9 @@ namespace fraud_poc_project.Configuration
                         MaxRetryAttempts = 2,
                         UseJitter = true,
                         ShouldHandle = new PredicateBuilder().Handle<Exception>()
-                    }).AddCircuitBreaker(new CircuitBreakerStrategyOptions()
-                    {
-                        SamplingDuration = TimeSpan.FromSeconds(30)
                     }).AddTimeout(TimeSpan.FromSeconds(30));
             });
         }
-
-
 
         // Loads AppSettings and Database settings from config (e.g. appsettings.json)
         // and checks that all their required fields are filled in.

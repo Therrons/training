@@ -1,10 +1,11 @@
-name: Deploy – Terraform + Docker
+name: Deploy – Build & Push Docker Image
 
-# Runs on pushes to main (and branches already used by the project).
-# PRs only run the lighter ci.yml checks.
+# Builds Docker image and pushes to DockerHub
+# Runs on pushes to develop, Docker, and K8s branches
+# Note: K8s deployment is handled locally via deploy-https.sh script
 on:
   push:
-    branches: [ "main", "Docker", "K8s" ]
+    branches: [ "develop", "Docker", "K8s" ]
   workflow_dispatch:
 
 # Required for GitHub OIDC:
@@ -16,106 +17,42 @@ permissions:
 
 env:
   AWS_REGION:     ${{ vars.AWS_REGION }}        # e.g. af-south-1
-  TF_WORKING_DIR: terraform
   IMAGE_NAME:     fraud-poc-api
 
 jobs:
-  # ── 1. Terraform – provision OIDC role + Secrets Manager secret ───────────────
-  terraform:
-    name: Terraform
-    runs-on: ubuntu-latest
-
-    outputs:
-      secret_name:             ${{ steps.tf_output.outputs.secret_name }}
-      github_actions_role_arn: ${{ steps.tf_output.outputs.github_actions_role_arn }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Authenticate using the bootstrap role (broader permissions, used only to
-      # run Terraform).  After the first apply the narrower app role exists and
-      # is used by the next job.
-      - name: Configure AWS credentials (bootstrap role via OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume:    ${{ vars.BOOTSTRAP_ROLE_ARN }}
-          aws-region:        ${{ env.AWS_REGION }}
-          role-session-name: github-actions-terraform
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~1.5"
-          terraform_wrapper: true
-
-      - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init
-
-      - name: Terraform Validate
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform validate
-
-      - name: Terraform Plan
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        env:
-          TF_VAR_github_org:   ${{ github.repository_owner }}
-          TF_VAR_github_repo:  ${{ github.event.repository.name }}
-          TF_VAR_db_password:  ${{ secrets.DB_PASSWORD }}
-          TF_VAR_aws_region:   ${{ env.AWS_REGION }}
-        run: terraform plan -out=tfplan
-
-      - name: Terraform Apply
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        env:
-          TF_VAR_github_org:   ${{ github.repository_owner }}
-          TF_VAR_github_repo:  ${{ github.event.repository.name }}
-          TF_VAR_db_password:  ${{ secrets.DB_PASSWORD }}
-          TF_VAR_aws_region:   ${{ env.AWS_REGION }}
-        run: terraform apply -auto-approve tfplan
-
-      - name: Capture Terraform outputs
-        id: tf_output
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: |
-          echo "secret_name=$(terraform output -raw secret_name)"             >> "$GITHUB_OUTPUT"
-          echo "github_actions_role_arn=$(terraform output -raw github_actions_role_arn)" >> "$GITHUB_OUTPUT"
-
-  # ── 2. Build & run Docker image with credentials injected from Secrets Manager ─
-  build-and-run:
+  # ── Build & Push Docker image to DockerHub ─────────────────────────────────
+  build-and-push:
     name: Build Docker Image
     runs-on: ubuntu-latest
-    needs: terraform
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Re-authenticate using the narrower app role that Terraform just ensured exists.
-      - name: Configure AWS credentials (app role via OIDC)
+      # Authenticate to AWS using OIDC to fetch secrets for smoke test
+      - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume:    ${{ needs.terraform.outputs.github_actions_role_arn }}
+          role-to-assume:    ${{ vars.AWS_ACTIONS_ROLE_ARN }}
           aws-region:        ${{ env.AWS_REGION }}
-          role-session-name: github-actions-app
+          role-session-name: github-actions-build
 
-      # Pull { username, password } from Secrets Manager and export as masked
-      # step-level env vars.  They are never written to disk or printed in logs.
-      - name: Fetch PostgreSQL credentials from Secrets Manager
-        id: fetch_secret
+      # Fetch credentials from AWS Secrets Manager for smoke test
+      - name: Fetch secrets from AWS Secrets Manager
+        id: aws_secrets
         env:
-          SECRET_NAME: ${{ needs.terraform.outputs.secret_name }}
+          SECRET_NAME: ${{ vars.AWS_SECRET_NAME }}
         run: |
           SECRET_JSON=$(aws secretsmanager get-secret-value \
             --secret-id "$SECRET_NAME" \
+            --region "${{ env.AWS_REGION }}" \
             --query SecretString \
             --output text)
 
-          DB_USERNAME=$(echo "$SECRET_JSON" | jq -r '.username')
-          DB_PASSWORD=$(echo "$SECRET_JSON" | jq -r '.password')
+          DB_USERNAME=$(echo "$SECRET_JSON" | jq -r '.DB_USERNAME // empty')
+          DB_PASSWORD=$(echo "$SECRET_JSON" | jq -r '.DB_PASSWORD // empty')
 
-          # Redact values from all subsequent log lines
+          # Redact values from logs
           echo "::add-mask::$DB_USERNAME"
           echo "::add-mask::$DB_PASSWORD"
 
@@ -139,20 +76,15 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-          # Credentials are NOT baked into the image – they are injected at run time.
-          # Build args here are only for non-secret build customisation.
           build-args: |
             APP_DLL=fraud_poc_project.dll
             APP_PORT=8080
 
-      # Smoke-test: run the image locally in the runner, injecting the credentials
-      # fetched from Secrets Manager as runtime env vars.
       - name: Run container smoke test
         env:
           DB_HOST: ${{ vars.DB_HOST }}
           DB_PORT: ${{ vars.DB_PORT }}
           DB_NAME: ${{ vars.DB_NAME }}
-          SECRET_NAME: ${{ needs.terraform.outputs.secret_name }}
         run: |
           docker run --rm \
             -e DB_USERNAME="$DB_USERNAME" \
@@ -160,13 +92,25 @@ jobs:
             -e DB_HOST="$DB_HOST" \
             -e DB_PORT="${DB_PORT:-5432}" \
             -e DB_NAME="$DB_NAME" \
-            -e AWSSecretName="$SECRET_NAME" \
-            -e AWSRegion="${{ env.AWS_REGION }}" \
             -e ASPNETCORE_ENVIRONMENT="RELEASE" \
             -p 8080:8080 \
             --name api-test \
             -d \
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           sleep 5
-          curl -f http://localhost:8080/health/readiness
+          curl -f http://localhost:8080/health/readiness || exit 1
           docker stop api-test
+
+      - name: Log build completion
+        run: |
+          echo "✓ Docker image built and pushed successfully"
+          echo "Image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Latest: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest"
+          echo ""
+          echo "Next step: Run locally on your machine:"
+          echo "  bash deploy-https.sh"
+          echo ""
+          echo "This will:"
+          echo "  1. Fetch secrets from AWS Secrets Manager"
+          echo "  2. Deploy to your local Rancher Desktop K8s cluster"
+          echo "  3. Set up HTTPS with self-signed certificate"

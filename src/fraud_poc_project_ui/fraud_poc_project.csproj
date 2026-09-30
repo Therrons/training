@@ -32,15 +32,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Confluent.Kafka">
-        <HintPath>..\Kafka\src\nuget-packages\confluent.kafka\2.14.2\lib\net8.0\Confluent.Kafka.dll</HintPath>
-      </Reference>
-      <Reference Include="Newtonsoft.Json">
-        <HintPath>..\src\nuget-packages\newtonsoft.json\13.0.4\lib\net6.0\Newtonsoft.Json.dll</HintPath>
-      </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
       <Folder Include="data\" />
     </ItemGroup>
 
