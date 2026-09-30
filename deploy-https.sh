@@ -24,7 +24,7 @@ NC='\033[0m' # No Color
 NAMESPACE="fraud-poc-api"
 APP_NAME="fraud-poc-api"
 AWS_REGION="${AWS_REGION:-af-south-1}"
-AWS_SECRET_NAME="fraud-poc-secrets"  # Change this to your AWS secret name
+AWS_SECRET_NAME="fraud_poc_secrets"  # Change this to your AWS secret name
 
 # Step 1: Verify prerequisites
 echo -e "${BLUE}Step 1: Checking prerequisites...${NC}"
