@@ -7,38 +7,14 @@
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <DocumentationFile>fraud_poc_project.xml</DocumentationFile>
         <UserSecretsId>ff8b7950-3516-4b83-9e03-9af24f59945e</UserSecretsId>
+        <Configurations>Debug;Release;DOCKER</Configurations>
     </PropertyGroup>
 
     <PropertyGroup>
         <RestorePackagesPath>../nuget-packages</RestorePackagesPath>
     </PropertyGroup>
-
+   
     <ItemGroup>
-      <Compile Remove="Fraud\**" />
-      <Compile Remove="wwwroot\**" />
-      <Content Remove="Fraud\**" />
-      <Content Remove="wwwroot\**" />
-      <EmbeddedResource Remove="Fraud\**" />
-      <EmbeddedResource Remove="wwwroot\**" />
-      <None Remove="Fraud\**" />
-      <None Remove="wwwroot\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Controllers\UserInputController.cs" />
-      <Compile Remove="Kafka\Consumer\FraudBatchConsumerWorker.cs" />
-      <Compile Remove="Middleware\CheckForXssMiddleware2.cs" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <None Remove="CapitecRootCA.cer" />
-      <None Remove="CapitecRootCA.crt" />
-      <None Remove="CapitecRootCA.pem" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.32" />
-      <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.4.16" />
       <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
       <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.3.0" />
@@ -53,15 +29,6 @@
     <ItemGroup>
       <ProjectReference Include="..\fraud_poc_project_buss\fraud_poc_project_buss.csproj" />
       <ProjectReference Include="..\fraud_poc_project_repo\fraud_poc_project_repo.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Confluent.Kafka">
-        <HintPath>..\Kafka\src\nuget-packages\confluent.kafka\2.14.2\lib\net8.0\Confluent.Kafka.dll</HintPath>
-      </Reference>
-      <Reference Include="Newtonsoft.Json">
-        <HintPath>..\src\nuget-packages\newtonsoft.json\13.0.4\lib\net6.0\Newtonsoft.Json.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
     <ItemGroup>

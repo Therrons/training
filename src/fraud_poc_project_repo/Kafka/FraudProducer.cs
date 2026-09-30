@@ -1,6 +1,6 @@
 using Confluent.Kafka;
+using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
-using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
 using Microsoft.Extensions.Logging;

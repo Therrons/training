@@ -1,5 +1,4 @@
 ﻿using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Models.Fraud;
 
 namespace fraud_poc_project_repo.Interfaces
 {

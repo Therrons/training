@@ -1,274 +1,321 @@
 using FluentAssertions;
-using fraud_poc_project_buss.Fraud;
-using fraud_poc_project_buss.Models;
-using fraud_poc_project_buss.Repositories;
-using fraud_poc_project_ui.Controllers;
+using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Models.Fraud;
+using fraud_poc_project.Controllers;
+using fraud_poc_project_repo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
-namespace fraud_poc_project.Tests.Controllers;
-
-/// <summary>
-/// Tests for FraudController - API endpoint tests.
-/// Verifies controller logic, response handling, and integration with services.
-/// </summary>
-public class FraudControllerTests
+namespace fraud_poc_project.Tests.Controllers
 {
-    private readonly Mock<IFraudEvaluationService> _mockFraudService;
-    private readonly Mock<IFraudRepository> _mockRepository;
-    private readonly Mock<IFraudProducer> _mockProducer;
-    private readonly FraudController _controller;
-
-    public FraudControllerTests()
+    /// <summary>
+    /// Tests for FraudController - API endpoint tests.
+    /// Verifies controller logic, response handling, and integration with repository.
+    /// </summary>
+    public class FraudControllerTests
     {
-        _mockFraudService = new Mock<IFraudEvaluationService>();
-        _mockRepository = new Mock<IFraudRepository>();
-        _mockProducer = new Mock<IFraudProducer>();
+        private readonly Mock<IFraudRepository> _mockRepository;
+        private readonly FraudController _controller;
 
-        _controller = new FraudController(
-            _mockFraudService.Object,
-            _mockRepository.Object,
-            _mockProducer.Object
-        );
-    }
-
-    [Fact]
-    public async Task EvaluateTransaction_WithValidTransaction_ReturnsOkResult()
-    {
-        // Arrange
-        var transaction = new FraudTransactionEvent
+        public FraudControllerTests()
         {
-            CustomerId = "CUST-001",
-            TransactionId = "TXN-001",
-            Amount = 100m,
-            Country = "ZA",
-            Timestamp = DateTime.UtcNow
-        };
+            _mockRepository = new Mock<IFraudRepository>();
+            _controller = new FraudController(_mockRepository.Object);
+        }
 
-        var fraudResult = new FraudEvaluationResult
+        [Fact]
+        public async Task QueryEvents_WithValidQuery_ReturnsOkResultWithEvents()
         {
-            TransactionId = "TXN-001",
-            CustomerId = "CUST-001",
-            IsFraud = false,
-            RiskScore = 0.3m,
-            FlaggedRules = new List<string>()
-        };
-
-        _mockRepository
-            .Setup(r => r.GetCustomerTransactionHistoryAsync(transaction.CustomerId, It.IsAny<int>()))
-            .ReturnsAsync(new List<FraudTransactionEvent>());
-
-        _mockFraudService
-            .Setup(s => s.Evaluate(transaction, It.IsAny<List<FraudTransactionEvent>>()))
-            .Returns(fraudResult);
-
-        _mockRepository
-            .Setup(r => r.SaveFraudEventAsync(It.IsAny<FraudEvaluationResult>()))
-            .ReturnsAsync(true);
-
-        // Act
-        var result = await _controller.EvaluateTransaction(transaction);
-
-        // Assert
-        result.Should().BeOfType<OkObjectResult>();
-        var okResult = result as OkObjectResult;
-        okResult?.Value.Should().Be(fraudResult);
-    }
-
-    [Fact]
-    public async Task EvaluateTransaction_WithNullTransaction_ReturnsBadRequest()
-    {
-        // Arrange & Act & Assert
-        await _controller.Invoking(c => c.EvaluateTransaction(null!))
-            .Should()
-            .ThrowAsync<ArgumentNullException>();
-    }
-
-    [Fact]
-    public async Task EvaluateTransaction_WithFraudDetected_ReturnsFraudResult()
-    {
-        // Arrange
-        var transaction = new FraudTransactionEvent
-        {
-            CustomerId = "CUST-001",
-            TransactionId = "TXN-001",
-            Amount = 5000m,  // Suspicious amount
-            Country = "GB",
-            Timestamp = DateTime.UtcNow
-        };
-
-        var recentTransactions = new List<FraudTransactionEvent>
-        {
-            new FraudTransactionEvent
+            // Arrange
+            var query = new FraudQueryDto
             {
+                DateFrom = "2024-01-01 00:00:00",
+                DateTo = "2024-01-31 23:59:59",
+                CustomerId = "CUST-001"
+            };
+
+            var expectedRecords = new List<FraudEventRecord>
+            {
+                new FraudEventRecordBuilder()
+                    .WithEvent(new TransactionEventBuilder().WithCustomerId("CUST-001").Build())
+                    .WithIsFlagged(true)
+                    .WithFraudScore(50m)
+                    .Build(),
+                new FraudEventRecordBuilder()
+                    .WithEvent(new TransactionEventBuilder().WithCustomerId("CUST-001").Build())
+                    .WithIsFlagged(false)
+                    .WithFraudScore(20m)
+                    .Build()
+            };
+
+            _mockRepository
+                .Setup(r => r.QueryFraudEventsAsync(query))
+                .ReturnsAsync(expectedRecords);
+
+            // Act
+            var result = await _controller.QueryEvents(query);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            var okResult = result.Result as OkObjectResult;
+            okResult?.Value.Should().Be(expectedRecords);
+            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query), Times.Once);
+        }
+
+        [Fact]
+        public async Task QueryEvents_WithEmptyResult_ReturnsOkResultWithEmptyList()
+        {
+            // Arrange
+            var query = new FraudQueryDto
+            {
+                DateFrom = "2024-01-01 00:00:00",
+                DateTo = "2024-01-31 23:59:59",
+                CustomerId = "NON-EXISTENT"
+            };
+
+            var emptyRecords = new List<FraudEventRecord>();
+
+            _mockRepository
+                .Setup(r => r.QueryFraudEventsAsync(query))
+                .ReturnsAsync(emptyRecords);
+
+            // Act
+            var result = await _controller.QueryEvents(query);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            var okResult = result.Result as OkObjectResult;
+            var returnedList = okResult?.Value as IEnumerable<FraudEventRecord>;
+            returnedList.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task QueryEvents_CallsRepositoryWithProvidedQuery()
+        {
+            // Arrange
+            var query = new FraudQueryDto
+            {
+                DateFrom = "2024-01-01 00:00:00",
+                DateTo = "2024-01-31 23:59:59",
+                IsFlaggedOnly = true
+            };
+
+            _mockRepository
+                .Setup(r => r.QueryFraudEventsAsync(query))
+                .ReturnsAsync(new List<FraudEventRecord>());
+
+            // Act
+            await _controller.QueryEvents(query);
+
+            // Assert
+            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRuleResults_WithValidEventId_ReturnsOkResultWithRuleResults()
+        {
+            // Arrange
+            const long fraudEventId = 123;
+
+            var expectedRuleResults = new List<FraudRuleSetRecord>
+            {
+                new FraudRuleSetRecord
+                {
+                    FraudEventId = fraudEventId,
+                    RuleCode = "HIGH_AMOUNT",
+                    RuleDescription = "High Amount Rule",
+                    IsTriggered = true,
+                    ScoreContribution = 40m
+                },
+                new FraudRuleSetRecord
+                {
+                    FraudEventId = fraudEventId,
+                    RuleCode = "FOREIGN_CNP",
+                    RuleDescription = "Foreign CNP Rule",
+                    IsTriggered = false,
+                    ScoreContribution = 0m
+                }
+            };
+
+            _mockRepository
+                .Setup(r => r.GetRuleResultsForEventAsync(fraudEventId))
+                .ReturnsAsync(expectedRuleResults);
+
+            // Act
+            var result = await _controller.GetRuleResults(fraudEventId);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            var okResult = result.Result as OkObjectResult;
+            okResult?.Value.Should().Be(expectedRuleResults);
+            _mockRepository.Verify(r => r.GetRuleResultsForEventAsync(fraudEventId), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetRuleResults_WithNoRuleResults_ReturnsOkResultWithEmptyList()
+        {
+            // Arrange
+            const long fraudEventId = 999;
+            var emptyResults = new List<FraudRuleSetRecord>();
+
+            _mockRepository
+                .Setup(r => r.GetRuleResultsForEventAsync(fraudEventId))
+                .ReturnsAsync(emptyResults);
+
+            // Act
+            var result = await _controller.GetRuleResults(fraudEventId);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            var okResult = result.Result as OkObjectResult;
+            var returnedList = okResult?.Value as IEnumerable<FraudRuleSetRecord>;
+            returnedList.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetRuleResults_CallsRepositoryWithProvidedEventId()
+        {
+            // Arrange
+            const long fraudEventId = 456;
+
+            _mockRepository
+                .Setup(r => r.GetRuleResultsForEventAsync(fraudEventId))
+                .ReturnsAsync(new List<FraudRuleSetRecord>());
+
+            // Act
+            await _controller.GetRuleResults(fraudEventId);
+
+            // Assert
+            _mockRepository.Verify(r => r.GetRuleResultsForEventAsync(fraudEventId), Times.Once);
+        }
+
+        [Fact]
+        public async Task QueryEvents_WithMultipleFilters_ReturnsFilteredResults()
+        {
+            // Arrange
+            var query = new FraudQueryDto
+            {
+                DateFrom = "2024-01-01 00:00:00",
+                DateTo = "2024-01-31 23:59:59",
                 CustomerId = "CUST-001",
-                TransactionId = "TXN-000",
-                Amount = 100m,
-                Country = "ZA",
-                Timestamp = DateTime.UtcNow.AddMinutes(-5)
-            }
-        };
+                TransactionType = "CNP",
+                MinFraudScore = 40m,
+                IsFlaggedOnly = true
+            };
 
-        var fraudResult = new FraudEvaluationResult
+            var filteredRecords = new List<FraudEventRecord>
+            {
+                new FraudEventRecordBuilder()
+                    .WithEvent(new TransactionEventBuilder()
+                        .WithCustomerId("CUST-001")
+                        .WithTransactionType("CNP")
+                        .Build())
+                    .WithIsFlagged(true)
+                    .WithFraudScore(50m)
+                    .Build()
+            };
+
+            _mockRepository
+                .Setup(r => r.QueryFraudEventsAsync(query))
+                .ReturnsAsync(filteredRecords);
+
+            // Act
+            var result = await _controller.QueryEvents(query);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            var okResult = result.Result as OkObjectResult;
+            var returnedList = okResult?.Value as IEnumerable<FraudEventRecord>;
+            returnedList.Should().HaveCount(1);
+            returnedList?.First().IsFlagged.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GetRuleResults_ReturnsBothTriggeredAndNonTriggeredRules()
         {
-            TransactionId = "TXN-001",
-            CustomerId = "CUST-001",
-            IsFraud = true,
-            RiskScore = 0.9m,
-            FlaggedRules = new List<string> { "AmountRule", "GeographicRule" }
-        };
+            // Arrange
+            const long fraudEventId = 100;
 
-        _mockRepository
-            .Setup(r => r.GetCustomerTransactionHistoryAsync(transaction.CustomerId, It.IsAny<int>()))
-            .ReturnsAsync(recentTransactions);
+            var ruleResults = new List<FraudRuleSetRecord>
+            {
+                new FraudRuleSetRecord
+                {
+                    FraudEventId = fraudEventId,
+                    RuleCode = "HIGH_AMOUNT",
+                    IsTriggered = true,
+                    ScoreContribution = 40m
+                },
+                new FraudRuleSetRecord
+                {
+                    FraudEventId = fraudEventId,
+                    RuleCode = "ATM_WITHDRAWAL_LIMIT",
+                    IsTriggered = false,
+                    ScoreContribution = 0m
+                },
+                new FraudRuleSetRecord
+                {
+                    FraudEventId = fraudEventId,
+                    RuleCode = "FOREIGN_CNP",
+                    IsTriggered = true,
+                    ScoreContribution = 35m
+                }
+            };
 
-        _mockFraudService
-            .Setup(s => s.Evaluate(transaction, recentTransactions))
-            .Returns(fraudResult);
+            _mockRepository
+                .Setup(r => r.GetRuleResultsForEventAsync(fraudEventId))
+                .ReturnsAsync(ruleResults);
 
-        _mockRepository
-            .Setup(r => r.SaveFraudEventAsync(fraudResult))
-            .ReturnsAsync(true);
+            // Act
+            var result = await _controller.GetRuleResults(fraudEventId);
 
-        // Act
-        var result = await _controller.EvaluateTransaction(transaction);
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            var returnedRules = okResult?.Value as IEnumerable<FraudRuleSetRecord>;
+            returnedRules.Should().HaveCount(3);
+            returnedRules?.Count(r => r.IsTriggered).Should().Be(2);
+            returnedRules?.Count(r => !r.IsTriggered).Should().Be(1);
+        }
 
-        // Assert
-        var okResult = result as OkObjectResult;
-        var returnedResult = okResult?.Value as FraudEvaluationResult;
-        returnedResult?.IsFraud.Should().BeTrue();
-        returnedResult?.RiskScore.Should().Be(0.9m);
-    }
-
-    [Fact]
-    public async Task EvaluateTransaction_PublishesToKafka()
-    {
-        // Arrange
-        var transaction = new FraudTransactionEvent
+        [Fact]
+        public async Task QueryEvents_PreservesTransactionEventDetails()
         {
-            CustomerId = "CUST-001",
-            TransactionId = "TXN-001",
-            Amount = 100m,
-            Country = "ZA",
-            Timestamp = DateTime.UtcNow
-        };
+            // Arrange
+            var query = new FraudQueryDto
+            {
+                DateFrom = "2024-01-01 00:00:00",
+                DateTo = "2024-01-31 23:59:59"
+            };
 
-        var fraudResult = new FraudEvaluationResult
-        {
-            TransactionId = "TXN-001",
-            CustomerId = "CUST-001",
-            IsFraud = false,
-            RiskScore = 0.2m,
-            FlaggedRules = new List<string>()
-        };
+            var customerId = "CUST-SPECIAL";
+            var accountId = "ACC-SPECIAL";
+            var amount = 12345.67m;
 
-        _mockRepository
-            .Setup(r => r.GetCustomerTransactionHistoryAsync(transaction.CustomerId, It.IsAny<int>()))
-            .ReturnsAsync(new List<FraudTransactionEvent>());
+            var records = new List<FraudEventRecord>
+            {
+                new FraudEventRecordBuilder()
+                    .WithEvent(new TransactionEventBuilder()
+                        .WithCustomerId(customerId)
+                        .WithAccountId(accountId)
+                        .WithAmount(amount)
+                        .Build())
+                    .Build()
+            };
 
-        _mockFraudService
-            .Setup(s => s.Evaluate(It.IsAny<FraudTransactionEvent>(), It.IsAny<List<FraudTransactionEvent>>()))
-            .Returns(fraudResult);
+            _mockRepository
+                .Setup(r => r.QueryFraudEventsAsync(query))
+                .ReturnsAsync(records);
 
-        _mockRepository
-            .Setup(r => r.SaveFraudEventAsync(It.IsAny<FraudEvaluationResult>()))
-            .ReturnsAsync(true);
+            // Act
+            var result = await _controller.QueryEvents(query);
 
-        // Act
-        await _controller.EvaluateTransaction(transaction);
-
-        // Assert
-        _mockProducer.Verify(
-            p => p.ProduceAsync(It.IsAny<FraudEvaluationResult>()),
-            Times.Once,
-            "Producer should be called to publish fraud result");
-    }
-
-    [Fact]
-    public async Task GetTransactionHistory_WithValidCustomerId_ReturnsTransactions()
-    {
-        // Arrange
-        const string customerId = "CUST-001";
-        var transactions = new List<FraudTransactionEvent>
-        {
-            new FraudTransactionEvent { CustomerId = customerId, TransactionId = "TXN-001", Amount = 100m },
-            new FraudTransactionEvent { CustomerId = customerId, TransactionId = "TXN-002", Amount = 150m }
-        };
-
-        _mockRepository
-            .Setup(r => r.GetCustomerTransactionHistoryAsync(customerId, It.IsAny<int>()))
-            .ReturnsAsync(transactions);
-
-        // Act
-        var result = await _controller.GetTransactionHistory(customerId, 100);
-
-        // Assert
-        var okResult = result as OkObjectResult;
-        var returnedTransactions = okResult?.Value as List<FraudTransactionEvent>;
-        returnedTransactions?.Should().HaveCount(2);
-    }
-
-    [Fact]
-    public async Task GetTransactionHistory_WithEmptyHistory_ReturnsEmptyList()
-    {
-        // Arrange
-        const string customerId = "NEW-CUSTOMER";
-
-        _mockRepository
-            .Setup(r => r.GetCustomerTransactionHistoryAsync(customerId, It.IsAny<int>()))
-            .ReturnsAsync(new List<FraudTransactionEvent>());
-
-        // Act
-        var result = await _controller.GetTransactionHistory(customerId, 100);
-
-        // Assert
-        var okResult = result as OkObjectResult;
-        var returnedTransactions = okResult?.Value as List<FraudTransactionEvent>;
-        returnedTransactions?.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task EvaluateTransaction_SavesResultToRepository()
-    {
-        // Arrange
-        var transaction = new FraudTransactionEvent
-        {
-            CustomerId = "CUST-001",
-            TransactionId = "TXN-001",
-            Amount = 100m,
-            Country = "ZA",
-            Timestamp = DateTime.UtcNow
-        };
-
-        var fraudResult = new FraudEvaluationResult
-        {
-            TransactionId = "TXN-001",
-            CustomerId = "CUST-001",
-            IsFraud = false,
-            RiskScore = 0.2m,
-            FlaggedRules = new List<string>()
-        };
-
-        _mockRepository
-            .Setup(r => r.GetCustomerTransactionHistoryAsync(transaction.CustomerId, It.IsAny<int>()))
-            .ReturnsAsync(new List<FraudTransactionEvent>());
-
-        _mockFraudService
-            .Setup(s => s.Evaluate(transaction, It.IsAny<List<FraudTransactionEvent>>()))
-            .Returns(fraudResult);
-
-        _mockRepository
-            .Setup(r => r.SaveFraudEventAsync(fraudResult))
-            .ReturnsAsync(true);
-
-        // Act
-        await _controller.EvaluateTransaction(transaction);
-
-        // Assert
-        _mockRepository.Verify(
-            r => r.SaveFraudEventAsync(It.IsAny<FraudEvaluationResult>()),
-            Times.Once,
-            "Repository should save fraud evaluation result");
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            var returnedRecords = okResult?.Value as IEnumerable<FraudEventRecord>;
+            var firstRecord = returnedRecords?.First();
+            firstRecord?.Event.CustomerId.Should().Be(customerId);
+            firstRecord?.Event.AccountId.Should().Be(accountId);
+            firstRecord?.Event.Amount.Should().Be(amount);
+        }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Amazon.Extensions.NETCore.Setup;
-using Amazon.SecretsManager;
-using fraud_poc_project.Controllers;
+﻿using fraud_poc_project.Controllers;
 using fraud_poc_project.Kafka.Consumer;
 using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
@@ -17,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
+using Polly.CircuitBreaker;
 using Polly.Retry;
 using System;
 using System.Collections.Generic;
@@ -25,16 +24,19 @@ using System.Text;
 namespace fraud_poc_project.Configuration
 {
     // This is where the app tells its Dependency Injection container about every
-    // service it needs: AWS secrets, app settings, the database, the fraud rules,
+    // service it needs: App settings, the database, the fraud rules,
     // and Kafka. Each piece is split into its own small method below so it's easy to
     // see, at a glance, everything the app is wired up to use.
     public static class ServiceConfiguration
     {
+        private static Environment_Variables envVariables;
+
         // This is the main entry point for registering services. It calls each of the
         // smaller methods below to register specific services.
         public static void AddServices_AddDI(this WebApplicationBuilder builder)
         {
-            RegisterAwsSecrets(builder);
+            envVariables = new Environment_Variables().Get_Environment_Values(builder);
+
             RegisterAppSettings(builder);
 
             var connectionString = BuildDatabaseConnectionString(builder);
@@ -55,26 +57,13 @@ namespace fraud_poc_project.Configuration
                 x.AddRetry(
                     new RetryStrategyOptions
                     {
-                        BackoffType = DelayBackoffType.Constant,
-                        Delay = TimeSpan.FromMilliseconds(15),
+                        BackoffType = DelayBackoffType.Exponential,
+                        Delay = TimeSpan.FromMilliseconds(1),
                         MaxRetryAttempts = 2,
                         UseJitter = true,
                         ShouldHandle = new PredicateBuilder().Handle<Exception>()
-                    });
+                    }).AddTimeout(TimeSpan.FromSeconds(30));
             });
-        }
-
-        // Lets the app fetch secrets (like database passwords) from AWS Secrets Manager.
-        private static void RegisterAwsSecrets(WebApplicationBuilder builder)
-        {
-            var awsOptions = new AWSOptions
-            {
-                Region = Amazon.RegionEndpoint.GetBySystemName(
-                    builder.Configuration["AWSRegion"] ?? "af-south-1")
-            };
-
-            builder.Services.AddAWSService<IAmazonSecretsManager>(awsOptions)
-                .AddSingleton<AWSSecretsConfiguration>();
         }
 
         // Loads AppSettings and Database settings from config (e.g. appsettings.json)
@@ -92,7 +81,6 @@ namespace fraud_poc_project.Configuration
         // that asks for "ConnectionStrings:PostgreSQL" can find it.
         private static string BuildDatabaseConnectionString(WebApplicationBuilder builder)
         {
-            var envVariables = new Environment_Variables().Get_Environment_Values(builder);
             var isLocal = true; // builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
             var isRancher = true; // builder.Environment.EnvironmentName.Equals("RELEASE", StringComparison.InvariantCultureIgnoreCase);
 
@@ -103,7 +91,9 @@ namespace fraud_poc_project.Configuration
             connectionString.Append($"Password={envVariables.DBPassword};");
             connectionString.Append($"Pooling=true;");
             connectionString.Append($"Connection Lifetime=0;");
-            // Disable SSL for local or Rancher deployments (no SSL in Docker/K8s)
+
+            // Disable SSL for local or Rancher deployments (no SSL in Docker/K8s) as
+            // these are docker containers and SSL is not needed. For other environments, require SSL for security.
             connectionString.Append((isLocal || isRancher) ? "SSLMode=Disable;" : "SSLMode=Require;");
             connectionString.Append("Trust Server Certificate = true;");
 
@@ -154,7 +144,7 @@ namespace fraud_poc_project.Configuration
         // producer/consumer that use them.
         private static void RegisterKafka(WebApplicationBuilder builder)
         {
-            builder.Services.AddKafkaConfigurations(builder.Configuration)
+            builder.Services.AddKafkaConfigurations(builder.Configuration, envVariables)
                .KafkaSetupTopics();
 
             builder.Services.AddSingleton<IFraudProducer, FraudProducer>();

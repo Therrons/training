@@ -8,9 +8,6 @@
         // Folder containing the SQL setup scripts (used when CreateDatabaseOnStartup is true).
         public string ScriptsFolder { get; init; }
 
-        // If true, use a short-lived AWS RDS login token instead of a fixed password.
-        public bool UseRdsToken { get; init; }
-
         public string ConnectionStringReadWrite { get; init; }
 
         public string DBSchema { get; init; }

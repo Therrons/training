@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using fraud_poc_project.Settings;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
 using Microsoft.Extensions.Configuration;
@@ -19,9 +20,23 @@ namespace fraud_poc_project.Configuration
     {
         public static IServiceCollection AddKafkaConfigurations(
             this IServiceCollection services,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            Environment_Variables environment_Variables)
         {
-            services.AddAndValidateOptions<FraudKafkaBrokerSettings>("KafkaSettings:BrokerSettings");
+            // Load the Kafka broker settings from config, and override the username/password with the values from environment variables.
+            var kafkaBrokerSettingsSection = configuration.GetSection("KafkaSettings:BrokerSettings").Get<FraudKafkaBrokerSettings>();
+            if (kafkaBrokerSettingsSection == null)
+                throw new InvalidOperationException("Kafka broker settings are not configured.");
+            else
+            {
+                kafkaBrokerSettingsSection.SaslUserName = environment_Variables.KAFKAUSER;
+                kafkaBrokerSettingsSection.SaslPassword = environment_Variables.KAFKAPASSWORD;
+
+                Extensions_Helper.ValidateOptions(kafkaBrokerSettingsSection);
+                services.AddSingleton<IOptions<FraudKafkaBrokerSettings>>(Options.Create(kafkaBrokerSettingsSection));
+            }
+
+            // Load the Kafka producer and consumer settings from config, and validate them.    
             services.AddAndValidateOptions<FraudKafkaProducerSettings>("KafkaSettings:ProducerSettings");
             services.AddAndValidateOptions<FraudKafkaConsumerSettings>("KafkaSettings:ConsumerSettings");
             services.AddAndValidateOptions<KafkaAdminOptions>("KafkaAdminOptions");

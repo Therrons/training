@@ -1,5 +1,4 @@
-﻿using Amazon.RDS.Util;
-using fraud_poc_project_buss.Models.Database;
+﻿using fraud_poc_project_buss.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -31,24 +30,13 @@ namespace fraud_poc_project_repo.Connection
             _dbConnector = SetupDatabaseConnection().Build().OpenConnection();
         }
 
-        // Builds the object that knows how to open a database connection. If we're using
-        // AWS RDS tokens instead of a plain password, this also sets up automatic
-        // refreshing of that token in the background.
+        // Builds the object that knows how to open a database connection.
         private NpgsqlDataSourceBuilder SetupDatabaseConnection()
         {
             try
             {
-                NpgsqlDataSourceBuilder dsBuilder = new NpgsqlDataSourceBuilder(_config.GetConnectionString("PostgreSQL"));
+                return new NpgsqlDataSourceBuilder(_config.GetConnectionString("PostgreSQL"));
 
-                if (_databaseOptions.UseRdsToken)
-                {
-                    dsBuilder.UsePeriodicPasswordProvider(
-                        (settings, cancellationToken) =>
-                            ValueTask.FromResult(RDSAuthTokenGenerator.GenerateAuthToken(settings.Host, settings.Port, settings.Username)),
-                            successRefreshInterval: TimeSpan.FromMinutes(_databaseOptions.SuccessRefreshInterval),
-                            failureRefreshInterval: TimeSpan.FromSeconds(_databaseOptions.FailureRefreshInterval));
-                }
-                return dsBuilder;
             }
             catch (Exception ex)
             {

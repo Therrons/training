@@ -45,6 +45,8 @@ services:
       DB_HOST: "postgres"
       DB_PORT: "5432"
       DB_NAME: "fraud_db"
+      KAFKA_USER: "kafka-admin"
+      KAFKA_PASSWORD: "kafka-admin-pass"
 
       # Kafka configuration (connects to existing kafka service)
       KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
