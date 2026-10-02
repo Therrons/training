@@ -6,7 +6,7 @@ namespace:
   name: fraud-poc-api
 
 image:
-  repository: fraud-poc-project
+  repository: therrons982/fraud-poc-api
   tag: offline
   pullPolicy: IfNotPresent
 
