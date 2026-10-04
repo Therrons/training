@@ -71,7 +71,7 @@ try {
 
     $DB_USERNAME = $SecretJson.DB_USERNAME
     $DB_PASSWORD = $SecretJson.DB_PASSWORD
-    $KAFKA_USERNAME = $SecretJson.KAFKA_USER
+    $KAFKA_USER = $SecretJson.KAFKA_USER
     $KAFKA_PASSWORD = $SecretJson.KAFKA_PASSWORD
 
     if (-not $DB_USERNAME -or -not $DB_PASSWORD) {
@@ -103,7 +103,7 @@ Write-Host ""
 Write-Host "Step 5: Deploying with Helm..." -ForegroundColor Blue
 
 try {
-    helm upgrade --install $AppName ./charts -f charts/values-localhost-https.yaml --set env.DB_USERNAME=$DB_USERNAME --set env.DB_PASSWORD=$DB_PASSWORD --set env.KAFKA_USERNAME=$KAFKA_USERNAME --set env.KAFKA_PASSWORD=$KAFKA_PASSWORD --create-namespace -n $Namespace | Out-Null
+    helm upgrade --install $AppName ./charts -f charts/values-localhost-https.yaml --set env.DB_USERNAME=$DB_USERNAME --set env.DB_PASSWORD=$DB_PASSWORD --set env.KAFKA_USER=$KAFKA_USER --set env.KAFKA_PASSWORD=$KAFKA_PASSWORD --create-namespace -n $Namespace | Out-Null
     Write-Host "  OK: Helm deployment completed" -ForegroundColor Green
 }
 catch {

@@ -59,6 +59,15 @@ spec:
             - name: DB_PASSWORD
               value: {{ .Values.env.DB_PASSWORD | quote }}
             {{- end }}
+            # Kafka configuration
+            {{- if .Values.env.KAFKA_USER }}
+            - name: KAFKA_USER
+              value: {{ .Values.env.KAFKA_USER | quote }}
+            {{- end }}
+            {{- if .Values.env.KAFKA_PASSWORD }}
+            - name: KAFKA_PASSWORD
+              value: {{ .Values.env.KAFKA_PASSWORD | quote }}
+            {{- end }}
             {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.k8sSecretName }}
             - name: DB_Id
               valueFrom:
