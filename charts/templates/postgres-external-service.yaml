@@ -1,0 +1,32 @@
+---
+# Service to reach Docker PostgreSQL running on the host
+# Uses manual Endpoints to point to the external Docker host
+apiVersion: v1
+kind: Service
+metadata:
+  name: fraud-poc-project-postgres
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
+  clusterIP: None  # Headless service for direct DNS resolution
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: fraud-poc-project-postgres
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: postgres
+subsets:
+  - addresses:
+      - ip: 192.168.127.2
+    ports:
+      - name: postgresql
+        port: 5432

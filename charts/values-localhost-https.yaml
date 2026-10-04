@@ -6,8 +6,8 @@ namespace:
   name: fraud-poc-api
 
 image:
-  repository: fraud-poc-project
-  tag: offline
+  repository: therrons982/fraud-poc-api
+  tag: latest
   pullPolicy: IfNotPresent
 
 replicaCount: 1
@@ -24,6 +24,8 @@ env:
   DB_NAME: "fraud_db"
   DB_USERNAME: "therrons"
   DB_PASSWORD: "therrons"
+  KAFKA_USER: "kafka-admin"
+  KAFKA_PASSWORD: "kafka-admin-pass"
 
 containerPort: 8083
 

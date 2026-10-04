@@ -98,10 +98,7 @@ resource "aws_iam_role" "fraud_POC_role" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = [
-              "repo:Therrons/training:ref:refs/heads/K8S",
-              "repo:Therrons/training:ref:refs/heads/K8S"
-            ]
+            "token.actions.githubusercontent.com:sub": "repo:Therrons/training:*"
           }
         }
       }
