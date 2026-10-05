@@ -73,9 +73,16 @@ try {
     $DB_PASSWORD = $SecretJson.DB_PASSWORD
     $KAFKA_USER = $SecretJson.KAFKA_USER
     $KAFKA_PASSWORD = $SecretJson.KAFKA_PASSWORD
+    $API_USERNAME = $SecretJson.API_USERNAME
+    $API_PASSWORD = $SecretJson.API_PASSWORD
 
     if (-not $DB_USERNAME -or -not $DB_PASSWORD) {
         Write-Host "ERROR: Missing required secrets" -ForegroundColor Red
+        exit
+    }
+
+    if (-not $API_USERNAME -or -not $API_PASSWORD) {
+        Write-Host "ERROR: Missing API credentials in secrets" -ForegroundColor Red
         exit
     }
 
@@ -103,7 +110,14 @@ Write-Host ""
 Write-Host "Step 5: Deploying with Helm..." -ForegroundColor Blue
 
 try {
-    helm upgrade --install $AppName ./charts -f charts/values-localhost-https.yaml --set env.DB_USERNAME=$DB_USERNAME --set env.DB_PASSWORD=$DB_PASSWORD --set env.KAFKA_USER=$KAFKA_USER --set env.KAFKA_PASSWORD=$KAFKA_PASSWORD --create-namespace -n $Namespace | Out-Null
+    helm upgrade --install $AppName ./charts -f charts/values-localhost-https.yaml `
+        --set env.DB_USERNAME=$DB_USERNAME `
+        --set env.DB_PASSWORD=$DB_PASSWORD `
+        --set env.KAFKA_USER=$KAFKA_USER `
+        --set env.KAFKA_PASSWORD=$KAFKA_PASSWORD `
+        --set env.API_USERNAME=$API_USERNAME `
+        --set env.API_PASSWORD=$API_PASSWORD `
+        --create-namespace -n $Namespace | Out-Null
     Write-Host "  OK: Helm deployment completed" -ForegroundColor Green
 }
 catch {

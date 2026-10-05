@@ -4,17 +4,44 @@
         <name>fraud_poc_project</name>
     </assembly>
     <members>
+        <member name="M:fraud_poc_project.Controllers.FraudController.Login(fraud_poc_project.Controllers.LoginRequest)">
+            <summary>
+            Authenticate with username and password to obtain a JWT token.
+            </summary>
+            <remarks>
+            Use the returned token in the Authorization header as: Bearer {token}
+            </remarks>
+        </member>
         <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
             <summary>
             Query fraud-evaluated transaction events by date range and optional filters.
             </summary>
             <remarks>
             The DateFrom and DateTo formats expects the following format: 2024-01-01 09:00:00
+            Requires authentication: Include JWT token in Authorization header as "Bearer {token}"
             </remarks>
         </member>
         <member name="M:fraud_poc_project.Controllers.FraudController.GetRuleResults(System.Int64)">
             <summary>
             Retrieve all fraud rule results for a specific fraud event.
+            </summary>
+            <remarks>
+            Requires authentication: Include JWT token in Authorization header as "Bearer {token}"
+            </remarks>
+        </member>
+        <member name="T:fraud_poc_project.Controllers.LoginRequest">
+            <summary>
+            Request model for user login
+            </summary>
+        </member>
+        <member name="P:fraud_poc_project.Controllers.LoginRequest.Username">
+            <summary>
+            The username to authenticate
+            </summary>
+        </member>
+        <member name="P:fraud_poc_project.Controllers.LoginRequest.Password">
+            <summary>
+            The password to authenticate
             </summary>
         </member>
         <member name="T:fraud_poc_project.Controllers.LoadSimulatorController">
@@ -29,6 +56,41 @@
             <param name="count">Number of events to produce (1–1000, default 50).</param>
             <param name="highFraudRatio">Fraction of events that should look fraudulent (0.0–1.0, default 0.2).</param>
             <param name="cancellationToken">Cancellation token.</param>
+        </member>
+        <member name="T:fraud_poc_project.Services.IAuthenticationService">
+            <summary>
+            Service for authenticating API users against configured credentials from AWS Secrets Manager
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Services.AuthenticationService.ValidateCredentials(System.String,System.String)">
+            <summary>
+            Validates provided credentials against configured credentials using constant-time comparison
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Services.AuthenticationService.ConstantTimeCompare(System.String,System.String)">
+            <summary>
+            Constant-time string comparison to prevent timing attacks
+            </summary>
+        </member>
+        <member name="T:fraud_poc_project.Services.IJwtService">
+            <summary>
+            Service for generating and validating JWT tokens
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Services.JwtService.GenerateToken(System.String,System.String)">
+            <summary>
+            Generates a JWT token if credentials are valid
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Services.JwtService.GenerateToken(System.String)">
+            <summary>
+            Generates a JWT token for the authenticated user
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Services.JwtService.ValidateToken(System.String)">
+            <summary>
+            Validates a JWT token and returns its claims principal
+            </summary>
         </member>
     </members>
 </doc>

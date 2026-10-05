@@ -26,6 +26,8 @@ env:
   DB_PASSWORD: "therrons"
   KAFKA_USER: "kafka-admin"
   KAFKA_PASSWORD: "kafka-admin-pass"
+  API_USERNAME: "fraud-analyst"
+  API_PASSWORD: "SecurePass123!"
 
 containerPort: 8083
 

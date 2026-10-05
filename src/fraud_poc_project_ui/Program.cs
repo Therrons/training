@@ -88,7 +88,8 @@ public class Program
         var kafKaProducerIdemPotence = builder.Configuration["KafkaSettings:ProducerSettings:EnableIdempotence"]?.ToLowerInvariant();
         if (kafKaProducerIdemPotence == "true") builder.AddKafkaProducerIdempotence();
 
-        // Step 6: build the app and start handling web requests.
+        // Step 6: configure Swagger, build the app and start handling web requests.
+        builder.ConfigureSwagger();
         var app = builder.Build();
 
         app.UseRouting();
@@ -99,6 +100,10 @@ public class Program
         // Applied only to endpoints marked with [ValidateXss] attribute.
         // Must be after UseRouting() so endpoint metadata is available.
         app.UseMiddleware<CheckForXssMiddleware>();
+
+        // Add authentication and authorization middleware
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.UseSwagger();
 
