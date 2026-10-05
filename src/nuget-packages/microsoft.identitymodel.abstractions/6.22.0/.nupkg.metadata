@@ -1,5 +1,5 @@
 {
   "version": 2,
   "contentHash": "iI+9V+2ciCrbheeLjpmjcqCnhy+r6yCoEcid3nkoFWerHgjVuT6CPM4HODUTtUPe1uwks4wcnAujJ8u+IKogHQ==",
-  "source": "https://api.nuget.org/v3/index.json"
+  "source": "https://capitecbank.jfrog.io/artifactory/api/nuget/v3/credit-domain-nuget/index.json"
 }

@@ -1,5 +1,6 @@
 ﻿using fraud_poc_project.Controllers;
 using fraud_poc_project.Kafka.Consumer;
+using fraud_poc_project.Services;
 using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
 using fraud_poc_project_buss.Helper;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
@@ -44,10 +46,10 @@ namespace fraud_poc_project.Configuration
             RegisterFraudRules(builder);
             RegisterTestOnlyControllers(builder);
             RegisterRetryPipeline(builder);
+            RegisterAuthentication(builder);
+            RegisterJwt(builder);
             RegisterKafka(builder);
             SetupDatabase(builder);
-
-            builder.ConfigureSwagger();
         }
 
         private static void RegisterRetryPipeline(WebApplicationBuilder builder)
@@ -151,6 +153,42 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddSingleton<FraudConsumer>();
             builder.Services.AddHostedService(sp => sp.GetRequiredService<FraudConsumer>());
             builder.Services.AddTransient<ITransactionEventHandler, FraudConsumerWorker>();
+        }
+
+        private static void RegisterAuthentication(WebApplicationBuilder builder)
+        {
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+        }
+
+        private static void RegisterJwt(WebApplicationBuilder builder)
+        {
+            builder.Services.AddScoped<IJwtService, JwtService>();
+
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var secret = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
+            var key = System.Text.Encoding.ASCII.GetBytes(secret);
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+            })
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings["Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            builder.Services.AddAuthorization();
         }
 
         private static void RegisterTestOnlyControllers(WebApplicationBuilder builder)

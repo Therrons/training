@@ -39,6 +39,18 @@ variable "kafka_password" {
   sensitive   = true
 }
 
+variable "api_username" {
+  description = "API username for fraud POC project authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "api_password" {
+  description = "API password for fraud POC project authentication"
+  type        = string
+  sensitive   = true
+}
+
 # ══════════════════════════════════════════════════════════════════════════════
 # AWS SECRETS MANAGER - Single Secret with Multiple Key-Value Pairs
 # ══════════════════════════════════════════════════════════════════════════════
@@ -68,6 +80,8 @@ resource "aws_secretsmanager_secret_version" "fraud_poc_secrets_value" {
     db_password    = var.db_password
     kafka_user     = var.kafka_user
     kafka_password = var.kafka_password
+    api_username   = var.api_username
+    api_password   = var.api_password
   })
 
   # ✅ Uncomment below to prevent updates to existing secrets
@@ -242,6 +256,8 @@ output "fraud_poc_secrets_keys" {
     db_password    = "password value"
     kafka_user     = "kafka user value"
     kafka_password = "kafka password value"
+    api_username   = "api username value"
+    api_password   = "api password value"
   }
   sensitive = true
 }
@@ -252,7 +268,7 @@ output "all_resources_summary" {
     iam_role             = aws_iam_role.fraud_POC_role.name
     inline_policies      = ["ReadFraudPocSecrets", "TerraformExecution"]
     secret_name          = aws_secretsmanager_secret.fraud_poc_secrets.name
-    secret_keys          = ["db_username", "db_password", "kafka_user", "kafka_password"]
+    secret_keys          = ["db_username", "db_password", "kafka_user", "kafka_password", "api_username", "api_password"]
     total_resources      = 3
     region               = "af-south-1"
   }

@@ -3,6 +3,7 @@ using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_repo.Kafka;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -52,6 +53,7 @@ namespace fraud_poc_project.Controllers
         /// <param name="highFraudRatio">Fraction of events that should look fraudulent (0.0–1.0, default 0.2).</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         [HttpPost("simulate")]
+        [Authorize]
         public async Task<ActionResult<LoadSimulationResult>> Simulate(
             [FromQuery] int count = 50,
             [FromQuery] double highFraudRatio = 0.2,
