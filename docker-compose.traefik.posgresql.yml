@@ -38,47 +38,38 @@ services:
   kafka:
     image: bitnamilegacy/kafka:3.9.0
     container_name: kafka-local
-    networks:
-      - local
     ports:
+      - "9092:9092"
       - "9094:9094"
-    volumes:
-      - kafka_data_local:/bitnami/kafka
     environment:
-      # === KRaft Broker Configuration ===
-      KAFKA_CFG_NODE_ID: "1"
-      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
-      KAFKA_KRAFT_CLUSTER_ID: "abcdefghijklmnopqrstuv"
+      # KRaft mode configuration
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
-      # === Network Listeners ===
-      KAFKA_CFG_LISTENERS: "INTERNAL://:9092,EXTERNAL://:9094,CONTROLLER://:9093"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "INTERNAL://kafka:9092,EXTERNAL://localhost:9094"
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT"
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      # Listeners
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,SASL_PLAINTEXT://:9094,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,SASL_PLAINTEXT://192.168.127.2:9094
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
-      # === SASL Authentication ===
-      KAFKA_CFG_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-256"
-      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-256"
+      # SASL configuration - support both PLAIN and SCRAM-SHA-256
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_CFG_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256
+      KAFKA_CLIENT_USERS: kafka-admin
+      KAFKA_CLIENT_PASSWORDS: kafka-admin-pass
+      KAFKA_BROKER_USER: kafka-admin
+      KAFKA_BROKER_PASSWORD: kafka-admin-pass
 
-      # === Users ===
-      KAFKA_CLIENT_USERS: "kafka-user"
-      KAFKA_CLIENT_PASSWORDS: "kafka-user-pass"
-      KAFKA_CFG_SUPER_USERS: "User:kafka-admin"
-      KAFKA_BROKER_USER: "kafka-admin"
-      KAFKA_BROKER_PASSWORD: "kafka-admin-pass"
-      ALLOW_PLAINTEXT_LISTENER: "yes"
+      # Auto-create topics
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "false"
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "kafka-topics.sh", "--version"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+      test: ["CMD", "kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ========================================
   # INFRASTRUCTURE: Kafka UI (Local)
@@ -86,28 +77,15 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui-local
-    depends_on:
-      - kafka
-    networks:
-      - local
     ports:
       - "8081:8080"
     environment:
-      KAFKA_CLUSTERS_0_NAME: "local"
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
-      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: "SASL_PLAINTEXT"
-      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: "SCRAM-SHA-256"
-      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"kafka-admin\" password=\"kafka-admin-pass\";"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.kafka-ui.rule=PathPrefix('/kafka')"
-      - "traefik.http.routers.kafka-ui.entrypoints=web"
-      - "traefik.http.services.kafka-ui.loadbalancer.server.port=8080"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_SASL_ENABLED: "false"
+    depends_on:
+      - kafka
+    restart: unless-stopped
 
   # ========================================
   # DATABASE: PostgreSQL (Local)

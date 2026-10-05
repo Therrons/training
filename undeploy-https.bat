@@ -1,1 +1,0 @@
-helm uninstall fraud-poc-api -n fraud-poc-api --wait
