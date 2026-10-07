@@ -1,11 +1,14 @@
 using fraud_poc_project.CustomAttributes;
+using fraud_poc_project.Exceptions;
 using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Exceptions;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -43,32 +46,46 @@ namespace fraud_poc_project.Controllers
         [AllowAnonymous]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request?.Username) || string.IsNullOrWhiteSpace(request?.Password))
+            try
             {
-                _logger.LogWarning("Login attempt with missing credentials");
-                _metricsService.RecordAuthenticationAttempt(false);
-                return BadRequest(new { error = "Username and password required" });
+                if (string.IsNullOrWhiteSpace(request?.Username) || string.IsNullOrWhiteSpace(request?.Password))
+                {
+                    _logger.LogWarning("Login attempt with missing credentials");
+                    _metricsService.RecordAuthenticationAttempt(false);
+                    return BadRequest(new { error = "Username and password required" });
+                }
+
+                var token = _jwtService.GenerateToken(request.Username, request.Password);
+
+                if (token == null)
+                {
+                    _logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
+                    _metricsService.RecordAuthenticationAttempt(false);
+                    return Unauthorized(new { error = "Invalid credentials" });
+                }
+
+                _logger.LogInformationOnly("Successful login for username: {Username}", request.Username);
+                _metricsService.RecordAuthenticationAttempt(true);
+                return Ok(new
+                {
+                    token.Value.token,
+                    validFrom = token.Value.validFrom.ToShortTimeString(),
+                    validTo = token.Value.validTo.ToShortTimeString(),
+                    expiresIn = string.Concat(3600/60, " minutes"),
+                    tokenType = "Bearer"
+                });
             }
-
-            var token = _jwtService.GenerateToken(request.Username, request.Password);
-
-            if (token == null)
+            catch (AuthenticationException ex)
             {
-                _logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
+                _logger.LogError(ex, "Authentication error for username: {Username}", request?.Username);
                 _metricsService.RecordAuthenticationAttempt(false);
-                return Unauthorized(new { error = "Invalid credentials" });
+                return Unauthorized(new { error = "Authentication failed", detail = ex.Message });
             }
-
-            _logger.LogInformationOnly("Successful login for username: {Username}", request.Username);
-            _metricsService.RecordAuthenticationAttempt(true);
-            return Ok(new
+            catch (Exception ex)
             {
-                token.Value.token,
-                validFrom = token.Value.validFrom.ToShortTimeString(),
-                validTo = token.Value.validTo.ToShortTimeString(),
-                expiresIn = string.Concat(3600/60, " minutes"),
-                tokenType = "Bearer"
-            });
+                _logger.LogError(ex, "Unexpected error during login");
+                return StatusCode(500, new { error = "An unexpected error occurred during authentication" });
+            }
         }
 
         /// <summary>

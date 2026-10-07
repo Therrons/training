@@ -1,10 +1,12 @@
 ﻿using Confluent.Kafka;
 using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Exceptions;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
+using fraud_poc_project_repo.Exceptions;
 using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.Extensions.DependencyInjection;
@@ -360,12 +362,26 @@ namespace fraud_poc_project.Kafka.Consumer
                         _logger.LogInformationOnly("No Fraud Event Records found for Transaction Event={event}", model);
                 }
             }
+            catch (FraudEvaluationException ex)
+            {
+                stopwatch.Stop();
+                _logger.LogError(ex, "Fraud evaluation failed for transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
+                linkedCts.Cancel();
+                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Fraud evaluation error: {ex.Message}");
+            }
+            catch (FraudRepositoryException ex)
+            {
+                stopwatch.Stop();
+                _logger.LogError(ex, "Database error processing transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
+                linkedCts.Cancel();
+                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Database error: {ex.Message}");
+            }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                _logger.LogError(ex, "Error processing transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
+                _logger.LogError(ex, "Unexpected error processing transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
                 linkedCts.Cancel();
-                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), ex.Message);
+                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Unexpected error: {ex.Message}");
             }
         }
 

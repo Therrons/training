@@ -181,6 +181,11 @@
             <response code="200">Metrics reset successfully</response>
             <response code="401">Unauthorized</response>
         </member>
+        <member name="T:fraud_poc_project.Exceptions.AuthenticationException">
+            <summary>
+            Thrown when authentication/JWT operations fail
+            </summary>
+        </member>
         <member name="T:fraud_poc_project.Services.IAuthenticationService">
             <summary>
             Service for authenticating API users against configured credentials from AWS Secrets Manager
