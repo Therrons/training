@@ -1,3 +1,4 @@
+using fraud_poc_project_buss.Helper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -26,7 +27,7 @@ namespace fraud_poc_project.Services
             _validPassword = configuration["API_PASSWORD"]
                 ?? throw new InvalidOperationException("API_PASSWORD not configured");
 
-            _logger.LogInformation("AuthenticationService initialized");
+            _logger.LogInformationOnly("AuthenticationService initialized");
         }
 
         /// <summary>

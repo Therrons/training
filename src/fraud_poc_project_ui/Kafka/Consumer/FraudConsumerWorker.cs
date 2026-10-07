@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
@@ -13,6 +14,7 @@ using Newtonsoft.Json;
 using Polly.Registry;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +32,7 @@ namespace fraud_poc_project.Kafka.Consumer
         private readonly IServiceScopeFactory _serviceLocator;
         private readonly IFraudEvaluationService _evaluationService;
         private readonly ResiliencePipelineProvider<string> _resilienceProvider;
+        private readonly IMetricsService _metricsService;
 
         private readonly List<ConsumeResult<string, byte[]>> _batch = [];
 
@@ -47,6 +50,7 @@ namespace fraud_poc_project.Kafka.Consumer
             IServiceScopeFactory serviceScopeFactory,
             IFraudRepository fraudRepository,
             IFraudEvaluationService evaluationService,
+            IMetricsService metricsService,
             ILogger<FraudConsumerWorker> logger)
         {
             _brokerOptions = brokerOptions.Value;
@@ -56,6 +60,7 @@ namespace fraud_poc_project.Kafka.Consumer
             _serviceLocator = serviceScopeFactory;
             _fraudRepository = fraudRepository;
             _evaluationService = evaluationService;
+            _metricsService = metricsService;
             _logger = logger;
 
             _batchSequentialProcessing = _consumerOptions.SequentialProcessing;
@@ -296,6 +301,7 @@ namespace fraud_poc_project.Kafka.Consumer
         {
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             var linkedToken = linkedCts.Token;
+            var stopwatch = Stopwatch.StartNew();
 
             try
             {
@@ -304,15 +310,48 @@ namespace fraud_poc_project.Kafka.Consumer
                 var model = JsonConvert.SerializeObject(consumeResult.transactionEvent);
                 if (model != null)
                 {
+                    var evaluationStopwatch = Stopwatch.StartNew();
                     var result = _evaluationService.Evaluate(consumeResult.transactionEvent);
+                    evaluationStopwatch.Stop();
 
                     if (result != null)
                     {
+                        var dbStopwatch = Stopwatch.StartNew();
                         var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
                         await pipeLineRetry.ExecuteAsync(async _ =>
                         {
                             await _fraudRepository.SaveFraudEvaluationAsync(result);
                         });
+                        dbStopwatch.Stop();
+
+                        // Record database operation metric (INSERT)
+                        _metricsService.RecordDatabaseOperation("INSERT", dbStopwatch.ElapsedMilliseconds);
+
+                        stopwatch.Stop();
+
+                        // Record transaction metrics
+                        _metricsService.RecordTransactionProcessed(
+                            result.IsFlagged,
+                            result.FraudScore,
+                            stopwatch.ElapsedMilliseconds
+                        );
+
+                        // Record individual rule metrics
+                        if (result.RuleResults != null && result.RuleResults.Count > 0)
+                        {
+                            // Distribute the evaluation time among all rules
+                            long timePerRule = Math.Max(1, evaluationStopwatch.ElapsedMilliseconds / result.RuleResults.Count);
+
+                            foreach (var ruleResult in result.RuleResults)
+                            {
+                                _metricsService.RecordRuleExecution(
+                                    ruleResult.RuleCode,
+                                    ruleResult.IsTriggered,
+                                    timePerRule
+                                );
+                            }
+                        }
+
                         _logger.LogInformationOnly("Processed transaction {TransactionId}: flagged={IsFlagged}, score={FraudScore}",
                             consumeResult.transactionEvent.TransactionId.ToString(), result.IsFlagged, result.FraudScore);
                         _logger.LogSensitiveData("Transaction data {TransactionId}: ", result);
@@ -323,6 +362,7 @@ namespace fraud_poc_project.Kafka.Consumer
             }
             catch (Exception ex)
             {
+                stopwatch.Stop();
                 _logger.LogError(ex, "Error processing transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
                 linkedCts.Cancel();
                 await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), ex.Message);

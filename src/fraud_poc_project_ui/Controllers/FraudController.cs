@@ -1,6 +1,7 @@
 using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,15 +18,18 @@ namespace fraud_poc_project.Controllers
     {
         private readonly IFraudRepository _repository;
         private readonly IJwtService _jwtService;
+        private readonly IMetricsService _metricsService;
         private readonly ILogger<FraudController> _logger;
 
         public FraudController(
             IFraudRepository repository,
             IJwtService jwtService,
+            IMetricsService metricsService,
             ILogger<FraudController> logger)
         {
             _repository = repository;
             _jwtService = jwtService;
+            _metricsService = metricsService;
             _logger = logger;
         }
 
@@ -42,6 +46,7 @@ namespace fraud_poc_project.Controllers
             if (string.IsNullOrWhiteSpace(request?.Username) || string.IsNullOrWhiteSpace(request?.Password))
             {
                 _logger.LogWarning("Login attempt with missing credentials");
+                _metricsService.RecordAuthenticationAttempt(false);
                 return BadRequest(new { error = "Username and password required" });
             }
 
@@ -50,14 +55,18 @@ namespace fraud_poc_project.Controllers
             if (token == null)
             {
                 _logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
+                _metricsService.RecordAuthenticationAttempt(false);
                 return Unauthorized(new { error = "Invalid credentials" });
             }
 
-            _logger.LogInformation("Successful login for username: {Username}", request.Username);
+            _logger.LogInformationOnly("Successful login for username: {Username}", request.Username);
+            _metricsService.RecordAuthenticationAttempt(true);
             return Ok(new
             {
-                token,
-                expiresIn = 3600,
+                token.Value.token,
+                validFrom = token.Value.validFrom.ToShortTimeString(),
+                validTo = token.Value.validTo.ToShortTimeString(),
+                expiresIn = string.Concat(3600/60, " minutes"),
                 tokenType = "Bearer"
             });
         }

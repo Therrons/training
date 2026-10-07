@@ -48,6 +48,7 @@ namespace fraud_poc_project.Configuration
             RegisterRetryPipeline(builder);
             RegisterAuthentication(builder);
             RegisterJwt(builder);
+            RegisterMetrics(builder);
             RegisterKafka(builder);
             SetupDatabase(builder);
         }
@@ -198,6 +199,13 @@ namespace fraud_poc_project.Configuration
                 builder.Services.AddTransient<LoadSimulatorController>();
                 builder.Services.AddTransient<FraudController>();
             }
+        }
+
+        private static void RegisterMetrics(WebApplicationBuilder builder)
+        {
+            // Register metrics service as a singleton
+            // All components can inject IMetricsService to record metrics
+            builder.Services.AddSingleton<IMetricsService, MetricsService>();
         }
     }
 }

@@ -1,4 +1,5 @@
 using fraud_poc_project.Models;
+using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -72,6 +74,10 @@ namespace fraud_poc_project.Controllers
 
             cancellationToken = cancellationToken == default ? new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token : cancellationToken;
 
+            // Get IMetricsService from service scope
+            using var scope = _serviceScopeFactory.CreateScope();
+            var metricsService = scope.ServiceProvider.GetRequiredService<IMetricsService>();
+
             for (int i = 0; i < count; i++)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -80,9 +86,16 @@ namespace fraud_poc_project.Controllers
                 bool isFraudulent = rng.NextDouble() < highFraudRatio;
                 var @event = BuildEvent(rng, isFraudulent);
 
+                var stopwatch = Stopwatch.StartNew();
                 bool ok = await _producer.ProduceAsync(@event, cancellationToken);
+                stopwatch.Stop();
+
                 if (ok)
+                {
                     produced++;
+                    // Record Kafka PRODUCE metric
+                    metricsService.RecordKafkaEvent("PRODUCE", stopwatch.ElapsedMilliseconds);
+                }
                 else
                     failed++;
 
