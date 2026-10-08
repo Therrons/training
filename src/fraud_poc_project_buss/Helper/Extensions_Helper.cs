@@ -22,6 +22,11 @@ namespace fraud_poc_project_buss.Helper
 #endif
         }
 
+        public static bool SensitiveDataCompare(this string givenValue, string existingValue)
+        {
+            return BCrypt.Net.BCrypt.Verify(givenValue, existingValue);
+        }
+
         // Converts a Kafka message with a byte[] value into a Kafka message with a string value.
         public static Message<string, string> Stream_Byte_Key_Value_To_String_Key_Value(this Message<string, byte[]> kvp)
         {

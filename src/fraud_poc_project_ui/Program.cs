@@ -1,5 +1,6 @@
 using fraud_poc_project.Configuration;
 using fraud_poc_project.Middleware;
+using fraud_poc_project.Utilities;
 using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
@@ -14,15 +15,12 @@ using System.Threading.Tasks;
 
 public class Program
 {
-    public static string file_Path_Name = "";
     private const string FileName = "input.txt";
-
 
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Step 1: set up logging (Serilog) so everything below can log to the console
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
@@ -30,44 +28,34 @@ public class Program
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
 
-        builder.Services.AddSerilog();  // Add Serilog services to the DI container
-        builder.Host.UseSerilog();      // Use Serilog for logging
+        builder.Services.AddSerilog();
+        builder.Host.UseSerilog();
 
-        // Step 2: load secrets and settings, then register every service the app needs.
-        builder.AddConfigurations();    // Add configurations from appsettings.json, environment variables, and command line arguments
-        builder.ConfigureSecrets();     // Load secrets and add them to the configuration
-        builder.AddServices_AddDI();    // Add application services to the DI container
-        builder.AddCorsConfiguration(); // Add CORS configuration to the DI container - the alternative would be to add CORS via Nginx
-                                        // or native cloud solution, eg AWS API Gateway
+        builder.AddConfigurations();
+        builder.ConfigureSecrets();
+        builder.AddServices_AddDI();
+        builder.AddCorsConfiguration();
 
         if (args != null && args.Length > 0)
             builder.Configuration.AddCommandLine(args);
 
-        // Step 3: determine the write directory for the app, and create it if it doesn't exist.
-        var writeDir =
-            builder.Configuration["write-dir"] ??
-            Environment.GetEnvironmentVariable("write_dir") ??
-            Path.Combine(AppContext.BaseDirectory, "data"); // Default write directory - if not specified in configuration or environment variable
+        var configuredWriteDir = builder.Configuration["write-dir"] ?? Environment.GetEnvironmentVariable("write_dir");
+        var writeDir = PathUtility.GetDataDirectory(configuredWriteDir);
+        PathUtility.EnsureDirectoryExists(writeDir);
 
         var version_docker_build = Environment.GetEnvironmentVariable("Build_Version") ??
             "Docker Build Version: UNKNOWN";
 
-        if (!Directory.Exists(writeDir)) Directory.CreateDirectory(writeDir);
-
-
-        // use for testing purposes only, to write a file to the host machine
 #if DEBUG
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string> { { "file_Path_Name", Path.Combine(writeDir, FileName) } });
 #endif
 
         var isLocal = builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
 
-        // Step 4: register the API framework pieces (controllers, Swagger, health checks).
-        builder.Services.AddControllers();          // Add controller services to the DI container
-        builder.Services.AddEndpointsApiExplorer(); // Add API explorer services to the DI container
-        builder.Services.AddHealthChecks();         // Add health check services to the DI container
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddHealthChecks();
 
-        // Add CORS support
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -83,33 +71,26 @@ public class Program
             options.AllowedHosts = new[] { "*" };
         });
 
-        // Step 5: if idempotent Kafka producing is turned on, double-check the broker
-        // supports it before we finish starting up (see KafkaIdempotence.cs).
+        // Validate idempotent producer config before startup (see KafkaIdempotence.cs)
         var kafKaProducerIdemPotence = builder.Configuration["KafkaSettings:ProducerSettings:EnableIdempotence"]?.ToLowerInvariant();
         if (kafKaProducerIdemPotence == "true") builder.AddKafkaProducerIdempotence();
 
-        // Step 6: configure Swagger, build the app and start handling web requests.
         builder.ConfigureSwagger();
         var app = builder.Build();
 
         app.UseRouting();
-
         app.UseCors();
 
-        // Validate incoming requests for XSS attacks.
-        // Applied only to endpoints marked with [ValidateXss] attribute.
-        // Must be after UseRouting() so endpoint metadata is available.
+        // XSS validation middleware - only on [ValidateXss] endpoints
         app.UseMiddleware<CheckForXssMiddleware>();
 
-        // Add authentication and authorization middleware
         app.UseAuthentication();
         app.UseAuthorization();
-
         app.UseSwagger();
 
-        // Step 7: configure Swagger UI based on the environment (local vs production).
+        // Restrict Swagger UI submit methods in production
         if (!isLocal)
-            app.UseSwaggerUI(settings => settings.SupportedSubmitMethods([SubmitMethod.Get, SubmitMethod.Post, SubmitMethod.Put])); // in production only allow these methods to be submitted via Swagger UI
+            app.UseSwaggerUI(settings => settings.SupportedSubmitMethods([SubmitMethod.Get, SubmitMethod.Post, SubmitMethod.Put]));
         else
             app.UseSwaggerUI(c => c.DefaultModelRendering(ModelRendering.Example));
 

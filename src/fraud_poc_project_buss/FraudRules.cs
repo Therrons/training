@@ -2,12 +2,6 @@ using fraud_poc_project_buss.Dto;
 
 namespace fraud_poc_project_buss
 {
-    // This file holds all the "fraud rules". Each rule looks at one transaction
-    // and answers a simple question: "does this look suspicious?"
-    // If it does, the rule adds some points ("ScoreContribution") to the transaction's
-    // overall fraud score. FraudEvaluationService (in the Service folder) adds up the
-    // points from every rule to decide if a transaction should be flagged.
-
     public interface IFraudRule
     {
         string RuleCode { get; }
@@ -34,7 +28,6 @@ namespace fraud_poc_project_buss
 
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
-            // Triggered when the transaction's amount (ignoring +/-) is bigger than our limit.
             var triggered = Math.Abs(tx.Amount) > _threshold;
             return new FraudRuleSetRecord
             {
@@ -63,14 +56,12 @@ namespace fraud_poc_project_buss
 
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
-            // Card-not-present means the physical card wasn't swiped/tapped (e.g. an online purchase).
             var isCnp = string.Equals(tx.TransactionType, "CNP", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(tx.Channel, "Online", StringComparison.OrdinalIgnoreCase);
 
             var isForeign = !string.IsNullOrWhiteSpace(tx.CountryCode)
                             && !string.Equals(tx.CountryCode, _homeCountry, StringComparison.OrdinalIgnoreCase);
 
-            // Triggered only when both conditions are true at once.
             var triggered = isCnp && isForeign;
             return new FraudRuleSetRecord
             {
@@ -102,7 +93,6 @@ namespace fraud_poc_project_buss
             var isAtm = string.Equals(tx.TransactionType, "ATM", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(tx.Channel, "ATM", StringComparison.OrdinalIgnoreCase);
 
-            // Triggered only for ATM withdrawals over the limit
             var triggered = isAtm && Math.Abs(tx.Amount) > _limit;
             return new FraudRuleSetRecord
             {
@@ -129,7 +119,6 @@ namespace fraud_poc_project_buss
 
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
-            // Triggered when the merchant's category is one of the risky ones in our list above.
             var triggered = !string.IsNullOrWhiteSpace(tx.MerchantCategory)
                             && HighRiskCategories.Contains(tx.MerchantCategory);
             return new FraudRuleSetRecord

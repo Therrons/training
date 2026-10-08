@@ -1,3 +1,5 @@
+
+using fraud_poc_project_buss.Helper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -9,12 +11,9 @@ using System.Text;
 
 namespace fraud_poc_project.Services
 {
-    /// <summary>
-    /// Service for generating and validating JWT tokens
-    /// </summary>
     public interface IJwtService
     {
-        string? GenerateToken(string username, string password);
+        (string token, DateTime validFrom, DateTime validTo)? GenerateToken(string username, string password);
         ClaimsPrincipal? ValidateToken(string token);
     }
 
@@ -43,13 +42,10 @@ namespace fraud_poc_project.Services
             _audience = jwtSettings["Audience"] ?? "fraud-poc-api-client";
             _expirationMinutes = int.Parse(jwtSettings["ExpirationMinutes"] ?? "60");
 
-            _logger.LogInformation("JwtService initialized with issuer: {Issuer}, audience: {Audience}", _issuer, _audience);
+            _logger.LogInformationOnly("JwtService initialized with issuer: {Issuer}, audience: {Audience}", _issuer, _audience);
         }
 
-        /// <summary>
-        /// Generates a JWT token if credentials are valid
-        /// </summary>
-        public string? GenerateToken(string username, string password)
+        public (string token, DateTime validFrom, DateTime validTo)? GenerateToken(string username, string password)
         {
             if (!_authService.ValidateCredentials(username, password))
             {
@@ -58,14 +54,11 @@ namespace fraud_poc_project.Services
             }
 
             var token = GenerateToken(username);
-            _logger.LogInformation("JWT token generated successfully for username: {Username}", username);
+            _logger.LogInformationOnly("JWT token generated successfully for username: {Username}", username);
             return token;
         }
 
-        /// <summary>
-        /// Generates a JWT token for the authenticated user
-        /// </summary>
-        private string GenerateToken(string username)
+        private (string token, DateTime validFrom, DateTime validTo) GenerateToken(string username)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secret);
@@ -90,12 +83,10 @@ namespace fraud_poc_project.Services
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local);
+            return (tokenHandler.WriteToken(token), localNow, localNow.AddMinutes(_expirationMinutes));
         }
 
-        /// <summary>
-        /// Validates a JWT token and returns its claims principal
-        /// </summary>
         public ClaimsPrincipal? ValidateToken(string token)
         {
             try

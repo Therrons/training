@@ -87,7 +87,7 @@ namespace fraud_poc_project_repo.Kafka
             try
             {
                 var kafkaMessage = BuildKafkaMessage(message);
-                var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage, cancellationToken);
+                var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage, cancellationToken).ConfigureAwait(false);
 
                 if (deliveryResult.Status == PersistenceStatus.Persisted)
                 {
@@ -155,7 +155,7 @@ namespace fraud_poc_project_repo.Kafka
                 _logger.LogError("DeadLetterTopic is not configured");
                 return false;
             }
-            return await ProduceAsync(message, cancellationToken);
+            return await ProduceAsync(message, cancellationToken).ConfigureAwait(false);
         }
 
         public void Flush(TimeSpan? timeout = null)

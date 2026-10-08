@@ -1,4 +1,6 @@
+using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Models;
+using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
@@ -9,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +21,7 @@ namespace fraud_poc_project.Controllers
     /// Produces synthetic transaction events to Kafka to simulate load.
     /// </summary>
     [ApiController]
+    [ValidateXss]
     [Route("api/load")]
     public class LoadSimulatorController : ControllerBase
     {
@@ -72,23 +76,36 @@ namespace fraud_poc_project.Controllers
 
             cancellationToken = cancellationToken == default ? new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token : cancellationToken;
 
+            // Get IMetricsService from service scope
+            using var scope = _serviceScopeFactory.CreateScope();
+            var metricsService = scope.ServiceProvider.GetRequiredService<IMetricsService>();
+
             for (int i = 0; i < count; i++)
             {
                 if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogInformationOnly("Consumer operation cancelled");
                     break;
+                }
 
                 bool isFraudulent = rng.NextDouble() < highFraudRatio;
                 var @event = BuildEvent(rng, isFraudulent);
 
-                bool ok = await _producer.ProduceAsync(@event, cancellationToken);
+                var stopwatch = Stopwatch.StartNew();
+                bool ok = await _producer.ProduceAsync(@event, cancellationToken).ConfigureAwait(false);
+                stopwatch.Stop();
+
                 if (ok)
+                {
                     produced++;
+                    metricsService.RecordKafkaEvent("PRODUCE", stopwatch.ElapsedMilliseconds);
+                }
                 else
                     failed++;
 
-                // small stagger to avoid overwhelming the broker in a single burst
+                // Stagger batches to prevent broker overload
                 if (i % 50 == 49)
-                    await Task.Delay(50, cancellationToken);
+                    await Task.Delay(50, cancellationToken).ConfigureAwait(false);
             }
 
             _logger.LogInformationOnly(

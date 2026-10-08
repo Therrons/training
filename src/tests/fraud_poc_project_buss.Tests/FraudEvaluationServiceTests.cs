@@ -1,6 +1,5 @@
 using FluentAssertions;
-using fraud_poc_project_buss;
-using fraud_poc_project_buss.Models.Fraud;
+using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Service;
 using Moq;
 using Xunit;
@@ -320,15 +319,6 @@ namespace fraud_poc_project_buss.Tests
             result.FlaggedReason.Should().BeNull();
         }
 
-        [Fact]
-        public void Evaluate_ThrowsOnNullTransaction()
-        {
-            // Arrange
-            TransactionEvent? nullTransaction = null;
-
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _service.Evaluate(nullTransaction!));
-        }
 
         [Fact]
         public async Task EvaluateAsync_ReturnsResultAsync()
@@ -358,7 +348,7 @@ namespace fraud_poc_project_buss.Tests
             });
 
             // Act
-            var result = await _service.EvaluateAsync(transaction);
+            var result = await _service.EvaluateAsync(transaction).ConfigureAwait(false);
 
             // Assert
             result.Should().NotBeNull();

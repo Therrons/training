@@ -38,7 +38,7 @@ namespace fraud_poc_project.Configuration
         {
             _logger.LogInformationOnly("Attempting to connect to Kafka broker at {BootstrapServers} with idempotence enabled...", _brokerSettings.BootstrapServers);
 
-            var result = await TryConnectAsync(maxRetries, delayMs, coordinatorTimeoutMs);
+            var result = await TryConnectAsync(maxRetries, delayMs, coordinatorTimeoutMs).ConfigureAwait(false);
 
             if (result.IsHealthy)
             {
@@ -47,7 +47,7 @@ namespace fraud_poc_project.Configuration
             }
 
             _logger.LogWarning("Broker connection failed with idempotence enabled. Attempting fallback to non-idempotent mode...");
-            result = await TryConnectAsync(maxRetries, delayMs, coordinatorTimeoutMs, enableIdempotenceTest: false);
+            result = await TryConnectAsync(maxRetries, delayMs, coordinatorTimeoutMs, enableIdempotenceTest: false).ConfigureAwait(false);
 
             if (result.IsHealthy)
             {
@@ -101,7 +101,7 @@ namespace fraud_poc_project.Configuration
 
                     if (attempt < maxRetries)
                     {
-                        await Task.Delay(delayMs);
+                        await Task.Delay(delayMs).ConfigureAwait(false);
                     }
                 }
             }

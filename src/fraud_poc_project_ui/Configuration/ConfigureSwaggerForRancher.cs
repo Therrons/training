@@ -1,18 +1,15 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using fraud_poc_project.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 
 namespace fraud_poc_project.Configuration
 {
     public static class ConfigureSwaggerForRancher
     {
-        // This method sets up the Swagger documentation and UI, including the
-        // title, version, description, and contact information. It also includes XML comments for better documentation.
         public static void ConfigureSwagger(this WebApplicationBuilder builder)
         {
             builder.Services.AddSwaggerGen(c =>
@@ -29,10 +26,7 @@ namespace fraud_poc_project.Configuration
                     }
                 });
 
-                // ════════════════════════════════════════════════════════════════
-                // JWT Bearer Token Security Scheme
-                // This enables the Authorize button in Swagger UI
-                // ════════════════════════════════════════════════════════════════
+                // JWT Bearer security for Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,
@@ -64,9 +58,10 @@ namespace fraud_poc_project.Configuration
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
+                // Uses PathUtility for cross-platform path management
+                var assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+                var xmlPath = PathUtility.GetXmlDocumentationPath(assemblyName);
+                if (!string.IsNullOrEmpty(xmlPath))
                 {
                     c.IncludeXmlComments(xmlPath);
                 }

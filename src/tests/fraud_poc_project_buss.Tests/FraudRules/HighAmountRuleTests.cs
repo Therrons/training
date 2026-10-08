@@ -1,5 +1,4 @@
 using FluentAssertions;
-using fraud_poc_project_buss;
 using Xunit;
 
 namespace fraud_poc_project_buss.Tests.FraudRules
