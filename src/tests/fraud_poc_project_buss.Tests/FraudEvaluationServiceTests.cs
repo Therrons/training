@@ -318,7 +318,7 @@ namespace fraud_poc_project_buss.Tests
             result.FraudScore.Should().Be(20m);
             result.FlaggedReason.Should().BeNull();
         }
-              
+
 
         [Fact]
         public async Task EvaluateAsync_ReturnsResultAsync()

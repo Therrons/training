@@ -2,7 +2,6 @@ using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Models;
 using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Authorization;
