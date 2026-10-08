@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using fraud_poc_project.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -62,9 +63,10 @@ namespace fraud_poc_project.Configuration
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
+                // Uses PathUtility for cross-platform path management
+                var assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+                var xmlPath = PathUtility.GetXmlDocumentationPath(assemblyName);
+                if (!string.IsNullOrEmpty(xmlPath))
                 {
                     c.IncludeXmlComments(xmlPath);
                 }

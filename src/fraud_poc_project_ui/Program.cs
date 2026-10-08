@@ -1,5 +1,6 @@
 using fraud_poc_project.Configuration;
 using fraud_poc_project.Middleware;
+using fraud_poc_project.Utilities;
 using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
@@ -42,15 +43,13 @@ public class Program
             builder.Configuration.AddCommandLine(args);
 
         // Step 3: determine the write directory for the app, and create it if it doesn't exist.
-        var writeDir =
-            builder.Configuration["write-dir"] ??
-            Environment.GetEnvironmentVariable("write_dir") ??
-            Path.Combine(AppContext.BaseDirectory, "data"); // Default write directory - if not specified in configuration or environment variable
+        // Uses PathUtility for cross-platform path management
+        var configuredWriteDir = builder.Configuration["write-dir"] ?? Environment.GetEnvironmentVariable("write_dir");
+        var writeDir = PathUtility.GetDataDirectory(configuredWriteDir);
+        PathUtility.EnsureDirectoryExists(writeDir);
 
         var version_docker_build = Environment.GetEnvironmentVariable("Build_Version") ??
             "Docker Build Version: UNKNOWN";
-
-        if (!Directory.Exists(writeDir)) Directory.CreateDirectory(writeDir);
 
 
         // use for testing purposes only, to write a file to the host machine
