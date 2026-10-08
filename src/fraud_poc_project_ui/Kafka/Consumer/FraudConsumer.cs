@@ -88,7 +88,7 @@ namespace fraud_poc_project.Kafka.Consumer
                 }
                 ;
                 var tasks = workers.Select(w => RunWorkerWithRetryAsync(w, stoppingToken));
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             finally
             {
@@ -105,7 +105,7 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 try
                 {
-                    await worker.StartAsync(stoppingToken);
+                    await worker.StartAsync(stoppingToken).ConfigureAwait(false);
                     retryCount = 0;
                 }
                 catch (OperationCanceledException)
@@ -117,7 +117,7 @@ namespace fraud_poc_project.Kafka.Consumer
                     retryCount++;
                     _logger.LogError(ex, "Worker failed. Retry {Retry}/{Max}", retryCount, maxRetries);
                     if (retryCount < maxRetries)
-                        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken).ConfigureAwait(false);
                 }
             }
         }

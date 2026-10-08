@@ -30,8 +30,8 @@ namespace fraud_poc_project_repo
         public async Task<long> SaveFraudEvaluationAsync(FraudEventRecord result)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
-            await using var tx = await conn.BeginTransactionAsync();
+            await conn.OpenAsync().ConfigureAwait(false);
+            await using var tx = await conn.BeginTransactionAsync().ConfigureAwait(false);
 
             try
             {
@@ -68,7 +68,7 @@ namespace fraud_poc_project_repo
                     };
                     cmd.Parameters.Add(outParam);
 
-                    await cmd.ExecuteNonQueryAsync();
+                    await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
                     fraudEventId = (long)cmd.Parameters["p_fraud_event_id"].Value;
                 }
 
@@ -83,16 +83,16 @@ namespace fraud_poc_project_repo
                     ruleCmd.Parameters.AddWithValue("rule_description", (object?)ruleResult.RuleDescription ?? DBNull.Value);
                     ruleCmd.Parameters.AddWithValue("is_triggered", ruleResult.IsTriggered);
                     ruleCmd.Parameters.AddWithValue("score_contribution", ruleResult.ScoreContribution);
-                    await ruleCmd.ExecuteNonQueryAsync();
+                    await ruleCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
                 }
 
-                await tx.CommitAsync();
+                await tx.CommitAsync().ConfigureAwait(false);
                 return fraudEventId;
             }
             catch
             {
                 _logger.LogError("Correlation ID: {correlationID} - Failed to write Fraud data to Database for Model={model}", result?.Event?.CorrelationId ?? Guid.NewGuid(), JsonConvert.SerializeObject(result));
-                await tx.RollbackAsync();
+                await tx.RollbackAsync().ConfigureAwait(false);
                 throw;
             }
         }
@@ -102,7 +102,7 @@ namespace fraud_poc_project_repo
             try
             {
                 await using var conn = new NpgsqlConnection(_connectionString);
-                await conn.OpenAsync();
+                await conn.OpenAsync().ConfigureAwait(false);
                 await using var cmd = new NpgsqlCommand(
                     $"CALL \"{_schema}\".sp_insert_dlt_error(@topic_data, @topic_schema, @topic_name, @topic_dlt_name, @message_data, @error)",
                     conn);
@@ -112,7 +112,7 @@ namespace fraud_poc_project_repo
                 cmd.Parameters.AddWithValue("topic_dlt_name", topic + ".dlt");
                 cmd.Parameters.AddWithValue("message_data", messageData);
                 cmd.Parameters.AddWithValue("error", error.Length > 2000 ? error[..2000] : error);
-                await cmd.ExecuteNonQueryAsync();
+                await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
             catch
             {
@@ -128,7 +128,7 @@ namespace fraud_poc_project_repo
                 var results = new List<FraudEventRecord>();
 
                 await using var conn = new NpgsqlConnection(_connectionString);
-                await conn.OpenAsync();
+                await conn.OpenAsync().ConfigureAwait(false);
 
                 await using var cmd = new NpgsqlCommand(
                     $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
@@ -141,8 +141,8 @@ namespace fraud_poc_project_repo
                 cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
 
-                await using var reader = await cmd.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
+                await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                while (await reader.ReadAsync().ConfigureAwait(false))
                 {
                     results.Add(MapFraudEventRecord(reader));
                 }
@@ -164,7 +164,7 @@ namespace fraud_poc_project_repo
                 var results = new List<FraudEventRecord>();
 
                 await using var conn = new NpgsqlConnection(_connectionString);
-                await conn.OpenAsync();
+                await conn.OpenAsync().ConfigureAwait(false);
 
                 await using var cmd = new NpgsqlCommand(
                     $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
@@ -177,8 +177,8 @@ namespace fraud_poc_project_repo
                 cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
 
-                await using var reader = await cmd.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
+                await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                while (await reader.ReadAsync().ConfigureAwait(false))
                 {
                     results.Add(MapFraudEventRecord(reader));
                 }
@@ -199,14 +199,14 @@ namespace fraud_poc_project_repo
                 var results = new List<FraudRuleSetRecord>();
 
                 await using var conn = new NpgsqlConnection(_connectionString);
-                await conn.OpenAsync();
+                await conn.OpenAsync().ConfigureAwait(false);
 
                 await using var cmd = new NpgsqlCommand(
                     $"SELECT * FROM \"{_schema}\".fn_select_fraud_rule_results(@fraud_event_id)", conn);
                 cmd.Parameters.AddWithValue("fraud_event_id", fraudEventId);
 
-                await using var reader = await cmd.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
+                await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                while (await reader.ReadAsync().ConfigureAwait(false))
                 {
                     results.Add(MapFraudRuleResultRecord(reader));
                 }

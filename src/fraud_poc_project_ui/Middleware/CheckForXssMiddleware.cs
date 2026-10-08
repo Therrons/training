@@ -60,8 +60,7 @@ namespace fraud_poc_project.Middleware
                         }
                     }
 
-                    // Check XSS in request content
-                    var content = await ReadRequestBody(context);
+                    var content = await ReadRequestBody(context).ConfigureAwait(false);
 
                     if (XSSValidation.IsPotentialXSS(content))
                     {
@@ -76,13 +75,13 @@ namespace fraud_poc_project.Middleware
         private static async Task<string> ReadRequestBody(HttpContext context)
         {
             var buffer = new MemoryStream();
-            await context.Request.Body.CopyToAsync(buffer);
+            await context.Request.Body.CopyToAsync(buffer).ConfigureAwait(false);
             context.Request.Body = buffer;
             buffer.Position = 0;
 
             var encoding = Encoding.UTF8;
 
-            var requestContent = await new StreamReader(buffer, encoding).ReadToEndAsync();
+            var requestContent = await new StreamReader(buffer, encoding).ReadToEndAsync().ConfigureAwait(false);
             context.Request.Body.Position = 0;
 
             return requestContent;

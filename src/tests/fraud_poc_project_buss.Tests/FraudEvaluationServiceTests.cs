@@ -348,7 +348,7 @@ namespace fraud_poc_project_buss.Tests
             });
 
             // Act
-            var result = await _service.EvaluateAsync(transaction);
+            var result = await _service.EvaluateAsync(transaction).ConfigureAwait(false);
 
             // Assert
             result.Should().NotBeNull();

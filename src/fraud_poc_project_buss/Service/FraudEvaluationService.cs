@@ -49,6 +49,6 @@ namespace fraud_poc_project_buss.Service
         }
 
         public async Task<FraudEventRecord> EvaluateAsync(TransactionEvent kafkaEvent)
-         => await Task.Run(() => Evaluate(kafkaEvent));
+         => await Task.Run(() => Evaluate(kafkaEvent)).ConfigureAwait(false);
     }
 }

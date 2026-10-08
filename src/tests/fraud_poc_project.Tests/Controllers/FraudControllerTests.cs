@@ -67,7 +67,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(expectedRecords);
 
             // Act
-            var result = await _controller.QueryEvents(query);
+            var result = await _controller.QueryEvents(query).ConfigureAwait(false);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
@@ -94,7 +94,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(emptyRecords);
 
             // Act
-            var result = await _controller.QueryEvents(query);
+            var result = await _controller.QueryEvents(query).ConfigureAwait(false);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
@@ -119,7 +119,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(new List<FraudEventRecord>());
 
             // Act
-            await _controller.QueryEvents(query);
+            await _controller.QueryEvents(query).ConfigureAwait(false);
 
             // Assert
             _mockRepository.Verify(r => r.QueryFraudEventsAsync(query), Times.Once);
@@ -156,7 +156,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(expectedRuleResults);
 
             // Act
-            var result = await _controller.GetRuleResults(fraudEventId);
+            var result = await _controller.GetRuleResults(fraudEventId).ConfigureAwait(false);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
@@ -177,7 +177,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(emptyResults);
 
             // Act
-            var result = await _controller.GetRuleResults(fraudEventId);
+            var result = await _controller.GetRuleResults(fraudEventId).ConfigureAwait(false);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
@@ -197,7 +197,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(new List<FraudRuleSetRecord>());
 
             // Act
-            await _controller.GetRuleResults(fraudEventId);
+            await _controller.GetRuleResults(fraudEventId).ConfigureAwait(false);
 
             // Assert
             _mockRepository.Verify(r => r.GetRuleResultsForEventAsync(fraudEventId), Times.Once);
@@ -234,7 +234,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(filteredRecords);
 
             // Act
-            var result = await _controller.QueryEvents(query);
+            var result = await _controller.QueryEvents(query).ConfigureAwait(false);
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
@@ -280,7 +280,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(ruleResults);
 
             // Act
-            var result = await _controller.GetRuleResults(fraudEventId);
+            var result = await _controller.GetRuleResults(fraudEventId).ConfigureAwait(false);
 
             // Assert
             var okResult = result.Result as OkObjectResult;
@@ -320,7 +320,7 @@ namespace fraud_poc_project.Tests.Controllers
                 .ReturnsAsync(records);
 
             // Act
-            var result = await _controller.QueryEvents(query);
+            var result = await _controller.QueryEvents(query).ConfigureAwait(false);
 
             // Assert
             var okResult = result.Result as OkObjectResult;

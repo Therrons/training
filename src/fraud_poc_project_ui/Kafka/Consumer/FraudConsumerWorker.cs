@@ -156,7 +156,7 @@ namespace fraud_poc_project.Kafka.Consumer
 
                     if (shouldProcessBatch)
                     {
-                        await ProcessBatchAsync(_batch, stoppingToken);
+                        await ProcessBatchAsync(_batch, stoppingToken).ConfigureAwait(false);
 
                         string trigger = "unknown";
                         if (_batch.Count >= _consumerOptions.BatchSize)
@@ -200,7 +200,7 @@ namespace fraud_poc_project.Kafka.Consumer
                     if (_batch.Count > 0)
                     {
                         _logger.LogInformationOnly("Processing remaining {Count} messages before shutdown", _batch.Count);
-                        await ProcessBatchAsync(_batch, CancellationToken.None);
+                        await ProcessBatchAsync(_batch, CancellationToken.None).ConfigureAwait(false);
                         if (lastProcessedResult != null)
                         {
                             _consumer.Commit(lastProcessedResult);
@@ -256,9 +256,9 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 if (_batchSequentialProcessing)
 
-                    await HandleBatchTransactionSequentialAsync(deserializedBatch, cancellationToken);
+                    await HandleBatchTransactionSequentialAsync(deserializedBatch, cancellationToken).ConfigureAwait(false);
                 else
-                    await HandleBatchTransactionNonSequentialAsync(deserializedBatch, cancellationToken);
+                    await HandleBatchTransactionNonSequentialAsync(deserializedBatch, cancellationToken).ConfigureAwait(false);
 
                 var processingTime = (DateTime.UtcNow - startTime).TotalMilliseconds;
 
@@ -275,11 +275,9 @@ namespace fraud_poc_project.Kafka.Consumer
             }
             catch (Exception ex)
             {
-                // Step 3: if handling the batch failed, don't lose the messages - send
-                // every one of them to the dead-letter topic so they can be looked at later.
                 _logger.LogError(ex, "Error processing batch of {Count} messages", deserializedBatch.Count);
                 foreach (var itm in deserializedBatch)
-                    await SendToDltAsync(JsonConvert.SerializeObject(itm.Event), $"Batch processing error: {ex.Message}");
+                    await SendToDltAsync(JsonConvert.SerializeObject(itm.Event), $"Batch processing error: {ex.Message}").ConfigureAwait(false);
             }
         }
 
@@ -308,8 +306,8 @@ namespace fraud_poc_project.Kafka.Consumer
                         var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
                         await pipeLineRetry.ExecuteAsync(async _ =>
                         {
-                            await _fraudRepository.SaveFraudEvaluationAsync(result);
-                        });
+                            await _fraudRepository.SaveFraudEvaluationAsync(result).ConfigureAwait(false);
+                        }).ConfigureAwait(false);
                         dbStopwatch.Stop();
 
                         // Record database operation metric (INSERT)
@@ -353,21 +351,21 @@ namespace fraud_poc_project.Kafka.Consumer
                 stopwatch.Stop();
                 _logger.LogError(ex, "Fraud evaluation failed for transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
                 linkedCts.Cancel();
-                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Fraud evaluation error: {ex.Message}");
+                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Fraud evaluation error: {ex.Message}").ConfigureAwait(false);
             }
             catch (FraudRepositoryException ex)
             {
                 stopwatch.Stop();
                 _logger.LogError(ex, "Database error processing transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
                 linkedCts.Cancel();
-                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Database error: {ex.Message}");
+                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Database error: {ex.Message}").ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
                 _logger.LogError(ex, "Unexpected error processing transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
                 linkedCts.Cancel();
-                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Unexpected error: {ex.Message}");
+                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Unexpected error: {ex.Message}").ConfigureAwait(false);
             }
         }
 
@@ -392,14 +390,14 @@ namespace fraud_poc_project.Kafka.Consumer
                     var msg = messages[i];
                     try
                     {
-                        await HandleTransactionAsync(msg, linkedToken);
+                        await HandleTransactionAsync(msg, linkedToken).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
                         if (msg.transactionEvent != null)
                         {
                             _logger.LogError(ex, "Failed to consume the following Transaction data={data}", JsonConvert.SerializeObject(msg));
-                            await SendToDltAsync(JsonConvert.SerializeObject(msg.transactionEvent), ex.Message);
+                            await SendToDltAsync(JsonConvert.SerializeObject(msg.transactionEvent), ex.Message).ConfigureAwait(false);
                         }
                         else
                             _logger.LogError(ex, "Failed to consume the following Transaction data - see error object details");
@@ -433,21 +431,20 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 if (ct.IsCancellationRequested) return;
 
-                // Create a new scope per parallel task for thread-safety
                 using var scope = _serviceLocator.CreateScope();
                 var fraudRepository = scope.ServiceProvider.GetRequiredService<IFraudRepository>();
 
                 try
                 {
                     if (msg.transactionEvent == null) return;
-                    await HandleTransactionAsync(msg, cancellationToken);
+                    await HandleTransactionAsync(msg, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     if (msg.transactionEvent != null)
                     {
                         _logger.LogError(ex, "Failed to consume the following Transaction data={data}", JsonConvert.SerializeObject(msg));
-                        await SendToDltAsync(JsonConvert.SerializeObject(msg.transactionEvent), ex.Message);
+                        await SendToDltAsync(JsonConvert.SerializeObject(msg.transactionEvent), ex.Message).ConfigureAwait(false);
                     }
                     else
                         _logger.LogError(ex, "Failed to consume the following Transaction data - see error object details");
@@ -455,7 +452,7 @@ namespace fraud_poc_project.Kafka.Consumer
                     linkedCts.Cancel();
                     throw;
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
         private async Task SendToDltAsync(string messageData, string error)
@@ -465,8 +462,8 @@ namespace fraud_poc_project.Kafka.Consumer
                 var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
                 await pipeLineRetry.ExecuteAsync(async _ =>
                 {
-                    await _fraudRepository.SavedltErrorAsync(_topic, messageData, error);
-                });
+                    await _fraudRepository.SavedltErrorAsync(_topic, messageData, error).ConfigureAwait(false);
+                }).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

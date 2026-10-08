@@ -22,14 +22,14 @@ namespace fraud_poc_project.Tests.Integration.Fixtures
             Client = _factory.CreateClient();
 
             // Authenticate and get JWT token
-            JwtToken = await AuthenticateAsync();
+            JwtToken = await AuthenticateAsync().ConfigureAwait(false);
         }
 
         public async Task DisposeAsync()
         {
             Client?.Dispose();
             _factory?.Dispose();
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         /// <summary>
@@ -43,11 +43,11 @@ namespace fraud_poc_project.Tests.Integration.Fixtures
                 password = "SecurePass123!"
             };
 
-            var response = await Client.PostAsJsonAsync("/api/fraud/login", loginRequest);
+            var response = await Client.PostAsJsonAsync("/api/fraud/login", loginRequest).ConfigureAwait(false);
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK,
                 "Login should succeed with default credentials");
 
-            var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            var content = await response.Content.ReadFromJsonAsync<LoginResponse>().ConfigureAwait(false);
             return content.Token;
         }
 

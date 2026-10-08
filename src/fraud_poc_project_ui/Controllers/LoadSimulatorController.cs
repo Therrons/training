@@ -89,7 +89,7 @@ namespace fraud_poc_project.Controllers
                 var @event = BuildEvent(rng, isFraudulent);
 
                 var stopwatch = Stopwatch.StartNew();
-                bool ok = await _producer.ProduceAsync(@event, cancellationToken);
+                bool ok = await _producer.ProduceAsync(@event, cancellationToken).ConfigureAwait(false);
                 stopwatch.Stop();
 
                 if (ok)
@@ -102,7 +102,7 @@ namespace fraud_poc_project.Controllers
 
                 // Stagger batches to prevent broker overload
                 if (i % 50 == 49)
-                    await Task.Delay(50, cancellationToken);
+                    await Task.Delay(50, cancellationToken).ConfigureAwait(false);
             }
 
             _logger.LogInformationOnly(
