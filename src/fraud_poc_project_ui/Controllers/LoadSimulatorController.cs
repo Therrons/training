@@ -83,7 +83,10 @@ namespace fraud_poc_project.Controllers
             for (int i = 0; i < count; i++)
             {
                 if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogInformationOnly("Consumer operation cancelled");
                     break;
+                }
 
                 bool isFraudulent = rng.NextDouble() < highFraudRatio;
                 var @event = BuildEvent(rng, isFraudulent);

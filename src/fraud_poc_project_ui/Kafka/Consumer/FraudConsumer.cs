@@ -110,6 +110,7 @@ namespace fraud_poc_project.Kafka.Consumer
                 }
                 catch (OperationCanceledException)
                 {
+                    _logger.LogInformationOnly("Consumer operation cancelled");
                     break;
                 }
                 catch (Exception ex)
@@ -132,7 +133,6 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 _logger.LogError(ex, "Error disposing FraudKafkaConsumer");
             }
-
             base.Dispose();
         }
 
