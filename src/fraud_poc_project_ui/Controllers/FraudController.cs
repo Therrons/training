@@ -36,11 +36,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Authenticate with username and password to obtain a JWT token.
+        /// Authenticate with username and password. Returns JWT token for use in Authorization header.
         /// </summary>
-        /// <remarks>
-        /// Use the returned token in the Authorization header as: Bearer {token}
-        /// </remarks>
         [HttpPost("login")]
         [AllowAnonymous]
         public IActionResult Login([FromBody] LoginRequest request)
@@ -88,12 +85,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Query fraud-evaluated transaction events by date range and optional filters.
+        /// Query fraud events by date range and filters. Date format: yyyy-MM-dd HH:mm:ss
         /// </summary>
-        /// <remarks>
-        /// The DateFrom and DateTo formats expects the following format: 2024-01-01 09:00:00
-        /// Requires authentication: Include JWT token in Authorization header as "Bearer {token}"
-        /// </remarks>
 
         [HttpGet("events")]
         [Authorize]
@@ -104,11 +97,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Retrieve all fraud rule results for a specific fraud event.
+        /// Get all rule results for a fraud event.
         /// </summary>
-        /// <remarks>
-        /// Requires authentication: Include JWT token in Authorization header as "Bearer {token}"
-        /// </remarks>
         [HttpGet("events/{fraudEventId:long}/rules")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<FraudRuleSetRecord>>> GetRuleResults(long fraudEventId)
@@ -118,19 +108,9 @@ namespace fraud_poc_project.Controllers
         }
     }
 
-    /// <summary>
-    /// Request model for user login
-    /// </summary>
     public class LoginRequest
     {
-        /// <summary>
-        /// The username to authenticate
-        /// </summary>
         public string Username { get; set; }
-
-        /// <summary>
-        /// The password to authenticate
-        /// </summary>
         public string Password { get; set; }
     }
 }

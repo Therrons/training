@@ -82,13 +82,12 @@ namespace fraud_poc_project.Kafka.Consumer
                 SecurityProtocol = _brokerOptions.SecurityProtocol,
                 AutoOffsetReset = _consumerOptions.AutoOffsetReset,
                 PartitionAssignmentStrategy = _consumerOptions.PartitionAssignmentStrategy,
-                EnableAutoCommit = false,  // We want to commit offsets manually after processing each batch, so we don't lose messages if the app crashes.
+                EnableAutoCommit = false,  // Manual offset management for at-least-once delivery
                 MaxPollIntervalMs = _consumerOptions.MaxPollIntervalMs,
                 SessionTimeoutMs = _consumerOptions.SessionTimeoutMs,
-                AllowAutoCreateTopics = _brokerOptions.AllowAutoCreateTopics, // this is set to false in the broker settings, we create topics manually in the setup phase
-                EnablePartitionEof = true, // allow the consumer to receive an EOF (end-of-file) event when it reaches the end of a partition.  
+                AllowAutoCreateTopics = _brokerOptions.AllowAutoCreateTopics,
+                EnablePartitionEof = true,
                 SslEndpointIdentificationAlgorithm = SslEndpointIdentificationAlgorithm.None,
-                // Batch optimization settings
                 FetchMinBytes = _consumerOptions.FetchMinBytes,
                 FetchMaxBytes = _consumerOptions.FetchMaxBytes,
                 GroupId = _appSettings.GroupId
@@ -136,10 +135,8 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 try
                 {
-                    // Consume a message from Kafka with a timeout of XXX milliseconds
                     var consumeResult = _consumer.Consume(TimeSpan.FromMilliseconds(_consumerOptions.ConsumeMessageIntervalMs));
 
-                    // Only add actual messages to batch, not EOF events
                     if (consumeResult?.Message is not null)
                     {
                         _batch.Add(consumeResult);
@@ -152,10 +149,6 @@ namespace fraud_poc_project.Kafka.Consumer
                             _batch.Count);
                     }
 
-                    // Check if we should process the batch:
-                    // 1. Batch is full (reached batch size limit)
-                    // 2. Batch timeout has expired and there's at least one message
-                    // 3. Reached end of partition and there's at least one message
                     var timeExpired = DateTime.UtcNow >= stopBatchTime;
                     var shouldProcessBatch = _batch.Count >= _consumerOptions.BatchSize ||
                                             (_batch.Count > 0 && timeExpired) ||
@@ -165,7 +158,6 @@ namespace fraud_poc_project.Kafka.Consumer
                     {
                         await ProcessBatchAsync(_batch, stoppingToken);
 
-                        // Determine what triggered the batch processing
                         string trigger = "unknown";
                         if (_batch.Count >= _consumerOptions.BatchSize)
                             trigger = "size";
@@ -179,7 +171,6 @@ namespace fraud_poc_project.Kafka.Consumer
                             _batch.Count,
                             trigger);
 
-                        // Commit the last processed offset only if we have a valid result
                         if (lastProcessedResult != null)
                         {
                             _consumer.Commit(lastProcessedResult);
@@ -206,7 +197,6 @@ namespace fraud_poc_project.Kafka.Consumer
                 {
                     _logger.LogInformationOnly("Consumer operation cancelled");
 
-                    // Process remaining messages in batch before stopping
                     if (_batch.Count > 0)
                     {
                         _logger.LogInformationOnly("Processing remaining {Count} messages before shutdown", _batch.Count);
@@ -226,10 +216,6 @@ namespace fraud_poc_project.Kafka.Consumer
             }
         }
 
-        //Takes one batch of raw Kafka messages and turns them into fraud results:
-        //1. Turn each raw message into a TransactionEvent(skip/log any that fail).
-        //2. Hand the whole batch to the event handler to evaluate and save.
-        //3. If that fails, send every message in the batch to the dead - letter topic.
         private async Task ProcessBatchAsync(List<ConsumeResult<string, byte[]>> batch, CancellationToken cancellationToken)
         {
             if (batch.Count == 0) return;

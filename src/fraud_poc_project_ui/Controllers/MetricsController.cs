@@ -31,20 +31,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Get current system metrics snapshot
+        /// Get metrics snapshot (transactions, performance, rules, auth, database, Kafka).
         /// </summary>
-        /// <remarks>
-        /// Returns comprehensive metrics including:
-        /// - Transaction volume and fraud rates
-        /// - Average processing times and percentiles
-        /// - Authentication statistics
-        /// - Per-rule execution metrics
-        /// - Database and Kafka operation metrics
-        ///
-        /// Requires authentication: Include JWT token in Authorization header as "Bearer {token}"
-        /// </remarks>
-        /// <response code="200">Returns current metrics snapshot</response>
-        /// <response code="401">Unauthorized - Missing or invalid JWT token</response>
         [HttpGet("snapshot")]
         [Authorize]
         [ProducesResponseType(typeof(MetricsSnapshot), StatusCodes.Status200OK)]
@@ -67,14 +55,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Get metrics as formatted text
+        /// Get metrics as plain text (for monitoring dashboards).
         /// </summary>
-        /// <remarks>
-        /// Returns metrics in human-readable format (text/plain)
-        /// Useful for monitoring dashboards and log aggregation
-        /// </remarks>
-        /// <response code="200">Returns formatted metrics text</response>
-        /// <response code="401">Unauthorized - Missing or invalid JWT token</response>
         [HttpGet("summary")]
         [Authorize]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -97,17 +79,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Get transaction volume metrics
+        /// Get transaction volume metrics.
         /// </summary>
-        /// <remarks>
-        /// Returns:
-        /// - Total transactions processed
-        /// - Number flagged as fraud
-        /// - Fraud detection rate
-        /// - Average fraud score
-        /// </remarks>
-        /// <response code="200">Returns transaction metrics</response>
-        /// <response code="401">Unauthorized</response>
         [HttpGet("transactions")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -137,15 +110,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Get performance metrics
+        /// Get performance metrics (avg, min, max, P95, P99).
         /// </summary>
-        /// <remarks>
-        /// Returns transaction processing time metrics:
-        /// - Average, min, max processing times
-        /// - P95 and P99 percentiles (important for SLAs)
-        /// </remarks>
-        /// <response code="200">Returns performance metrics</response>
-        /// <response code="401">Unauthorized</response>
         [HttpGet("performance")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -179,17 +145,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Get fraud rule execution metrics
+        /// Get fraud rule execution metrics (per-rule stats).
         /// </summary>
-        /// <remarks>
-        /// Returns per-rule statistics:
-        /// - Number of times each rule was executed
-        /// - Number of times triggered
-        /// - Trigger rate (triggered / total executions)
-        /// - Average execution time
-        /// </remarks>
-        /// <response code="200">Returns rule metrics</response>
-        /// <response code="401">Unauthorized</response>
         [HttpGet("rules")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -223,16 +180,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Get authentication metrics
+        /// Get authentication metrics (login attempts and success rate).
         /// </summary>
-        /// <remarks>
-        /// Returns login statistics:
-        /// - Total authentication attempts
-        /// - Successful authentications
-        /// - Success rate
-        /// </remarks>
-        /// <response code="200">Returns authentication metrics</response>
-        /// <response code="401">Unauthorized</response>
         [HttpGet("authentication")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -261,15 +210,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Get database operation metrics
+        /// Get database operation metrics (counts and timings).
         /// </summary>
-        /// <remarks>
-        /// Returns database performance metrics:
-        /// - Operation counts per type (SELECT, INSERT, UPDATE, etc.)
-        /// - Total and average execution times
-        /// </remarks>
-        /// <response code="200">Returns database metrics</response>
-        /// <response code="401">Unauthorized</response>
         [HttpGet("database")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -302,15 +244,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Get Kafka operation metrics
+        /// Get Kafka operation metrics (produce/consume timings).
         /// </summary>
-        /// <remarks>
-        /// Returns Kafka event metrics:
-        /// - Event counts per type (produce, consume)
-        /// - Total and average operation times
-        /// </remarks>
-        /// <response code="200">Returns Kafka metrics</response>
-        /// <response code="401">Unauthorized</response>
         [HttpGet("kafka")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -343,14 +278,8 @@ namespace fraud_poc_project.Controllers
         }
 
         /// <summary>
-        /// Reset all metrics (Admin only)
+        /// Reset all metrics (testing only).
         /// </summary>
-        /// <remarks>
-        /// Clears all collected metrics. Should only be called for testing or
-        /// when starting a new monitoring period.
-        /// </remarks>
-        /// <response code="200">Metrics reset successfully</response>
-        /// <response code="401">Unauthorized</response>
         [HttpPost("reset")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]

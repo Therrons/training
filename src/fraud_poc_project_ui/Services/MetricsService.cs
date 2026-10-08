@@ -6,10 +6,6 @@ using System.Linq;
 
 namespace fraud_poc_project.Services
 {
-    /// <summary>
-    /// Metrics tracking for fraud detection system
-    /// Tracks: transaction volume, fraud rates, processing times, rule performance
-    /// </summary>
     public interface IMetricsService
     {
         void RecordTransactionProcessed(bool isFlagged, decimal fraudScore, long elapsedMilliseconds);
@@ -22,42 +18,28 @@ namespace fraud_poc_project.Services
         void Reset();
     }
 
-    /// <summary>
-    /// Simple in-memory metrics service
-    /// Thread-safe implementation for tracking system metrics
-    /// </summary>
     public class MetricsService : IMetricsService
     {
         private readonly ILogger<MetricsService> _logger;
         private readonly object _lockObject = new object();
 
-        // ════════════════════════════════════════════════════════════════════════════════
-        // TRANSACTION METRICS
-        // ════════════════════════════════════════════════════════════════════════════════
+        // Transaction metrics
         private long _totalTransactions;
         private long _flaggedTransactions;
         private long _totalFraudScore;
         private List<long> _transactionProcessingTimes = new();
 
-        // ════════════════════════════════════════════════════════════════════════════════
-        // RULE METRICS
-        // ════════════════════════════════════════════════════════════════════════════════
+        // Rule metrics
         private Dictionary<string, RuleMetrics> _ruleMetrics = new();
 
-        // ════════════════════════════════════════════════════════════════════════════════
-        // AUTHENTICATION METRICS
-        // ════════════════════════════════════════════════════════════════════════════════
+        // Authentication metrics
         private long _totalLoginAttempts;
         private long _successfulLogins;
 
-        // ════════════════════════════════════════════════════════════════════════════════
-        // DATABASE METRICS
-        // ════════════════════════════════════════════════════════════════════════════════
+        // Database metrics
         private Dictionary<string, OperationMetrics> _databaseOperations = new();
 
-        // ════════════════════════════════════════════════════════════════════════════════
-        // KAFKA METRICS
-        // ════════════════════════════════════════════════════════════════════════════════
+        // Kafka metrics
         private Dictionary<string, OperationMetrics> _kafkaOperations = new();
 
         public MetricsService(ILogger<MetricsService> logger)
@@ -65,9 +47,6 @@ namespace fraud_poc_project.Services
             _logger = logger;
         }
 
-        /// <summary>
-        /// Records a processed transaction
-        /// </summary>
         public void RecordTransactionProcessed(bool isFlagged, decimal fraudScore, long elapsedMilliseconds)
         {
             lock (_lockObject)
@@ -79,7 +58,7 @@ namespace fraud_poc_project.Services
                 _totalFraudScore += (long)fraudScore;
                 _transactionProcessingTimes.Add(elapsedMilliseconds);
 
-                // Keep only last 1000 measurements for memory efficiency
+                // Retain only recent measurements to bound memory
                 if (_transactionProcessingTimes.Count > 1000)
                     _transactionProcessingTimes = _transactionProcessingTimes.TakeLast(1000).ToList();
 
@@ -89,9 +68,6 @@ namespace fraud_poc_project.Services
             }
         }
 
-        /// <summary>
-        /// Records a rule execution
-        /// </summary>
         public void RecordRuleExecution(string ruleCode, bool triggered, long elapsedMilliseconds)
         {
             lock (_lockObject)
@@ -109,15 +85,11 @@ namespace fraud_poc_project.Services
                 metrics.TotalExecutionTime += elapsedMilliseconds;
                 metrics.ExecutionTimes.Add(elapsedMilliseconds);
 
-                // Keep only last 500 measurements per rule
                 if (metrics.ExecutionTimes.Count > 500)
                     metrics.ExecutionTimes = metrics.ExecutionTimes.TakeLast(500).ToList();
             }
         }
 
-        /// <summary>
-        /// Records an authentication attempt
-        /// </summary>
         public void RecordAuthenticationAttempt(bool successful)
         {
             lock (_lockObject)
@@ -132,9 +104,6 @@ namespace fraud_poc_project.Services
             }
         }
 
-        /// <summary>
-        /// Records a database operation
-        /// </summary>
         public void RecordDatabaseOperation(string operationType, long elapsedMilliseconds)
         {
             lock (_lockObject)
@@ -149,15 +118,11 @@ namespace fraud_poc_project.Services
                 metrics.TotalTime += elapsedMilliseconds;
                 metrics.Times.Add(elapsedMilliseconds);
 
-                // Keep only last 500 measurements per operation type
                 if (metrics.Times.Count > 500)
                     metrics.Times = metrics.Times.TakeLast(500).ToList();
             }
         }
 
-        /// <summary>
-        /// Records a Kafka event
-        /// </summary>
         public void RecordKafkaEvent(string eventType, long elapsedMilliseconds)
         {
             lock (_lockObject)
@@ -172,15 +137,11 @@ namespace fraud_poc_project.Services
                 metrics.TotalTime += elapsedMilliseconds;
                 metrics.Times.Add(elapsedMilliseconds);
 
-                // Keep only last 500 measurements per event type
                 if (metrics.Times.Count > 500)
                     metrics.Times = metrics.Times.TakeLast(500).ToList();
             }
         }
 
-        /// <summary>
-        /// Gets a snapshot of all current metrics
-        /// </summary>
         public MetricsSnapshot GetSnapshot()
         {
             lock (_lockObject)
@@ -188,8 +149,6 @@ namespace fraud_poc_project.Services
                 return new MetricsSnapshot
                 {
                     Timestamp = DateTime.UtcNow,
-
-                    // Transaction metrics
                     TotalTransactions = _totalTransactions,
                     FlaggedTransactions = _flaggedTransactions,
                     FraudRate = _totalTransactions > 0 ? (decimal)_flaggedTransactions / _totalTransactions : 0,
@@ -202,27 +161,16 @@ namespace fraud_poc_project.Services
                         _transactionProcessingTimes.Min() : 0,
                     P95ProcessingTime = CalculatePercentile(_transactionProcessingTimes, 95),
                     P99ProcessingTime = CalculatePercentile(_transactionProcessingTimes, 99),
-
-                    // Authentication metrics
                     TotalAuthenticationAttempts = _totalLoginAttempts,
                     SuccessfulAuthentications = _successfulLogins,
                     AuthenticationSuccessRate = GetAuthenticationSuccessRate(),
-
-                    // Rule metrics
                     RuleMetrics = _ruleMetrics.Values.ToList(),
-
-                    // Database metrics
                     DatabaseOperationMetrics = _databaseOperations.Values.ToList(),
-
-                    // Kafka metrics
                     KafkaOperationMetrics = _kafkaOperations.Values.ToList()
                 };
             }
         }
 
-        /// <summary>
-        /// Resets all metrics
-        /// </summary>
         public void Reset()
         {
             lock (_lockObject)
@@ -241,10 +189,6 @@ namespace fraud_poc_project.Services
             }
         }
 
-        // ════════════════════════════════════════════════════════════════════════════════
-        // PRIVATE HELPER METHODS
-        // ════════════════════════════════════════════════════════════════════════════════
-
         private decimal GetAuthenticationSuccessRate()
         {
             return _totalLoginAttempts > 0 ?
@@ -262,14 +206,9 @@ namespace fraud_poc_project.Services
         }
     }
 
-    /// <summary>
-    /// Metrics snapshot - point-in-time view of all metrics
-    /// </summary>
     public class MetricsSnapshot
     {
         public DateTime Timestamp { get; set; }
-
-        // Transaction Metrics
         public long TotalTransactions { get; set; }
         public long FlaggedTransactions { get; set; }
         public decimal FraudRate { get; set; }
@@ -279,24 +218,13 @@ namespace fraud_poc_project.Services
         public long MinProcessingTime { get; set; }
         public long P95ProcessingTime { get; set; }
         public long P99ProcessingTime { get; set; }
-
-        // Authentication Metrics
         public long TotalAuthenticationAttempts { get; set; }
         public long SuccessfulAuthentications { get; set; }
         public decimal AuthenticationSuccessRate { get; set; }
-
-        // Rule Metrics
         public List<RuleMetrics> RuleMetrics { get; set; } = new();
-
-        // Database Metrics
         public List<OperationMetrics> DatabaseOperationMetrics { get; set; } = new();
-
-        // Kafka Metrics
         public List<OperationMetrics> KafkaOperationMetrics { get; set; } = new();
 
-        /// <summary>
-        /// Returns a formatted string representation of metrics
-        /// </summary>
         public override string ToString()
         {
             return $@"
@@ -372,9 +300,6 @@ KAFKA OPERATIONS:
         }
     }
 
-    /// <summary>
-    /// Metrics for individual fraud rule execution
-    /// </summary>
     public class RuleMetrics
     {
         public string RuleCode { get; set; }
@@ -389,9 +314,6 @@ KAFKA OPERATIONS:
             TotalExecutionTime / ExecutionCount : 0;
     }
 
-    /// <summary>
-    /// Metrics for database or Kafka operations
-    /// </summary>
     public class OperationMetrics
     {
         public string OperationType { get; set; }

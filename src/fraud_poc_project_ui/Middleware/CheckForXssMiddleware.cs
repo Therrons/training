@@ -10,9 +10,7 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Middleware
 {
-    // checks if query string or request content has potential XSS attack,
-    // an additional filter has been applied to the endpoint to check for XSS attacks
-    // , if the filter is not applied, this middleware will not check for XSS attacks
+    // XSS validation for endpoints marked with [ValidateXss]
     public class CheckForXssMiddleware
     {
         private readonly RequestDelegate _next;

@@ -1,3 +1,5 @@
+
+using fraud_poc_project_buss.Helper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -9,9 +11,6 @@ using System.Text;
 
 namespace fraud_poc_project.Services
 {
-    /// <summary>
-    /// Service for generating and validating JWT tokens
-    /// </summary>
     public interface IJwtService
     {
         (string token, DateTime validFrom, DateTime validTo)? GenerateToken(string username, string password);
@@ -46,9 +45,6 @@ namespace fraud_poc_project.Services
             _logger.LogInformationOnly("JwtService initialized with issuer: {Issuer}, audience: {Audience}", _issuer, _audience);
         }
 
-        /// <summary>
-        /// Generates a JWT token if credentials are valid
-        /// </summary>
         public (string token, DateTime validFrom, DateTime validTo)? GenerateToken(string username, string password)
         {
             if (!_authService.ValidateCredentials(username, password))
@@ -62,9 +58,6 @@ namespace fraud_poc_project.Services
             return token;
         }
 
-        /// <summary>
-        /// Generates a JWT token for the authenticated user
-        /// </summary>
         private (string token, DateTime validFrom, DateTime validTo) GenerateToken(string username)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -94,9 +87,6 @@ namespace fraud_poc_project.Services
             return (tokenHandler.WriteToken(token), localNow, localNow.AddMinutes(_expirationMinutes));
         }
 
-        /// <summary>
-        /// Validates a JWT token and returns its claims principal
-        /// </summary>
         public ClaimsPrincipal? ValidateToken(string token)
         {
             try

@@ -24,16 +24,10 @@ using System.Text;
 
 namespace fraud_poc_project.Configuration
 {
-    // This is where the app tells its Dependency Injection container about every
-    // service it needs: App settings, the database, the fraud rules,
-    // and Kafka. Each piece is split into its own small method below so it's easy to
-    // see, at a glance, everything the app is wired up to use.
     public static class ServiceConfiguration
     {
         private static Environment_Variables envVariables;
 
-        // This is the main entry point for registering services. It calls each of the
-        // smaller methods below to register specific services.
         public static void AddServices_AddDI(this WebApplicationBuilder builder)
         {
             envVariables = new Environment_Variables().Get_Environment_Values(builder);
@@ -68,19 +62,13 @@ namespace fraud_poc_project.Configuration
             });
         }
 
-        // Loads AppSettings and Database settings from config (e.g. appsettings.json)
-        // and checks that all their required fields are filled in.
         private static void RegisterAppSettings(WebApplicationBuilder builder)
         {
-            // AppSettings is bound here so the Kafka configuration (added later) can resolve it.
             builder.Services.AddAndValidateOptions<AppSettings>("AppSettings");
             builder.Services.AddAndValidateOptions<Database>("Database");
         }
 
         #region Database Operations
-        // Builds the PostgreSQL connection string from environment variables (falling
-        // back to config values), then adds it to the app's configuration so anything
-        // that asks for "ConnectionStrings:PostgreSQL" can find it.
         private static string BuildDatabaseConnectionString(WebApplicationBuilder builder)
         {
             var isLocal = true; // builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
@@ -94,8 +82,6 @@ namespace fraud_poc_project.Configuration
             connectionString.Append($"Pooling=true;");
             connectionString.Append($"Connection Lifetime=0;");
 
-            // Disable SSL for local or Rancher deployments (no SSL in Docker/K8s) as
-            // these are docker containers and SSL is not needed. For other environments, require SSL for security.
             connectionString.Append((isLocal || isRancher) ? "SSLMode=Disable;" : "SSLMode=Require;");
             connectionString.Append("Trust Server Certificate = true;");
 
@@ -108,7 +94,6 @@ namespace fraud_poc_project.Configuration
             return result;
         }
 
-        // Registers everything needed to read from and write to the database.
         private static void RegisterDatabaseAccess(WebApplicationBuilder builder, string connectionString)
         {
             builder.Services.AddDbContextPool<IDBConnection, DBConnection>(options => options.UseNpgsql(connectionString));
@@ -116,8 +101,6 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
         }
 
-        // If the app is configured to create the database on startup, this method
-        // sets up the necessary services.
         private static void SetupDatabase(WebApplicationBuilder builder)
         {
             var createDbFlag = builder.Configuration["Database:CreateDatabaseOnStartup"]?.ToLowerInvariant();
@@ -128,7 +111,6 @@ namespace fraud_poc_project.Configuration
         }
         #endregion
 
-        // Registers every fraud rule (see FraudRules.cs) and the service that runs them.
         private static void RegisterFraudRules(WebApplicationBuilder builder)
         {
             builder.Services
@@ -142,8 +124,6 @@ namespace fraud_poc_project.Configuration
                 .AddSingleton<IFraudEvaluationService, FraudEvaluationService>();
         }
 
-        // Registers Kafka configuration, creates any missing topics, and wires up the
-        // producer/consumer that use them.
         private static void RegisterKafka(WebApplicationBuilder builder)
         {
             builder.Services.AddKafkaConfigurations(builder.Configuration, envVariables)
@@ -202,8 +182,6 @@ namespace fraud_poc_project.Configuration
 
         private static void RegisterMetrics(WebApplicationBuilder builder)
         {
-            // Register metrics service as a singleton
-            // All components can inject IMetricsService to record metrics
             builder.Services.AddSingleton<IMetricsService, MetricsService>();
         }
     }

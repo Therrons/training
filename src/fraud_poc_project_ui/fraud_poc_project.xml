@@ -6,42 +6,17 @@
     <members>
         <member name="M:fraud_poc_project.Controllers.FraudController.Login(fraud_poc_project.Controllers.LoginRequest)">
             <summary>
-            Authenticate with username and password to obtain a JWT token.
+            Authenticate with username and password. Returns JWT token for use in Authorization header.
             </summary>
-            <remarks>
-            Use the returned token in the Authorization header as: Bearer {token}
-            </remarks>
         </member>
         <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
             <summary>
-            Query fraud-evaluated transaction events by date range and optional filters.
+            Query fraud events by date range and filters. Date format: yyyy-MM-dd HH:mm:ss
             </summary>
-            <remarks>
-            The DateFrom and DateTo formats expects the following format: 2024-01-01 09:00:00
-            Requires authentication: Include JWT token in Authorization header as "Bearer {token}"
-            </remarks>
         </member>
         <member name="M:fraud_poc_project.Controllers.FraudController.GetRuleResults(System.Int64)">
             <summary>
-            Retrieve all fraud rule results for a specific fraud event.
-            </summary>
-            <remarks>
-            Requires authentication: Include JWT token in Authorization header as "Bearer {token}"
-            </remarks>
-        </member>
-        <member name="T:fraud_poc_project.Controllers.LoginRequest">
-            <summary>
-            Request model for user login
-            </summary>
-        </member>
-        <member name="P:fraud_poc_project.Controllers.LoginRequest.Username">
-            <summary>
-            The username to authenticate
-            </summary>
-        </member>
-        <member name="P:fraud_poc_project.Controllers.LoginRequest.Password">
-            <summary>
-            The password to authenticate
+            Get all rule results for a fraud event.
             </summary>
         </member>
         <member name="T:fraud_poc_project.Controllers.LoadSimulatorController">
@@ -66,226 +41,53 @@
              </summary>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.GetMetricsSnapshot">
-             <summary>
-             Get current system metrics snapshot
-             </summary>
-             <remarks>
-             Returns comprehensive metrics including:
-             - Transaction volume and fraud rates
-             - Average processing times and percentiles
-             - Authentication statistics
-             - Per-rule execution metrics
-             - Database and Kafka operation metrics
-            
-             Requires authentication: Include JWT token in Authorization header as "Bearer {token}"
-             </remarks>
-             <response code="200">Returns current metrics snapshot</response>
-             <response code="401">Unauthorized - Missing or invalid JWT token</response>
+            <summary>
+            Get metrics snapshot (transactions, performance, rules, auth, database, Kafka).
+            </summary>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.GetMetricsSummary">
             <summary>
-            Get metrics as formatted text
+            Get metrics as plain text (for monitoring dashboards).
             </summary>
-            <remarks>
-            Returns metrics in human-readable format (text/plain)
-            Useful for monitoring dashboards and log aggregation
-            </remarks>
-            <response code="200">Returns formatted metrics text</response>
-            <response code="401">Unauthorized - Missing or invalid JWT token</response>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.GetTransactionMetrics">
             <summary>
-            Get transaction volume metrics
+            Get transaction volume metrics.
             </summary>
-            <remarks>
-            Returns:
-            - Total transactions processed
-            - Number flagged as fraud
-            - Fraud detection rate
-            - Average fraud score
-            </remarks>
-            <response code="200">Returns transaction metrics</response>
-            <response code="401">Unauthorized</response>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.GetPerformanceMetrics">
             <summary>
-            Get performance metrics
+            Get performance metrics (avg, min, max, P95, P99).
             </summary>
-            <remarks>
-            Returns transaction processing time metrics:
-            - Average, min, max processing times
-            - P95 and P99 percentiles (important for SLAs)
-            </remarks>
-            <response code="200">Returns performance metrics</response>
-            <response code="401">Unauthorized</response>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.GetRuleMetrics">
             <summary>
-            Get fraud rule execution metrics
+            Get fraud rule execution metrics (per-rule stats).
             </summary>
-            <remarks>
-            Returns per-rule statistics:
-            - Number of times each rule was executed
-            - Number of times triggered
-            - Trigger rate (triggered / total executions)
-            - Average execution time
-            </remarks>
-            <response code="200">Returns rule metrics</response>
-            <response code="401">Unauthorized</response>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.GetAuthenticationMetrics">
             <summary>
-            Get authentication metrics
+            Get authentication metrics (login attempts and success rate).
             </summary>
-            <remarks>
-            Returns login statistics:
-            - Total authentication attempts
-            - Successful authentications
-            - Success rate
-            </remarks>
-            <response code="200">Returns authentication metrics</response>
-            <response code="401">Unauthorized</response>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.GetDatabaseMetrics">
             <summary>
-            Get database operation metrics
+            Get database operation metrics (counts and timings).
             </summary>
-            <remarks>
-            Returns database performance metrics:
-            - Operation counts per type (SELECT, INSERT, UPDATE, etc.)
-            - Total and average execution times
-            </remarks>
-            <response code="200">Returns database metrics</response>
-            <response code="401">Unauthorized</response>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.GetKafkaMetrics">
             <summary>
-            Get Kafka operation metrics
+            Get Kafka operation metrics (produce/consume timings).
             </summary>
-            <remarks>
-            Returns Kafka event metrics:
-            - Event counts per type (produce, consume)
-            - Total and average operation times
-            </remarks>
-            <response code="200">Returns Kafka metrics</response>
-            <response code="401">Unauthorized</response>
         </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.ResetMetrics">
             <summary>
-            Reset all metrics (Admin only)
+            Reset all metrics (testing only).
             </summary>
-            <remarks>
-            Clears all collected metrics. Should only be called for testing or
-            when starting a new monitoring period.
-            </remarks>
-            <response code="200">Metrics reset successfully</response>
-            <response code="401">Unauthorized</response>
         </member>
         <member name="T:fraud_poc_project.Exceptions.AuthenticationException">
             <summary>
             Thrown when authentication/JWT operations fail
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.IAuthenticationService">
-            <summary>
-            Service for authenticating API users against configured credentials from AWS Secrets Manager
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.AuthenticationService.ValidateCredentials(System.String,System.String)">
-            <summary>
-            Validates provided credentials against configured credentials using constant-time comparison
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.AuthenticationService.ConstantTimeCompare(System.String,System.String)">
-            <summary>
-            Constant-time string comparison to prevent timing attacks
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.IJwtService">
-            <summary>
-            Service for generating and validating JWT tokens
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.JwtService.GenerateToken(System.String,System.String)">
-            <summary>
-            Generates a JWT token if credentials are valid
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.JwtService.GenerateToken(System.String)">
-            <summary>
-            Generates a JWT token for the authenticated user
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.JwtService.ValidateToken(System.String)">
-            <summary>
-            Validates a JWT token and returns its claims principal
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.IMetricsService">
-            <summary>
-            Metrics tracking for fraud detection system
-            Tracks: transaction volume, fraud rates, processing times, rule performance
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.MetricsService">
-            <summary>
-            Simple in-memory metrics service
-            Thread-safe implementation for tracking system metrics
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsService.RecordTransactionProcessed(System.Boolean,System.Decimal,System.Int64)">
-            <summary>
-            Records a processed transaction
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsService.RecordRuleExecution(System.String,System.Boolean,System.Int64)">
-            <summary>
-            Records a rule execution
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsService.RecordAuthenticationAttempt(System.Boolean)">
-            <summary>
-            Records an authentication attempt
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsService.RecordDatabaseOperation(System.String,System.Int64)">
-            <summary>
-            Records a database operation
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsService.RecordKafkaEvent(System.String,System.Int64)">
-            <summary>
-            Records a Kafka event
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsService.GetSnapshot">
-            <summary>
-            Gets a snapshot of all current metrics
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsService.Reset">
-            <summary>
-            Resets all metrics
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.MetricsSnapshot">
-            <summary>
-            Metrics snapshot - point-in-time view of all metrics
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsSnapshot.ToString">
-            <summary>
-            Returns a formatted string representation of metrics
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.RuleMetrics">
-            <summary>
-            Metrics for individual fraud rule execution
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.OperationMetrics">
-            <summary>
-            Metrics for database or Kafka operations
             </summary>
         </member>
     </members>

@@ -2,6 +2,7 @@ using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Models;
 using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Authorization;
@@ -94,13 +95,12 @@ namespace fraud_poc_project.Controllers
                 if (ok)
                 {
                     produced++;
-                    // Record Kafka PRODUCE metric
                     metricsService.RecordKafkaEvent("PRODUCE", stopwatch.ElapsedMilliseconds);
                 }
                 else
                     failed++;
 
-                // small stagger to avoid overwhelming the broker in a single burst
+                // Stagger batches to prevent broker overload
                 if (i % 50 == 49)
                     await Task.Delay(50, cancellationToken);
             }

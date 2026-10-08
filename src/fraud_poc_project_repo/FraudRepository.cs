@@ -27,10 +27,6 @@ namespace fraud_poc_project_repo
             _dbConnection = dbConnection;
         }
 
-        // Saves one fraud evaluation result to the database:
-        //   1. Insert the transaction + its overall score/flag into fraud_event.
-        //   2. Insert one row per rule result into fraud_rule_result, linked to that event.
-        // Both steps happen in a single transaction, so if either one fails, nothing is saved.
         public async Task<long> SaveFraudEvaluationAsync(FraudEventRecord result)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
@@ -101,8 +97,6 @@ namespace fraud_poc_project_repo
             }
         }
 
-        // A simpler way to record a dead-letter error, used when we only have the raw
-        // topic name, message text, and error message (no full DLT_Kafka model).
         public async Task SavedltErrorAsync(string topic, string messageData, string error)
         {
             try
@@ -127,7 +121,6 @@ namespace fraud_poc_project_repo
             }
         }
 
-        // Looks up transactions matching the given filters (date range, customer, etc).
         public async Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query)
         {
             try
