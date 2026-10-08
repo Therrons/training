@@ -1,10 +1,7 @@
 using FluentAssertions;
 using fraud_poc_project_buss;
-using fraud_poc_project_buss.Models.Fraud;
-using fraud_poc_project_repo.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Service;
 using Xunit;
 
 namespace fraud_poc_project.Tests.Integration.Business
@@ -174,7 +171,7 @@ namespace fraud_poc_project.Tests.Integration.Business
         public void FraudEvaluationService_ScoreAboveThreshold_IsFlagged()
         {
             // Arrange
-            var transaction = CreateTransaction();
+            TransactionEvent transaction = CreateTransaction();
 
             // Create rules that exceed the fraud flag threshold (typically 50-75)
             var rule1 = CreateMockRule("RULE1", true, 40m);
@@ -317,14 +314,13 @@ namespace fraud_poc_project.Tests.Integration.Business
         {
             return new TransactionEvent
             {
-                TransactionId = Guid.NewGuid().ToString(),
+                TransactionId = Guid.NewGuid(),
                 CustomerId = "CUST-TEST-001",
                 Amount = amount,
-                CardCountry = cardCountry,
-                TransactionCountry = transactionCountry,
+                CountryCode = cardCountry,
                 TransactionType = type,
                 MerchantCategory = merchantCategory,
-                Timestamp = DateTime.UtcNow
+                TransactionTime = DateTime.UtcNow
             };
         }
 
@@ -349,7 +345,11 @@ namespace fraud_poc_project.Tests.Integration.Business
                 _scoreContribution = scoreContribution;
             }
 
-            public FraudRuleSetRecord Evaluate(TransactionEvent transaction)
+            public string RuleCode => throw new NotImplementedException();
+
+            public string RuleDescription => throw new NotImplementedException();
+
+            public fraud_poc_project_buss.Dto.FraudRuleSetRecord Evaluate(fraud_poc_project_buss.Dto.TransactionEvent transaction)
             {
                 return new FraudRuleSetRecord
                 {
@@ -364,16 +364,16 @@ namespace fraud_poc_project.Tests.Integration.Business
         /// <summary>
         /// Placeholder transaction event class
         /// </summary>
-        private class TransactionEvent
-        {
-            public string TransactionId { get; set; }
-            public string CustomerId { get; set; }
-            public decimal Amount { get; set; }
-            public string CardCountry { get; set; }
-            public string TransactionCountry { get; set; }
-            public string TransactionType { get; set; }
-            public string MerchantCategory { get; set; }
-            public DateTime Timestamp { get; set; }
-        }
+        //private class TransactionEvent
+        //{
+        //    public string TransactionId { get; set; }
+        //    public string CustomerId { get; set; }
+        //    public decimal Amount { get; set; }
+        //    public string CardCountry { get; set; }
+        //    public string TransactionCountry { get; set; }
+        //    public string TransactionType { get; set; }
+        //    public string MerchantCategory { get; set; }
+        //    public DateTime Timestamp { get; set; }
+        //}
     }
 }

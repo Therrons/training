@@ -1,9 +1,8 @@
+using fraud_poc_project_buss.Helper;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using fraud_poc_project_buss.Helper;
 
 namespace fraud_poc_project.Services
 {

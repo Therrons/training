@@ -1,5 +1,4 @@
-using fraud_poc_project_buss.Models.Fraud;
-using System;
+using fraud_poc_project_buss.Dto;
 
 namespace fraud_poc_project_buss.Tests
 {

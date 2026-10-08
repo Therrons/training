@@ -2,7 +2,6 @@ using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Exceptions;
 using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Exceptions;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -71,7 +70,7 @@ namespace fraud_poc_project.Controllers
                     token.Value.token,
                     validFrom = token.Value.validFrom.ToShortTimeString(),
                     validTo = token.Value.validTo.ToShortTimeString(),
-                    expiresIn = string.Concat(3600/60, " minutes"),
+                    expiresIn = string.Concat(3600 / 60, " minutes"),
                     tokenType = "Bearer"
                 });
             }

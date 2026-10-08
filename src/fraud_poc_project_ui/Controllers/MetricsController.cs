@@ -1,12 +1,12 @@
+using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Services;
+using fraud_poc_project_buss.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using fraud_poc_project_buss.Helper;
 
 namespace fraud_poc_project.Controllers
 {
@@ -17,6 +17,7 @@ namespace fraud_poc_project.Controllers
     /// Requires: Bearer token authentication (same as other protected endpoints)
     /// </summary>
     [ApiController]
+    [ValidateXss]
     [Route("api/metrics")]
     public class MetricsController : ControllerBase
     {

@@ -1,6 +1,8 @@
 using fraud_poc_project.CustomAttributes;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -90,7 +92,10 @@ namespace fraud_poc_project.Middleware
 
         private async Task FlagAsError(HttpContext context)
         {
-            context.Response.Headers.Add("XXSValidation", "Failed - Potential XSS attack");
+            KeyValuePair<string, StringValues> _xss = new KeyValuePair<string, StringValues>("XXSValidation", "Failed - Potential XSS attack");
+            if (!context.Response.Headers.Contains(_xss))
+                context.Response.Headers.Add(_xss.Key, _xss.Value);
+
             context.Response.StatusCode = _statusCode;
         }
     }

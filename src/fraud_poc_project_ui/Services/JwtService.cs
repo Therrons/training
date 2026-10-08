@@ -1,3 +1,4 @@
+using fraud_poc_project_buss.Helper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -6,7 +7,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using fraud_poc_project_buss.Helper;
 
 namespace fraud_poc_project.Services
 {

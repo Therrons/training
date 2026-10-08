@@ -1,9 +1,7 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
-using System;
-using System.Net.Http;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace fraud_poc_project.Tests.Integration.Fixtures
@@ -50,7 +48,7 @@ namespace fraud_poc_project.Tests.Integration.Fixtures
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK,
                 "Login should succeed with default credentials");
 
-            var content = await response.Content.ReadAsAsync<LoginResponse>();
+            var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
             return content.Token;
         }
 

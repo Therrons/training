@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>AWSSDK.RDS</id>
+    <version>4.0.21.6</version>
+    <title>AWSSDK - RDS</title>
+    <authors>Amazon Web Services</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">Apache-2.0</license>
+    <licenseUrl>https://licenses.nuget.org/Apache-2.0</licenseUrl>
+    <icon>images\AWSLogo.png</icon>
+    <projectUrl>https://github.com/aws/aws-sdk-net/</projectUrl>
+    <description>Amazon Relational Database Service (Amazon RDS) is a web service that makes it easy to set up, operate, and scale a relational database in the cloud. It provides cost-efficient and resizable capacity while managing time-consuming database management tasks, freeing you up to focus on your applications and business.</description>
+    <language>en-US</language>
+    <tags>AWS Amazon cloud RDS aws-sdk-v4</tags>
+    <dependencies>
+      <dependency id="AWSSDK.Core" version="[4.0.9.4, 5.0.0)" />
+    </dependencies>
+  </metadata>
+</package>

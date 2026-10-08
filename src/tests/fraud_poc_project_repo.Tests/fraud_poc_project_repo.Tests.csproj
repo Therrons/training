@@ -8,10 +8,12 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <RestorePackagesPath>../nuget-packages</RestorePackagesPath>
+        <RestorePackagesPath>../../nuget-packages</RestorePackagesPath>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" Version="8.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
         <PackageReference Include="xunit" Version="2.6.6" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
             <PrivateAssets>all</PrivateAssets>
@@ -23,8 +25,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\fraud_poc_project_repo\fraud_poc_project_repo.csproj" />
-        <ProjectReference Include="..\fraud_poc_project_buss\fraud_poc_project_buss.csproj" />
+      <ProjectReference Include="..\..\fraud_poc_project_buss\fraud_poc_project_buss.csproj" />
+      <ProjectReference Include="..\..\fraud_poc_project_repo\fraud_poc_project_repo.csproj" />
+      <ProjectReference Include="..\fraud_poc_project_buss.Tests\fraud_poc_project_buss.Tests.csproj" />
     </ItemGroup>
 
 </Project>

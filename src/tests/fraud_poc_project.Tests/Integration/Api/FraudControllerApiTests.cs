@@ -1,12 +1,8 @@
 using FluentAssertions;
 using fraud_poc_project.Tests.Integration.Fixtures;
 using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Models.Fraud;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace fraud_poc_project.Tests.Integration.Api
@@ -45,7 +41,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsAsync<LoginResponse>();
+            var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
             content.Token.Should().NotBeNullOrEmpty("Token should be provided");
             content.ExpiresIn.Should().Be(3600, "Token should expire in 1 hour");
             content.TokenType.Should().Be("Bearer");
@@ -164,7 +160,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsAsync<List<FraudEventRecord>>();
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
             content.Should().BeOfType<List<FraudEventRecord>>();
 
             // Cleanup
@@ -186,7 +182,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsAsync<List<FraudEventRecord>>();
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
             content.Should().BeOfType<List<FraudEventRecord>>();
 
             // Cleanup
@@ -207,7 +203,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsAsync<List<FraudEventRecord>>();
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
             content.Should().BeOfType<List<FraudEventRecord>>();
 
             // Cleanup
@@ -230,7 +226,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsAsync<List<FraudEventRecord>>();
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
             content.Should().BeOfType<List<FraudEventRecord>>();
 
             // Cleanup
@@ -288,7 +284,7 @@ namespace fraud_poc_project.Tests.Integration.Api
 
             // Act
             var response = await _fixture.Client.GetAsync("/api/fraud/events");
-            var content = await response.Content.ReadAsAsync<List<FraudEventRecord>>();
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);

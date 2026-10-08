@@ -1,5 +1,4 @@
 using fraud_poc_project_buss.Exceptions;
-using System;
 
 namespace fraud_poc_project_repo.Exceptions
 {

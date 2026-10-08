@@ -1,9 +1,11 @@
 using FluentAssertions;
-using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Models.Fraud;
 using fraud_poc_project.Controllers;
+using fraud_poc_project.Services;
+using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Tests;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -16,12 +18,23 @@ namespace fraud_poc_project.Tests.Controllers
     public class FraudControllerTests
     {
         private readonly Mock<IFraudRepository> _mockRepository;
+        private readonly Mock<IJwtService> _mockJwtService;
+        private readonly Mock<IMetricsService> _mockMetricsService;
+        private readonly Mock<ILogger<FraudController>> _mockLogger;
         private readonly FraudController _controller;
 
         public FraudControllerTests()
         {
             _mockRepository = new Mock<IFraudRepository>();
-            _controller = new FraudController(_mockRepository.Object);
+            _mockJwtService = new Mock<IJwtService>();
+            _mockMetricsService = new Mock<IMetricsService>();
+            _mockLogger = new Mock<ILogger<FraudController>>();
+
+            _controller = new FraudController(
+                _mockRepository.Object,
+                _mockJwtService.Object,
+                _mockMetricsService.Object,
+                _mockLogger.Object);
         }
 
         [Fact]

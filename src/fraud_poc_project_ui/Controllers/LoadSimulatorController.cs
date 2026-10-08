@@ -1,3 +1,4 @@
+using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Models;
 using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
@@ -20,6 +21,7 @@ namespace fraud_poc_project.Controllers
     /// Produces synthetic transaction events to Kafka to simulate load.
     /// </summary>
     [ApiController]
+    [ValidateXss]
     [Route("api/load")]
     public class LoadSimulatorController : ControllerBase
     {
