@@ -166,7 +166,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
 
             // Assert
             result.RuleCode.Should().Be("ATM_WITHDRAWAL_LIMIT");
-            result.RuleDescription.Should().Contain("5000");
+            result.RuleDescription.Should().Contain("5,000");
         }
     }
 }

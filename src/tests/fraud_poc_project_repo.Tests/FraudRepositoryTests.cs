@@ -53,7 +53,7 @@ namespace fraud_poc_project_repo.Tests
                 .ReturnsAsync(expectedEventId);
 
             // Act
-            var result = await _mockRepository.Object.SaveFraudEvaluationAsync(fraudRecord).ConfigureAwait(false);
+            var result = await _mockRepository.Object.SaveFraudEvaluationAsync(fraudRecord);
 
             // Assert
             result.Should().Be(expectedEventId);
@@ -73,7 +73,7 @@ namespace fraud_poc_project_repo.Tests
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _mockRepository.Object.SavedltErrorAsync(topic, messageData, error).ConfigureAwait(false);
+            await _mockRepository.Object.SavedltErrorAsync(topic, messageData, error);
 
             // Assert
             _mockRepository.Verify(r => r.SavedltErrorAsync(topic, messageData, error), Times.Once);
@@ -109,7 +109,7 @@ namespace fraud_poc_project_repo.Tests
                 .ReturnsAsync(expectedRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFraudEventsAsync(query).ConfigureAwait(false);
+            var result = await _mockRepository.Object.QueryFraudEventsAsync(query);
 
             // Assert
             result.Should().HaveCount(2);
@@ -135,7 +135,7 @@ namespace fraud_poc_project_repo.Tests
                 .ReturnsAsync(emptyRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFraudEventsAsync(query).ConfigureAwait(false);
+            var result = await _mockRepository.Object.QueryFraudEventsAsync(query);
 
             // Assert
             result.Should().BeEmpty();
@@ -165,7 +165,7 @@ namespace fraud_poc_project_repo.Tests
                 .ReturnsAsync(flaggedRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFlaggedOnlyFraudEventsAsync(query).ConfigureAwait(false);
+            var result = await _mockRepository.Object.QueryFlaggedOnlyFraudEventsAsync(query);
 
             // Assert
             result.Should().HaveCount(1);
@@ -203,7 +203,7 @@ namespace fraud_poc_project_repo.Tests
                 .ReturnsAsync(ruleResults);
 
             // Act
-            var result = await _mockRepository.Object.GetRuleResultsForEventAsync(fraudEventId).ConfigureAwait(false);
+            var result = await _mockRepository.Object.GetRuleResultsForEventAsync(fraudEventId);
 
             // Assert
             result.Should().HaveCount(2);
@@ -224,7 +224,7 @@ namespace fraud_poc_project_repo.Tests
                 .ReturnsAsync(emptyResults);
 
             // Act
-            var result = await _mockRepository.Object.GetRuleResultsForEventAsync(fraudEventId).ConfigureAwait(false);
+            var result = await _mockRepository.Object.GetRuleResultsForEventAsync(fraudEventId);
 
             // Assert
             result.Should().BeEmpty();
@@ -252,7 +252,7 @@ namespace fraud_poc_project_repo.Tests
                 .ReturnsAsync(highScoreRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFraudEventsAsync(query).ConfigureAwait(false);
+            var result = await _mockRepository.Object.QueryFraudEventsAsync(query);
 
             // Assert
             result.Should().AllSatisfy(r => r.FraudScore.Should().BeGreaterThanOrEqualTo(50m));
@@ -281,7 +281,7 @@ namespace fraud_poc_project_repo.Tests
                 .ReturnsAsync(cnpRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFraudEventsAsync(query).ConfigureAwait(false);
+            var result = await _mockRepository.Object.QueryFraudEventsAsync(query);
 
             // Assert
             result.Should().AllSatisfy(r => r.Event.TransactionType.Should().Be("CNP"));

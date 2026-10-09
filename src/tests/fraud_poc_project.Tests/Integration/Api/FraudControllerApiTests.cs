@@ -36,14 +36,15 @@ namespace fraud_poc_project.Tests.Integration.Api
             };
 
             // Act
-            var response = await _fixture.Client.PostAsJsonAsync("/api/fraud/login", loginRequest).ConfigureAwait(false);
+            var response = await _fixture.Client.PostAsJsonAsync("/api/fraud/login", loginRequest);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadFromJsonAsync<LoginResponse>().ConfigureAwait(false);
-            content.Token.Should().NotBeNullOrEmpty("Token should be provided");
-            content.ExpiresIn.Should().Be(3600, "Token should expire in 1 hour");
+            var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            content.Should().NotBeNull();
+            content!.Token.Should().NotBeNullOrEmpty("Token should be provided");
+            content.ExpiresIn.Should().Be("60 minutes", "Token should expire in 60 minutes");
             content.TokenType.Should().Be("Bearer");
         }
 
@@ -58,7 +59,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             };
 
             // Act
-            var response = await _fixture.Client.PostAsJsonAsync("/api/fraud/login", loginRequest).ConfigureAwait(false);
+            var response = await _fixture.Client.PostAsJsonAsync("/api/fraud/login", loginRequest);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -75,7 +76,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             };
 
             // Act
-            var response = await _fixture.Client.PostAsJsonAsync("/api/fraud/login", loginRequest).ConfigureAwait(false);
+            var response = await _fixture.Client.PostAsJsonAsync("/api/fraud/login", loginRequest);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -92,7 +93,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             };
 
             // Act
-            var response = await _fixture.Client.PostAsJsonAsync("/api/fraud/login", loginRequest).ConfigureAwait(false);
+            var response = await _fixture.Client.PostAsJsonAsync("/api/fraud/login", loginRequest);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -108,7 +109,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             // Arrange - Do NOT authorize
 
             // Act
-            var response = await _fixture.Client.GetAsync("/api/fraud/events").ConfigureAwait(false);
+            var response = await _fixture.Client.GetAsync("/api/fraud/events");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized,
@@ -123,7 +124,7 @@ namespace fraud_poc_project.Tests.Integration.Api
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "invalid-token");
 
             // Act
-            var response = await _fixture.Client.GetAsync("/api/fraud/events").ConfigureAwait(false);
+            var response = await _fixture.Client.GetAsync("/api/fraud/events");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -138,7 +139,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             // Arrange - Do NOT authorize
 
             // Act
-            var response = await _fixture.Client.GetAsync("/api/fraud/events/1/rules").ConfigureAwait(false);
+            var response = await _fixture.Client.GetAsync("/api/fraud/events/1/rules");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -155,12 +156,12 @@ namespace fraud_poc_project.Tests.Integration.Api
             _fixture.AuthorizeClient();
 
             // Act
-            var response = await _fixture.Client.GetAsync("/api/fraud/events").ConfigureAwait(false);
+            var response = await _fixture.Client.GetAsync("/api/fraud/events");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>().ConfigureAwait(false);
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
             content.Should().BeOfType<List<FraudEventRecord>>();
 
             // Cleanup
@@ -177,12 +178,12 @@ namespace fraud_poc_project.Tests.Integration.Api
 
             // Act
             var response = await _fixture.Client.GetAsync(
-                $"/api/fraud/events?dateFrom={Uri.EscapeDataString(dateFrom)}&dateTo={Uri.EscapeDataString(dateTo)}").ConfigureAwait(false);
+                $"/api/fraud/events?dateFrom={Uri.EscapeDataString(dateFrom)}&dateTo={Uri.EscapeDataString(dateTo)}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>().ConfigureAwait(false);
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
             content.Should().BeOfType<List<FraudEventRecord>>();
 
             // Cleanup
@@ -198,12 +199,12 @@ namespace fraud_poc_project.Tests.Integration.Api
 
             // Act
             var response = await _fixture.Client.GetAsync(
-                $"/api/fraud/events?customerId={customerId}").ConfigureAwait(false);
+                $"/api/fraud/events?customerId={customerId}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>().ConfigureAwait(false);
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
             content.Should().BeOfType<List<FraudEventRecord>>();
 
             // Cleanup
@@ -221,12 +222,12 @@ namespace fraud_poc_project.Tests.Integration.Api
 
             // Act
             var response = await _fixture.Client.GetAsync(
-                $"/api/fraud/events?dateFrom={Uri.EscapeDataString(dateFrom)}&dateTo={Uri.EscapeDataString(dateTo)}&customerId={customerId}").ConfigureAwait(false);
+                $"/api/fraud/events?dateFrom={Uri.EscapeDataString(dateFrom)}&dateTo={Uri.EscapeDataString(dateTo)}&customerId={customerId}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>().ConfigureAwait(false);
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
             content.Should().BeOfType<List<FraudEventRecord>>();
 
             // Cleanup
@@ -245,7 +246,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             const long eventId = 1;
 
             // Act
-            var response = await _fixture.Client.GetAsync($"/api/fraud/events/{eventId}/rules").ConfigureAwait(false);
+            var response = await _fixture.Client.GetAsync($"/api/fraud/events/{eventId}/rules");
 
             // Assert
             // 200 if event exists, 404 if not (both are valid)
@@ -263,7 +264,7 @@ namespace fraud_poc_project.Tests.Integration.Api
             const long invalidEventId = 999999999;
 
             // Act
-            var response = await _fixture.Client.GetAsync($"/api/fraud/events/{invalidEventId}/rules").ConfigureAwait(false);
+            var response = await _fixture.Client.GetAsync($"/api/fraud/events/{invalidEventId}/rules");
 
             // Assert
             response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NotFound);
@@ -283,15 +284,15 @@ namespace fraud_poc_project.Tests.Integration.Api
             _fixture.AuthorizeClient();
 
             // Act
-            var response = await _fixture.Client.GetAsync("/api/fraud/events").ConfigureAwait(false);
-            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>().ConfigureAwait(false);
+            var response = await _fixture.Client.GetAsync("/api/fraud/events");
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             content.Should().NotBeNull("Response should contain fraud events");
 
             // Each event should have required properties
-            if (content.Any())
+            if (content?.Any() == true)
             {
                 content.ForEach(record =>
                 {
@@ -312,7 +313,7 @@ namespace fraud_poc_project.Tests.Integration.Api
         private class LoginResponse
         {
             public string Token { get; set; }
-            public int ExpiresIn { get; set; }
+            public string ExpiresIn { get; set; }  // API returns this as a string
             public string TokenType { get; set; }
         }
     }

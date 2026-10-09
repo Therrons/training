@@ -1,0 +1,29 @@
+{
+  "IntegrationTestConfig": {
+    "EnabledCategories": {
+      "Authentication": true,
+      "FraudEvaluation": true,
+      "QueryEvents": true,
+      "Metrics": true,
+      "ErrorHandling": true,
+      "Authorization": true,
+      "LoadSimulation": false,
+      "KafkaIntegration": false
+    },
+    "TestSettings": {
+      "Timeout": 30000,
+      "RetryCount": 1,
+      "ParallelExecution": true,
+      "MaxParallelThreads": 4,
+      "CreateTestDataAutomatically": true,
+      "CleanupAfterTests": true
+    },
+    "TestData": {
+      "DefaultUsername": "fraud-analyst",
+      "DefaultPassword": "SecurePass123!",
+      "TestCustomerId": "CUST-TEST-001",
+      "TestTransactionCount": 10,
+      "GenerateRandomTransactions": true
+    }
+  }
+}

@@ -1,0 +1,703 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="879236b6-dfe6-4f26-bd47-749ef0566b95" name="CP360267@CWIN7KW59J4 2026-10-09 13:58:58" runUser="CAPITECBANK\CP360267" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-09T13:58:58.4020617+02:00" queuing="2026-10-09T13:58:58.4020624+02:00" start="2026-10-09T13:58:51.7908381+02:00" finish="2026-10-09T13:59:01.4067809+02:00" />
+  <TestSettings name="default" id="75bd6fb3-9d2c-4779-bd33-c35cb3a8bc0d">
+    <Deployment runDeploymentRoot="CP360267_CWIN7KW59J4_2026-10-09_13_58_58" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="32dccef8-37ab-449b-a8dc-3092db77ad49" testId="83fe95ff-ac3b-c636-e0c4-7553d36623a3" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.Reset_ClearsAllMetrics" computerName="CWIN7KW59J4" duration="00:00:00.0004686" startTime="2026-10-09T13:58:58.8251534+02:00" endTime="2026-10-09T13:58:58.8251535+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="32dccef8-37ab-449b-a8dc-3092db77ad49" />
+    <UnitTestResult executionId="46671de9-b77c-43b7-873a-5e07e366c4d7" testId="5e710f0a-f83c-f747-b18a-39b99acde272" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_AllRulesDisabled_NoScore" computerName="CWIN7KW59J4" duration="00:00:00.0017026" startTime="2026-10-09T13:58:58.3746473+02:00" endTime="2026-10-09T13:58:58.3746473+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="46671de9-b77c-43b7-873a-5e07e366c4d7" />
+    <UnitTestResult executionId="aeee7f49-565a-4573-8703-0be301f0009f" testId="5edc45a7-f7d9-da8f-82bb-7206df9274a8" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_PreservesTransactionEventDetails" computerName="CWIN7KW59J4" duration="00:00:00.0100728" startTime="2026-10-09T13:58:58.4136653+02:00" endTime="2026-10-09T13:58:58.4136658+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aeee7f49-565a-4573-8703-0be301f0009f" />
+    <UnitTestResult executionId="7a7676bb-72c4-4277-9b33-821cefeb37ac" testId="c655818e-6dca-3e38-38d7-206bff7fbdd5" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordDatabaseOperation_SingleOperation_TracksMetrics" computerName="CWIN7KW59J4" duration="00:00:00.0004996" startTime="2026-10-09T13:58:58.8241530+02:00" endTime="2026-10-09T13:58:58.8241531+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7a7676bb-72c4-4277-9b33-821cefeb37ac" />
+    <UnitTestResult executionId="ff7b368a-4f75-4b34-af6f-cc94268ce1ea" testId="23bc5272-b137-b50b-6959-cb86dba0260a" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordAuthenticationAttempt_SuccessfulLogin_TracksMetrics" computerName="CWIN7KW59J4" duration="00:00:00.0001836" startTime="2026-10-09T13:58:58.8260457+02:00" endTime="2026-10-09T13:58:58.8260457+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ff7b368a-4f75-4b34-af6f-cc94268ce1ea" />
+    <UnitTestResult executionId="ff05ec17-2cbb-4284-b74f-1d0fffbbdac5" testId="08a0cab9-0e46-99cb-8d70-25a48de2bb64" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(amount: 2500)" computerName="CWIN7KW59J4" duration="00:00:00.0046426" startTime="2026-10-09T13:58:58.3473286+02:00" endTime="2026-10-09T13:58:58.3473439+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ff05ec17-2cbb-4284-b74f-1d0fffbbdac5" />
+    <UnitTestResult executionId="55bc17da-c7b5-4f61-bc5a-de6bdd528c1b" testId="5ba28fd7-76b2-4dd9-ddf8-a6da7ab94925" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.Login_WithValidCredentials_ReturnsJwtToken" computerName="CWIN7KW59J4" duration="00:00:00.0051026" startTime="2026-10-09T13:59:00.4728358+02:00" endTime="2026-10-09T13:59:00.4728360+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="55bc17da-c7b5-4f61-bc5a-de6bdd528c1b" />
+    <UnitTestResult executionId="587f874f-c823-4594-8246-0dc69bc5aad5" testId="6894e5b2-676a-27db-f6e9-2b475279887d" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordKafkaEvent_SingleEvent_TracksMetrics" computerName="CWIN7KW59J4" duration="00:00:00.0005885" startTime="2026-10-09T13:58:58.3918476+02:00" endTime="2026-10-09T13:58:58.3918478+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="587f874f-c823-4594-8246-0dc69bc5aad5" />
+    <UnitTestResult executionId="865b4afa-2b2d-4f06-825b-f8d7f8b1b4e6" testId="284bcd8f-e9d9-a5db-02ed-1e977d4cdd95" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_WithEmptyResult_ReturnsOkResultWithEmptyList" computerName="CWIN7KW59J4" duration="00:00:00.0018613" startTime="2026-10-09T13:58:58.4156143+02:00" endTime="2026-10-09T13:58:58.4156146+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="865b4afa-2b2d-4f06-825b-f8d7f8b1b4e6" />
+    <UnitTestResult executionId="13c9637d-79a2-468b-b130-5b852067a161" testId="ae672d30-54db-cbf5-fbec-ec8d00dd3ab9" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.ForeignCnpRule_VariousCountries_TriggersCorrectly(cardCountry: &quot;ZA&quot;, transactionCountry: &quot;ZA&quot;)" computerName="CWIN7KW59J4" duration="00:00:00.0000015" startTime="2026-10-09T13:58:58.3736977+02:00" endTime="2026-10-09T13:58:58.3736978+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="13c9637d-79a2-468b-b130-5b852067a161" />
+    <UnitTestResult executionId="b8eb518b-f3fd-40fb-85b4-49d8310c3058" testId="fa5049d7-0896-7db3-c84c-a30ecba7f02b" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_NoRulesTriggered_ReturnsFraudFalse" computerName="CWIN7KW59J4" duration="00:00:00.0003399" startTime="2026-10-09T13:58:58.3736537+02:00" endTime="2026-10-09T13:58:58.3736537+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b8eb518b-f3fd-40fb-85b4-49d8310c3058" />
+    <UnitTestResult executionId="4cf8d602-0032-4c85-a57b-3e0dd6e10586" testId="78a86d02-b269-55eb-f051-541328eb8022" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.GetRuleResults_WithNoRuleResults_ReturnsOkResultWithEmptyList" computerName="CWIN7KW59J4" duration="00:00:00.0004771" startTime="2026-10-09T13:58:58.4171493+02:00" endTime="2026-10-09T13:58:58.4171494+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4cf8d602-0032-4c85-a57b-3e0dd6e10586" />
+    <UnitTestResult executionId="41daae4f-25ce-4e10-9ef2-fc234caa3be2" testId="1e28224e-6939-ce7f-ab2a-39c283aa0d50" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordKafkaEvent_MultipleEvents_TracksSeparately" computerName="CWIN7KW59J4" duration="00:00:00.0003950" startTime="2026-10-09T13:58:58.8261219+02:00" endTime="2026-10-09T13:58:58.8261219+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="41daae4f-25ce-4e10-9ef2-fc234caa3be2" />
+    <UnitTestResult executionId="7487b5d9-c46c-4a64-ad63-deb6245663a6" testId="bc1b17a2-4b1f-d3e4-3d43-3be602aba518" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_ResponseContentValid" computerName="CWIN7KW59J4" duration="00:00:00.2175145" startTime="2026-10-09T13:59:00.7408976+02:00" endTime="2026-10-09T13:59:00.7408979+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7487b5d9-c46c-4a64-ad63-deb6245663a6">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : Parameter 'date_from' must have either its NpgsqlDbType or its DataTypeName or its Value set.</Message>
+          <StackTrace>   at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)&#xD;
+   at Npgsql.NpgsqlParameter.&lt;ResolveTypeInfo&gt;g__ThrowNoTypeInfo|111_0()&#xD;
+   at Npgsql.NpgsqlParameter.ResolveTypeInfo(PgSerializerOptions options)&#xD;
+   at Npgsql.NpgsqlParameterCollection.ProcessParameters(PgSerializerOptions options, Boolean validateValues, CommandType commandType)&#xD;
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 144&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 149&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 149&#xD;
+   at fraud_poc_project.Controllers.FraudController.QueryEvents(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_ui\Controllers\FraudController.cs:line 95&#xD;
+   at lambda_method110(Closure, Object)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)&#xD;
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)&#xD;
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)&#xD;
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)&#xD;
+   at fraud_poc_project.Middleware.CheckForXssMiddleware.InvokeAsync(HttpContext context) in C:\Development\Therron\training\src\fraud_poc_project_ui\Middleware\CheckForXssMiddleware.cs:line 72&#xD;
+   at Microsoft.AspNetCore.TestHost.HttpContextBuilder.&lt;&gt;c__DisplayClass23_0.&lt;&lt;SendAsync&gt;g__RunRequestAsync|0&gt;d.MoveNext()&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.AspNetCore.TestHost.ClientHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.Handlers.CookieContainerHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.Handlers.RedirectHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_ResponseContentValid() in C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\Integration\Api\FraudControllerApiTests.cs:line 287&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4d7407b7-37a5-41b7-a666-8c1e6523d35c" testId="e816ca1e-a465-862d-7c5c-aa4ac5a7393a" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(amount: 5000)" computerName="CWIN7KW59J4" duration="00:00:00.0000120" startTime="2026-10-09T13:58:58.3498292+02:00" endTime="2026-10-09T13:58:58.3498292+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d7407b7-37a5-41b7-a666-8c1e6523d35c" />
+    <UnitTestResult executionId="f6c4095d-e47f-4662-a91d-7f3cc1f112b1" testId="8e79ade1-6641-51f1-41ae-c703751076d0" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordRuleExecution_MultipleRules_TracksSeparately" computerName="CWIN7KW59J4" duration="00:00:00.0007220" startTime="2026-10-09T13:58:58.3994588+02:00" endTime="2026-10-09T13:58:58.3994590+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f6c4095d-e47f-4662-a91d-7f3cc1f112b1" />
+    <UnitTestResult executionId="b1c03bcd-35dd-4502-bec4-a92d431f3df8" testId="a54b872c-6969-cd38-9ce2-b7dd1b4ecf37" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.HighAmountRule_VariousAmounts_TriggersCorrectly(amount: 5000)" computerName="CWIN7KW59J4" duration="00:00:00.0000565" startTime="2026-10-09T13:58:58.3565623+02:00" endTime="2026-10-09T13:58:58.3565624+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b1c03bcd-35dd-4502-bec4-a92d431f3df8" />
+    <UnitTestResult executionId="76de1563-d8a4-4273-9f97-3ff98c1bb305" testId="ae91c151-2c81-24f6-0f5e-c7cd12e207f6" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.GetRuleResults_WithoutToken_ReturnsUnauthorized" computerName="CWIN7KW59J4" duration="00:00:00.0032039" startTime="2026-10-09T13:59:00.4890207+02:00" endTime="2026-10-09T13:59:00.4890208+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76de1563-d8a4-4273-9f97-3ff98c1bb305" />
+    <UnitTestResult executionId="b650e2fb-6e12-4127-bb25-2c0b6ca01c61" testId="1ffab8c7-3ab0-5983-2f31-a06f501fa9d6" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_NegativeAmount_Handled" computerName="CWIN7KW59J4" duration="00:00:00.0001293" startTime="2026-10-09T13:58:58.3746713+02:00" endTime="2026-10-09T13:58:58.3746714+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b650e2fb-6e12-4127-bb25-2c0b6ca01c61" />
+    <UnitTestResult executionId="76df66b9-253b-4c66-8b93-f8fc6711d30f" testId="90d18d78-322f-4d87-803c-ce9ff41ab309" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.HighAmountRule_VariousAmounts_TriggersCorrectly(amount: 2500)" computerName="CWIN7KW59J4" duration="00:00:00.0000020" startTime="2026-10-09T13:58:58.3736014+02:00" endTime="2026-10-09T13:58:58.3736014+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76df66b9-253b-4c66-8b93-f8fc6711d30f" />
+    <UnitTestResult executionId="b588b03e-2a76-48a5-972a-23d0c3ca3368" testId="ef58bf4f-fe6a-abce-ebd4-56a7361a25d5" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_CalculatesAverageFraudScore" computerName="CWIN7KW59J4" duration="00:00:00.0117456" startTime="2026-10-09T13:58:58.3911866+02:00" endTime="2026-10-09T13:58:58.3911872+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b588b03e-2a76-48a5-972a-23d0c3ca3368" />
+    <UnitTestResult executionId="bdb81288-7fc7-4e9e-bfd0-da8f69fe54fb" testId="dd4f6ed9-4974-b294-af84-ab4e12e97d7c" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.ForeignCnpRule_VariousCountries_TriggersCorrectly(cardCountry: &quot;US&quot;, transactionCountry: &quot;US&quot;)" computerName="CWIN7KW59J4" duration="00:00:00.0000410" startTime="2026-10-09T13:58:58.3736696+02:00" endTime="2026-10-09T13:58:58.3736697+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bdb81288-7fc7-4e9e-bfd0-da8f69fe54fb" />
+    <UnitTestResult executionId="5549b027-e100-44ba-a449-78d272d8ba62" testId="40db2091-d512-bddc-2553-77561f02769d" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_CalculatesPercentiles" computerName="CWIN7KW59J4" duration="00:00:00.0011933" startTime="2026-10-09T13:58:58.3986408+02:00" endTime="2026-10-09T13:58:58.3986411+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5549b027-e100-44ba-a449-78d272d8ba62" />
+    <UnitTestResult executionId="1fdd5aa9-c10d-40ea-b0a0-de84de2d3e22" testId="49fe3429-269b-d7d4-7626-22506010c721" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.GetRuleResults_WithValidToken_ReturnsOk" computerName="CWIN7KW59J4" duration="00:00:00.0162449" startTime="2026-10-09T13:59:01.2588438+02:00" endTime="2026-10-09T13:59:01.2588443+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1fdd5aa9-c10d-40ea-b0a0-de84de2d3e22" />
+    <UnitTestResult executionId="f19460ed-2324-4531-91e7-5abeaa452620" testId="b6e6c635-4c06-1c8f-8119-abb77d4e4e28" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithDateRange_IncludesDateParameters" computerName="CWIN7KW59J4" duration="00:00:00.0042424" startTime="2026-10-09T13:59:01.2423747+02:00" endTime="2026-10-09T13:59:01.2423749+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f19460ed-2324-4531-91e7-5abeaa452620" />
+    <UnitTestResult executionId="cb294f49-4017-46f2-8b82-77d7b3aa0b72" testId="6510438b-d06d-5f0c-36f7-512b53367c5f" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_WithValidQuery_ReturnsOkResultWithEvents" computerName="CWIN7KW59J4" duration="00:00:00.0016014" startTime="2026-10-09T13:58:58.4195179+02:00" endTime="2026-10-09T13:58:58.4195181+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cb294f49-4017-46f2-8b82-77d7b3aa0b72" />
+    <UnitTestResult executionId="58d0d95e-9c83-44ab-a1bb-46eb04591b37" testId="ad125620-3f15-099e-eb48-f6bc7f590b2a" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.GetSnapshot_IncludesTimestamp" computerName="CWIN7KW59J4" duration="00:00:00.0006633" startTime="2026-10-09T13:58:58.8268828+02:00" endTime="2026-10-09T13:58:58.8268829+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="58d0d95e-9c83-44ab-a1bb-46eb04591b37" />
+    <UnitTestResult executionId="6c906961-47ec-447d-9794-e2edd751ba1e" testId="4915e52f-f06c-7d54-668a-fa417addadd7" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.GetRuleResults_WithValidEventId_ReturnsOkResultWithRuleResults" computerName="CWIN7KW59J4" duration="00:00:00.0007692" startTime="2026-10-09T13:58:58.4203280+02:00" endTime="2026-10-09T13:58:58.4203281+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6c906961-47ec-447d-9794-e2edd751ba1e" />
+    <UnitTestResult executionId="6eaa0c67-5619-4844-aeec-446e23447642" testId="438c07ef-a441-8648-3f15-96ddd364003f" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordAuthenticationAttempt_FailedLogin_UpdatesMetrics" computerName="CWIN7KW59J4" duration="00:00:00.0004016" startTime="2026-10-09T13:58:58.3973431+02:00" endTime="2026-10-09T13:58:58.3973432+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6eaa0c67-5619-4844-aeec-446e23447642" />
+    <UnitTestResult executionId="4781a305-ded3-445a-bbc5-98c2e3f9aa6a" testId="aff42783-a114-7e33-1d43-23ac117b32d4" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_TracksProcessingTime" computerName="CWIN7KW59J4" duration="00:00:00.0002059" startTime="2026-10-09T13:58:58.3920997+02:00" endTime="2026-10-09T13:58:58.3920999+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4781a305-ded3-445a-bbc5-98c2e3f9aa6a" />
+    <UnitTestResult executionId="538e3e67-cffe-4936-a23c-16a7e2d390eb" testId="5afc18ea-2580-e54b-b140-46021e5f26a1" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_RuleResultsIncludeDetails" computerName="CWIN7KW59J4" duration="00:00:00.0014704" startTime="2026-10-09T13:58:58.3747213+02:00" endTime="2026-10-09T13:58:58.3747213+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="538e3e67-cffe-4936-a23c-16a7e2d390eb" />
+    <UnitTestResult executionId="a50e46b4-d50e-4647-864c-7c185d7cd448" testId="14495b46-7c76-c69a-a437-e7f37a96948d" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_HighRiskScenario_AllRulesTriggered" computerName="CWIN7KW59J4" duration="00:00:00.0087450" startTime="2026-10-09T13:58:58.3557266+02:00" endTime="2026-10-09T13:58:58.3557269+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a50e46b4-d50e-4647-864c-7c185d7cd448" />
+    <UnitTestResult executionId="e1dc6deb-f0fe-437d-b8e1-3db958a972cf" testId="3d52d240-2554-03f2-2241-8ac8bde68372" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordRuleExecution_CalculatesAverageExecutionTime" computerName="CWIN7KW59J4" duration="00:00:00.0408272" startTime="2026-10-09T13:58:58.3793474+02:00" endTime="2026-10-09T13:58:58.3793476+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e1dc6deb-f0fe-437d-b8e1-3db958a972cf" />
+    <UnitTestResult executionId="07fc8e42-90ac-45ff-ba97-2440c93bcecd" testId="6f583068-0b23-c7ee-471e-a96300a6ceb6" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.MetricsSnapshot_ToString_FormatsCorrectly" computerName="CWIN7KW59J4" duration="00:00:00.0046590" startTime="2026-10-09T13:58:58.3968470+02:00" endTime="2026-10-09T13:58:58.3968474+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="07fc8e42-90ac-45ff-ba97-2440c93bcecd" />
+    <UnitTestResult executionId="d2a79528-8dba-4853-9921-624a787fc001" testId="88b6d4f4-ef3c-667b-5e5b-5ee082854a74" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.ForeignCnpRule_VariousCountries_TriggersCorrectly(cardCountry: &quot;GB&quot;, transactionCountry: &quot;ZA&quot;)" computerName="CWIN7KW59J4" duration="00:00:00.0000009" startTime="2026-10-09T13:58:58.3737100+02:00" endTime="2026-10-09T13:58:58.3737101+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d2a79528-8dba-4853-9921-624a787fc001" />
+    <UnitTestResult executionId="c019e6a3-1287-4760-bf80-e9abbedc2f6c" testId="f2369c94-5e85-31a3-d2da-5b899600de66" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.GetRuleResults_CallsRepositoryWithProvidedEventId" computerName="CWIN7KW59J4" duration="00:00:00.0650153" startTime="2026-10-09T13:58:58.4034699+02:00" endTime="2026-10-09T13:58:58.4034704+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c019e6a3-1287-4760-bf80-e9abbedc2f6c" />
+    <UnitTestResult executionId="7647938b-a1e4-4727-93bf-bb7b286856dd" testId="f2b44b90-f5d4-839d-fbd9-92761c24fb8a" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithValidToken_ReturnsOk" computerName="CWIN7KW59J4" duration="00:00:00.1300321" startTime="2026-10-09T13:59:01.0060479+02:00" endTime="2026-10-09T13:59:01.0060482+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7647938b-a1e4-4727-93bf-bb7b286856dd">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : Parameter 'date_from' must have either its NpgsqlDbType or its DataTypeName or its Value set.</Message>
+          <StackTrace>   at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)&#xD;
+   at Npgsql.NpgsqlParameter.&lt;ResolveTypeInfo&gt;g__ThrowNoTypeInfo|111_0()&#xD;
+   at Npgsql.NpgsqlParameter.ResolveTypeInfo(PgSerializerOptions options)&#xD;
+   at Npgsql.NpgsqlParameterCollection.ProcessParameters(PgSerializerOptions options, Boolean validateValues, CommandType commandType)&#xD;
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 144&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 149&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 149&#xD;
+   at fraud_poc_project.Controllers.FraudController.QueryEvents(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_ui\Controllers\FraudController.cs:line 95&#xD;
+   at lambda_method110(Closure, Object)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)&#xD;
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)&#xD;
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)&#xD;
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)&#xD;
+   at fraud_poc_project.Middleware.CheckForXssMiddleware.InvokeAsync(HttpContext context) in C:\Development\Therron\training\src\fraud_poc_project_ui\Middleware\CheckForXssMiddleware.cs:line 72&#xD;
+   at Microsoft.AspNetCore.TestHost.HttpContextBuilder.&lt;&gt;c__DisplayClass23_0.&lt;&lt;SendAsync&gt;g__RunRequestAsync|0&gt;d.MoveNext()&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.AspNetCore.TestHost.ClientHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.Handlers.CookieContainerHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.Handlers.RedirectHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithValidToken_ReturnsOk() in C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\Integration\Api\FraudControllerApiTests.cs:line 159&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ce7d36b5-484c-4be8-a7a9-3ad0ef636e68" testId="9550fc5a-96bb-eefe-6d26-4a22899f5ab8" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(amount: 10000)" computerName="CWIN7KW59J4" duration="00:00:00.0000037" startTime="2026-10-09T13:58:58.3498144+02:00" endTime="2026-10-09T13:58:58.3498144+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ce7d36b5-484c-4be8-a7a9-3ad0ef636e68" />
+    <UnitTestResult executionId="40d7ac1c-9c58-40e3-bb60-2973b79b52db" testId="4ff96120-1170-e455-7f22-e3d95ee25df2" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.ForeignCnpRule_VariousCountries_TriggersCorrectly(cardCountry: &quot;US&quot;, transactionCountry: &quot;ZA&quot;)" computerName="CWIN7KW59J4" duration="00:00:00.0000966" startTime="2026-10-09T13:58:58.3736858+02:00" endTime="2026-10-09T13:58:58.3736859+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="40d7ac1c-9c58-40e3-bb60-2973b79b52db" />
+    <UnitTestResult executionId="731259a5-82ce-49d1-addf-f38f186f0f0b" testId="f1be5f38-f7b4-74e9-8dae-2038a0b5aa81" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordDatabaseOperation_MultipleOperationTypes_TracksSeparately" computerName="CWIN7KW59J4" duration="00:00:00.0002597" startTime="2026-10-09T13:58:58.8276697+02:00" endTime="2026-10-09T13:58:58.8276699+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="731259a5-82ce-49d1-addf-f38f186f0f0b" />
+    <UnitTestResult executionId="04472851-2524-4c5f-a30e-b97c62242049" testId="fe70ae88-d4f9-f721-72c5-9237b7206763" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_MultipleTransactions_CalculatesFraudRate" computerName="CWIN7KW59J4" duration="00:00:00.0003786" startTime="2026-10-09T13:58:58.8245963+02:00" endTime="2026-10-09T13:58:58.8245963+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="04472851-2524-4c5f-a30e-b97c62242049" />
+    <UnitTestResult executionId="9b25e636-cc46-418f-80e5-6c2be328dbcd" testId="d1e1e976-8db5-aac1-608c-dd15df7b5346" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.Login_WithInvalidPassword_ReturnsUnauthorized" computerName="CWIN7KW59J4" duration="00:00:00.0025375" startTime="2026-10-09T13:59:00.4674821+02:00" endTime="2026-10-09T13:59:00.4674822+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9b25e636-cc46-418f-80e5-6c2be328dbcd" />
+    <UnitTestResult executionId="a31bca34-e286-478e-bd5b-977317b20c8c" testId="e08f8518-4694-a5d2-fd5c-ff727bae9627" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_WithMultipleFilters_ReturnsFilteredResults" computerName="CWIN7KW59J4" duration="00:00:00.0009003" startTime="2026-10-09T13:58:58.4165813+02:00" endTime="2026-10-09T13:58:58.4165814+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a31bca34-e286-478e-bd5b-977317b20c8c" />
+    <UnitTestResult executionId="d145005d-f624-4353-a406-4d91aefe9ed1" testId="0ddc2849-0145-6d11-c9c8-5be7a1210e2d" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordRuleExecution_SingleRule_TracksMetrics" computerName="CWIN7KW59J4" duration="00:00:00.0002665" startTime="2026-10-09T13:58:58.8283107+02:00" endTime="2026-10-09T13:58:58.8283109+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d145005d-f624-4353-a406-4d91aefe9ed1" />
+    <UnitTestResult executionId="2aa66e27-4475-4e70-8d11-cde1e938d755" testId="0b096346-1e07-d5b1-7afb-a6bc697c5b86" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithoutToken_ReturnsUnauthorized" computerName="CWIN7KW59J4" duration="00:00:00.0014647" startTime="2026-10-09T13:59:01.2604518+02:00" endTime="2026-10-09T13:59:01.2604521+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2aa66e27-4475-4e70-8d11-cde1e938d755" />
+    <UnitTestResult executionId="dc497e0e-819a-4a1e-a0ad-66661c48cba3" testId="4764ae63-95ab-241c-2367-f0f6700259bd" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.Login_WithInvalidUsername_ReturnsUnauthorized" computerName="CWIN7KW59J4" duration="00:00:00.0068959" startTime="2026-10-09T13:59:00.4647584+02:00" endTime="2026-10-09T13:59:00.4647588+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dc497e0e-819a-4a1e-a0ad-66661c48cba3" />
+    <UnitTestResult executionId="f1416831-90e0-41a0-ac57-d714224d7d8c" testId="7b753e55-455e-8da6-cbfc-dc25de017bab" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_CallsRepositoryWithProvidedQuery" computerName="CWIN7KW59J4" duration="00:00:00.0013407" startTime="2026-10-09T13:58:58.4217767+02:00" endTime="2026-10-09T13:58:58.4217769+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f1416831-90e0-41a0-ac57-d714224d7d8c" />
+    <UnitTestResult executionId="d4a79d86-1e02-44b8-b884-60c3397d5988" testId="4ee943e4-db9a-2102-4940-fc0ec840fcdd" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.GetRuleResults_WithInvalidEventId_ReturnsNotFoundOrEmpty" computerName="CWIN7KW59J4" duration="00:00:00.2161152" startTime="2026-10-09T13:59:01.2183815+02:00" endTime="2026-10-09T13:59:01.2183819+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d4a79d86-1e02-44b8-b884-60c3397d5988" />
+    <UnitTestResult executionId="43a534a0-4855-445e-81f6-3b0820899d3e" testId="61b5bdbe-2a63-c668-a0b4-4e1206173e84" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_SingleRuleTriggered_ReturnsFraudScore" computerName="CWIN7KW59J4" duration="00:00:00.0007119" startTime="2026-10-09T13:58:58.3564641+02:00" endTime="2026-10-09T13:58:58.3564642+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="43a534a0-4855-445e-81f6-3b0820899d3e" />
+    <UnitTestResult executionId="37bb704e-240a-49d6-a654-e11c328688e7" testId="b40a60b9-9dee-f070-f854-1ca3f4cbe345" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_MultipleRulesTriggered_CumulativeScore" computerName="CWIN7KW59J4" duration="00:00:00.0002629" startTime="2026-10-09T13:58:58.3747059+02:00" endTime="2026-10-09T13:58:58.3747060+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="37bb704e-240a-49d6-a654-e11c328688e7" />
+    <UnitTestResult executionId="ede39f4a-3f4e-4da5-9d2b-39b913a8333a" testId="94cf1b27-11fc-848e-f04d-5e867223a1be" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithCustomerId_IncludesFilterParameter" computerName="CWIN7KW59J4" duration="00:00:00.1421775" startTime="2026-10-09T13:59:00.8723534+02:00" endTime="2026-10-09T13:59:00.8723536+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ede39f4a-3f4e-4da5-9d2b-39b913a8333a">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : Parameter 'date_from' must have either its NpgsqlDbType or its DataTypeName or its Value set.</Message>
+          <StackTrace>   at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)&#xD;
+   at Npgsql.NpgsqlParameter.&lt;ResolveTypeInfo&gt;g__ThrowNoTypeInfo|111_0()&#xD;
+   at Npgsql.NpgsqlParameter.ResolveTypeInfo(PgSerializerOptions options)&#xD;
+   at Npgsql.NpgsqlParameterCollection.ProcessParameters(PgSerializerOptions options, Boolean validateValues, CommandType commandType)&#xD;
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 144&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 149&#xD;
+   at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs:line 149&#xD;
+   at fraud_poc_project.Controllers.FraudController.QueryEvents(FraudQueryDto query) in C:\Development\Therron\training\src\fraud_poc_project_ui\Controllers\FraudController.cs:line 95&#xD;
+   at lambda_method110(Closure, Object)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)&#xD;
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)&#xD;
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)&#xD;
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)&#xD;
+   at fraud_poc_project.Middleware.CheckForXssMiddleware.InvokeAsync(HttpContext context) in C:\Development\Therron\training\src\fraud_poc_project_ui\Middleware\CheckForXssMiddleware.cs:line 72&#xD;
+   at Microsoft.AspNetCore.TestHost.HttpContextBuilder.&lt;&gt;c__DisplayClass23_0.&lt;&lt;SendAsync&gt;g__RunRequestAsync|0&gt;d.MoveNext()&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Microsoft.AspNetCore.TestHost.ClientHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.Handlers.CookieContainerHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.Handlers.RedirectHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithCustomerId_IncludesFilterParameter() in C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\Integration\Api\FraudControllerApiTests.cs:line 201&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="14fe4969-e6ae-482a-8eaf-1204e0f4d79c" testId="b72b01a6-3612-7e04-e58c-3b9cc8b9bcea" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_SingleTransaction_UpdatesMetrics" computerName="CWIN7KW59J4" duration="00:00:00.0002244" startTime="2026-10-09T13:58:58.8279686+02:00" endTime="2026-10-09T13:58:58.8279688+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="14fe4969-e6ae-482a-8eaf-1204e0f4d79c" />
+    <UnitTestResult executionId="1fbcdbbf-3da5-4fc6-9174-88500c71180a" testId="0a29e1fb-1399-05a0-1ae6-f23e6c131a8a" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_ZeroAmount_Evaluated" computerName="CWIN7KW59J4" duration="00:00:00.0006163" startTime="2026-10-09T13:58:58.3736326+02:00" endTime="2026-10-09T13:58:58.3736326+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1fbcdbbf-3da5-4fc6-9174-88500c71180a" />
+    <UnitTestResult executionId="4fdeeff7-d7c4-4aff-846d-a2e4888937ee" testId="41e55b4d-dde4-5fb0-0c81-6615e0ef5292" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_MultipleFilters_AllApplied" computerName="CWIN7KW59J4" duration="00:00:00.0193048" startTime="2026-10-09T13:59:01.2378962+02:00" endTime="2026-10-09T13:59:01.2378964+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4fdeeff7-d7c4-4aff-846d-a2e4888937ee" />
+    <UnitTestResult executionId="b516ae70-d672-45b1-bc30-1e3c71c97f79" testId="d0f8613c-1674-8ee3-5dac-792d684d7966" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_HighVolume_HandlesEfficiently" computerName="CWIN7KW59J4" duration="00:00:00.4239579" startTime="2026-10-09T13:58:58.8236111+02:00" endTime="2026-10-09T13:58:58.8236115+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b516ae70-d672-45b1-bc30-1e3c71c97f79" />
+    <UnitTestResult executionId="1f712c36-96a4-415c-a105-d02f59051396" testId="5fc7981b-0749-5f0f-e9b5-7da7c356faac" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_ScoreAboveThreshold_IsFlagged" computerName="CWIN7KW59J4" duration="00:00:00.0001256" startTime="2026-10-09T13:58:58.3746881+02:00" endTime="2026-10-09T13:58:58.3746882+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1f712c36-96a4-415c-a105-d02f59051396" />
+    <UnitTestResult executionId="a3c4c0eb-2c2c-470f-a63a-f2a8be784600" testId="534de068-df1a-7f09-f38a-cf8c8d04d11d" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_FlaggedTransaction_IncrementsFlaggedCount" computerName="CWIN7KW59J4" duration="00:00:00.0001975" startTime="2026-10-09T13:58:58.8271231+02:00" endTime="2026-10-09T13:58:58.8271233+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a3c4c0eb-2c2c-470f-a63a-f2a8be784600" />
+    <UnitTestResult executionId="56944763-300d-4080-a7fd-d335690813c6" testId="b7136c84-c504-6995-40bd-f739404b2429" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordAuthenticationAttempt_MultipleAttempts_CalculatesSuccessRate" computerName="CWIN7KW59J4" duration="00:00:00.0001800" startTime="2026-10-09T13:58:58.8273646+02:00" endTime="2026-10-09T13:58:58.8273647+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="56944763-300d-4080-a7fd-d335690813c6" />
+    <UnitTestResult executionId="64309c14-2160-4f17-9b3f-4ece77738e79" testId="69f89b46-416e-7aed-ee5f-d6983dc4ee84" testName="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.GetSnapshot_WithNoData_ReturnsDefaults" computerName="CWIN7KW59J4" duration="00:00:00.0002476" startTime="2026-10-09T13:58:58.8259561+02:00" endTime="2026-10-09T13:58:58.8259562+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="64309c14-2160-4f17-9b3f-4ece77738e79" />
+    <UnitTestResult executionId="2e8b71be-774d-42db-b1f3-6cd91643a90f" testId="f5f14cfd-c020-54e9-7b8c-a1c5fce40507" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.HighAmountRule_VariousAmounts_TriggersCorrectly(amount: 500)" computerName="CWIN7KW59J4" duration="00:00:00.0000007" startTime="2026-10-09T13:58:58.3736157+02:00" endTime="2026-10-09T13:58:58.3736158+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2e8b71be-774d-42db-b1f3-6cd91643a90f" />
+    <UnitTestResult executionId="697ee807-bad8-4d52-b0ca-b8b8b5139b55" testId="a78db441-03ab-5f79-81b7-c71e706ba601" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.HighAmountRule_VariousAmounts_TriggersCorrectly(amount: 1000)" computerName="CWIN7KW59J4" duration="00:00:00.0001265" startTime="2026-10-09T13:58:58.3734875+02:00" endTime="2026-10-09T13:58:58.3734875+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="697ee807-bad8-4d52-b0ca-b8b8b5139b55" />
+    <UnitTestResult executionId="c3606238-c444-4552-8290-3b5b45fa2632" testId="89255932-931f-2c88-3e82-3ce935be0e78" testName="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(amount: 1000)" computerName="CWIN7KW59J4" duration="00:00:00.0002059" startTime="2026-10-09T13:58:58.3496404+02:00" endTime="2026-10-09T13:58:58.3496405+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c3606238-c444-4552-8290-3b5b45fa2632" />
+    <UnitTestResult executionId="8c807b49-88ee-4aaa-91de-8df68bf1e22a" testId="32d0517e-8b1f-5894-c5de-6feae221184a" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.Login_WithMissingCredentials_ReturnsBadRequest" computerName="CWIN7KW59J4" duration="00:00:00.0090126" startTime="2026-10-09T13:59:00.4568656+02:00" endTime="2026-10-09T13:59:00.4568662+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8c807b49-88ee-4aaa-91de-8df68bf1e22a" />
+    <UnitTestResult executionId="39bdd899-ff8a-4dbf-8bba-b0b6df7c896e" testId="157d5034-dffc-ef59-c782-83da8c506e2d" testName="fraud_poc_project.Tests.Controllers.FraudControllerTests.GetRuleResults_ReturnsBothTriggeredAndNonTriggeredRules" computerName="CWIN7KW59J4" duration="00:00:00.0007055" startTime="2026-10-09T13:58:58.4178714+02:00" endTime="2026-10-09T13:58:58.4178715+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="39bdd899-ff8a-4dbf-8bba-b0b6df7c896e" />
+    <UnitTestResult executionId="820bbd44-11a9-449b-8430-66d46cc51bb4" testId="0c4c467e-2f47-91ca-81e2-790bf47446bd" testName="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithInvalidToken_ReturnsUnauthorized" computerName="CWIN7KW59J4" duration="00:00:00.0125734" startTime="2026-10-09T13:59:00.4856039+02:00" endTime="2026-10-09T13:59:00.4856042+02:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="820bbd44-11a9-449b-8430-66d46cc51bb4" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.Reset_ClearsAllMetrics" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="83fe95ff-ac3b-c636-e0c4-7553d36623a3">
+      <Execution id="32dccef8-37ab-449b-a8dc-3092db77ad49" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="Reset_ClearsAllMetrics" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithCustomerId_IncludesFilterParameter" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="94cf1b27-11fc-848e-f04d-5e867223a1be">
+      <Execution id="ede39f4a-3f4e-4da5-9d2b-39b913a8333a" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="QueryEvents_WithCustomerId_IncludesFilterParameter" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithoutToken_ReturnsUnauthorized" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="0b096346-1e07-d5b1-7afb-a6bc697c5b86">
+      <Execution id="2aa66e27-4475-4e70-8d11-cde1e938d755" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="QueryEvents_WithoutToken_ReturnsUnauthorized" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_WithMultipleFilters_ReturnsFilteredResults" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="e08f8518-4694-a5d2-fd5c-ff727bae9627">
+      <Execution id="a31bca34-e286-478e-bd5b-977317b20c8c" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="QueryEvents_WithMultipleFilters_ReturnsFilteredResults" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_FlaggedTransaction_IncrementsFlaggedCount" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="534de068-df1a-7f09-f38a-cf8c8d04d11d">
+      <Execution id="a3c4c0eb-2c2c-470f-a63a-f2a8be784600" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordTransactionProcessed_FlaggedTransaction_IncrementsFlaggedCount" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.ForeignCnpRule_VariousCountries_TriggersCorrectly(cardCountry: &quot;GB&quot;, transactionCountry: &quot;ZA&quot;)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="88b6d4f4-ef3c-667b-5e5b-5ee082854a74">
+      <Execution id="d2a79528-8dba-4853-9921-624a787fc001" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="ForeignCnpRule_VariousCountries_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.GetSnapshot_IncludesTimestamp" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="ad125620-3f15-099e-eb48-f6bc7f590b2a">
+      <Execution id="58d0d95e-9c83-44ab-a1bb-46eb04591b37" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="GetSnapshot_IncludesTimestamp" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(amount: 1000)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="89255932-931f-2c88-3e82-3ce935be0e78">
+      <Execution id="c3606238-c444-4552-8290-3b5b45fa2632" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.GetRuleResults_ReturnsBothTriggeredAndNonTriggeredRules" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="157d5034-dffc-ef59-c782-83da8c506e2d">
+      <Execution id="39bdd899-ff8a-4dbf-8bba-b0b6df7c896e" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="GetRuleResults_ReturnsBothTriggeredAndNonTriggeredRules" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.HighAmountRule_VariousAmounts_TriggersCorrectly(amount: 1000)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="a78db441-03ab-5f79-81b7-c71e706ba601">
+      <Execution id="697ee807-bad8-4d52-b0ca-b8b8b5139b55" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="HighAmountRule_VariousAmounts_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordDatabaseOperation_SingleOperation_TracksMetrics" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="c655818e-6dca-3e38-38d7-206bff7fbdd5">
+      <Execution id="7a7676bb-72c4-4277-9b33-821cefeb37ac" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordDatabaseOperation_SingleOperation_TracksMetrics" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_TracksProcessingTime" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="aff42783-a114-7e33-1d43-23ac117b32d4">
+      <Execution id="4781a305-ded3-445a-bbc5-98c2e3f9aa6a" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordTransactionProcessed_TracksProcessingTime" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_RuleResultsIncludeDetails" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="5afc18ea-2580-e54b-b140-46021e5f26a1">
+      <Execution id="538e3e67-cffe-4936-a23c-16a7e2d390eb" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_RuleResultsIncludeDetails" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(amount: 5000)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="e816ca1e-a465-862d-7c5c-aa4ac5a7393a">
+      <Execution id="4d7407b7-37a5-41b7-a666-8c1e6523d35c" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordAuthenticationAttempt_SuccessfulLogin_TracksMetrics" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="23bc5272-b137-b50b-6959-cb86dba0260a">
+      <Execution id="ff7b368a-4f75-4b34-af6f-cc94268ce1ea" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordAuthenticationAttempt_SuccessfulLogin_TracksMetrics" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_HighRiskScenario_AllRulesTriggered" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="14495b46-7c76-c69a-a437-e7f37a96948d">
+      <Execution id="a50e46b4-d50e-4647-864c-7c185d7cd448" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_HighRiskScenario_AllRulesTriggered" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_SingleRuleTriggered_ReturnsFraudScore" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="61b5bdbe-2a63-c668-a0b4-4e1206173e84">
+      <Execution id="43a534a0-4855-445e-81f6-3b0820899d3e" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_SingleRuleTriggered_ReturnsFraudScore" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.GetRuleResults_WithNoRuleResults_ReturnsOkResultWithEmptyList" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="78a86d02-b269-55eb-f051-541328eb8022">
+      <Execution id="4cf8d602-0032-4c85-a57b-3e0dd6e10586" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="GetRuleResults_WithNoRuleResults_ReturnsOkResultWithEmptyList" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordRuleExecution_CalculatesAverageExecutionTime" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="3d52d240-2554-03f2-2241-8ac8bde68372">
+      <Execution id="e1dc6deb-f0fe-437d-b8e1-3db958a972cf" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordRuleExecution_CalculatesAverageExecutionTime" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.Login_WithMissingCredentials_ReturnsBadRequest" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="32d0517e-8b1f-5894-c5de-6feae221184a">
+      <Execution id="8c807b49-88ee-4aaa-91de-8df68bf1e22a" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="Login_WithMissingCredentials_ReturnsBadRequest" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_MultipleRulesTriggered_CumulativeScore" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="b40a60b9-9dee-f070-f854-1ca3f4cbe345">
+      <Execution id="37bb704e-240a-49d6-a654-e11c328688e7" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_MultipleRulesTriggered_CumulativeScore" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithDateRange_IncludesDateParameters" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="b6e6c635-4c06-1c8f-8119-abb77d4e4e28">
+      <Execution id="f19460ed-2324-4531-91e7-5abeaa452620" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="QueryEvents_WithDateRange_IncludesDateParameters" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.Login_WithInvalidUsername_ReturnsUnauthorized" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="4764ae63-95ab-241c-2367-f0f6700259bd">
+      <Execution id="dc497e0e-819a-4a1e-a0ad-66661c48cba3" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="Login_WithInvalidUsername_ReturnsUnauthorized" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_CalculatesAverageFraudScore" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="ef58bf4f-fe6a-abce-ebd4-56a7361a25d5">
+      <Execution id="b588b03e-2a76-48a5-972a-23d0c3ca3368" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordTransactionProcessed_CalculatesAverageFraudScore" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.GetRuleResults_WithValidEventId_ReturnsOkResultWithRuleResults" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="4915e52f-f06c-7d54-668a-fa417addadd7">
+      <Execution id="6c906961-47ec-447d-9794-e2edd751ba1e" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="GetRuleResults_WithValidEventId_ReturnsOkResultWithRuleResults" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_MultipleFilters_AllApplied" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="41e55b4d-dde4-5fb0-0c81-6615e0ef5292">
+      <Execution id="4fdeeff7-d7c4-4aff-846d-a2e4888937ee" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="QueryEvents_MultipleFilters_AllApplied" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.ForeignCnpRule_VariousCountries_TriggersCorrectly(cardCountry: &quot;ZA&quot;, transactionCountry: &quot;ZA&quot;)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="ae672d30-54db-cbf5-fbec-ec8d00dd3ab9">
+      <Execution id="13c9637d-79a2-468b-b130-5b852067a161" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="ForeignCnpRule_VariousCountries_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordRuleExecution_MultipleRules_TracksSeparately" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="8e79ade1-6641-51f1-41ae-c703751076d0">
+      <Execution id="f6c4095d-e47f-4662-a91d-7f3cc1f112b1" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordRuleExecution_MultipleRules_TracksSeparately" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(amount: 2500)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="08a0cab9-0e46-99cb-8d70-25a48de2bb64">
+      <Execution id="ff05ec17-2cbb-4284-b74f-1d0fffbbdac5" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.HighAmountRule_VariousAmounts_TriggersCorrectly(amount: 5000)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="a54b872c-6969-cd38-9ce2-b7dd1b4ecf37">
+      <Execution id="b1c03bcd-35dd-4502-bec4-a92d431f3df8" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="HighAmountRule_VariousAmounts_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.Login_WithValidCredentials_ReturnsJwtToken" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="5ba28fd7-76b2-4dd9-ddf8-a6da7ab94925">
+      <Execution id="55bc17da-c7b5-4f61-bc5a-de6bdd528c1b" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="Login_WithValidCredentials_ReturnsJwtToken" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(amount: 10000)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="9550fc5a-96bb-eefe-6d26-4a22899f5ab8">
+      <Execution id="ce7d36b5-484c-4be8-a7a9-3ad0ef636e68" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordRuleExecution_SingleRule_TracksMetrics" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="0ddc2849-0145-6d11-c9c8-5be7a1210e2d">
+      <Execution id="d145005d-f624-4353-a406-4d91aefe9ed1" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordRuleExecution_SingleRule_TracksMetrics" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.HighAmountRule_VariousAmounts_TriggersCorrectly(amount: 500)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="f5f14cfd-c020-54e9-7b8c-a1c5fce40507">
+      <Execution id="2e8b71be-774d-42db-b1f3-6cd91643a90f" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="HighAmountRule_VariousAmounts_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.GetRuleResults_WithInvalidEventId_ReturnsNotFoundOrEmpty" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="4ee943e4-db9a-2102-4940-fc0ec840fcdd">
+      <Execution id="d4a79d86-1e02-44b8-b884-60c3397d5988" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="GetRuleResults_WithInvalidEventId_ReturnsNotFoundOrEmpty" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordDatabaseOperation_MultipleOperationTypes_TracksSeparately" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="f1be5f38-f7b4-74e9-8dae-2038a0b5aa81">
+      <Execution id="731259a5-82ce-49d1-addf-f38f186f0f0b" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordDatabaseOperation_MultipleOperationTypes_TracksSeparately" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_NegativeAmount_Handled" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="1ffab8c7-3ab0-5983-2f31-a06f501fa9d6">
+      <Execution id="b650e2fb-6e12-4127-bb25-2c0b6ca01c61" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_NegativeAmount_Handled" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordKafkaEvent_SingleEvent_TracksMetrics" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="6894e5b2-676a-27db-f6e9-2b475279887d">
+      <Execution id="587f874f-c823-4594-8246-0dc69bc5aad5" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordKafkaEvent_SingleEvent_TracksMetrics" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.ForeignCnpRule_VariousCountries_TriggersCorrectly(cardCountry: &quot;US&quot;, transactionCountry: &quot;US&quot;)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="dd4f6ed9-4974-b294-af84-ab4e12e97d7c">
+      <Execution id="bdb81288-7fc7-4e9e-bfd0-da8f69fe54fb" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="ForeignCnpRule_VariousCountries_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_NoRulesTriggered_ReturnsFraudFalse" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="fa5049d7-0896-7db3-c84c-a30ecba7f02b">
+      <Execution id="b8eb518b-f3fd-40fb-85b4-49d8310c3058" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_NoRulesTriggered_ReturnsFraudFalse" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.GetRuleResults_WithoutToken_ReturnsUnauthorized" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="ae91c151-2c81-24f6-0f5e-c7cd12e207f6">
+      <Execution id="76de1563-d8a4-4273-9f97-3ff98c1bb305" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="GetRuleResults_WithoutToken_ReturnsUnauthorized" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_ScoreAboveThreshold_IsFlagged" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="5fc7981b-0749-5f0f-e9b5-7da7c356faac">
+      <Execution id="1f712c36-96a4-415c-a105-d02f59051396" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_ScoreAboveThreshold_IsFlagged" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.Login_WithInvalidPassword_ReturnsUnauthorized" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="d1e1e976-8db5-aac1-608c-dd15df7b5346">
+      <Execution id="9b25e636-cc46-418f-80e5-6c2be328dbcd" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="Login_WithInvalidPassword_ReturnsUnauthorized" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.ForeignCnpRule_VariousCountries_TriggersCorrectly(cardCountry: &quot;US&quot;, transactionCountry: &quot;ZA&quot;)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="4ff96120-1170-e455-7f22-e3d95ee25df2">
+      <Execution id="40d7ac1c-9c58-40e3-bb60-2973b79b52db" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="ForeignCnpRule_VariousCountries_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_WithValidQuery_ReturnsOkResultWithEvents" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="6510438b-d06d-5f0c-36f7-512b53367c5f">
+      <Execution id="cb294f49-4017-46f2-8b82-77d7b3aa0b72" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="QueryEvents_WithValidQuery_ReturnsOkResultWithEvents" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithInvalidToken_ReturnsUnauthorized" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="0c4c467e-2f47-91ca-81e2-790bf47446bd">
+      <Execution id="820bbd44-11a9-449b-8430-66d46cc51bb4" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="QueryEvents_WithInvalidToken_ReturnsUnauthorized" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.GetRuleResults_WithValidToken_ReturnsOk" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="49fe3429-269b-d7d4-7626-22506010c721">
+      <Execution id="1fdd5aa9-c10d-40ea-b0a0-de84de2d3e22" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="GetRuleResults_WithValidToken_ReturnsOk" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_SingleTransaction_UpdatesMetrics" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="b72b01a6-3612-7e04-e58c-3b9cc8b9bcea">
+      <Execution id="14fe4969-e6ae-482a-8eaf-1204e0f4d79c" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordTransactionProcessed_SingleTransaction_UpdatesMetrics" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.HighAmountRule_VariousAmounts_TriggersCorrectly(amount: 2500)" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="90d18d78-322f-4d87-803c-ce9ff41ab309">
+      <Execution id="76df66b9-253b-4c66-8b93-f8fc6711d30f" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="HighAmountRule_VariousAmounts_TriggersCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordKafkaEvent_MultipleEvents_TracksSeparately" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="1e28224e-6939-ce7f-ab2a-39c283aa0d50">
+      <Execution id="41daae4f-25ce-4e10-9ef2-fc234caa3be2" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordKafkaEvent_MultipleEvents_TracksSeparately" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.GetRuleResults_CallsRepositoryWithProvidedEventId" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="f2369c94-5e85-31a3-d2da-5b899600de66">
+      <Execution id="c019e6a3-1287-4760-bf80-e9abbedc2f6c" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="GetRuleResults_CallsRepositoryWithProvidedEventId" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_HighVolume_HandlesEfficiently" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="d0f8613c-1674-8ee3-5dac-792d684d7966">
+      <Execution id="b516ae70-d672-45b1-bc30-1e3c71c97f79" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordTransactionProcessed_HighVolume_HandlesEfficiently" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_ResponseContentValid" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="bc1b17a2-4b1f-d3e4-3d43-3be602aba518">
+      <Execution id="7487b5d9-c46c-4a64-ad63-deb6245663a6" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="QueryEvents_ResponseContentValid" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordAuthenticationAttempt_MultipleAttempts_CalculatesSuccessRate" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="b7136c84-c504-6995-40bd-f739404b2429">
+      <Execution id="56944763-300d-4080-a7fd-d335690813c6" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordAuthenticationAttempt_MultipleAttempts_CalculatesSuccessRate" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_CalculatesPercentiles" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="40db2091-d512-bddc-2553-77561f02769d">
+      <Execution id="5549b027-e100-44ba-a449-78d272d8ba62" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordTransactionProcessed_CalculatesPercentiles" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_ZeroAmount_Evaluated" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="0a29e1fb-1399-05a0-1ae6-f23e6c131a8a">
+      <Execution id="1fbcdbbf-3da5-4fc6-9174-88500c71180a" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_ZeroAmount_Evaluated" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_WithEmptyResult_ReturnsOkResultWithEmptyList" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="284bcd8f-e9d9-a5db-02ed-1e977d4cdd95">
+      <Execution id="865b4afa-2b2d-4f06-825b-f8d7f8b1b4e6" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="QueryEvents_WithEmptyResult_ReturnsOkResultWithEmptyList" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.GetSnapshot_WithNoData_ReturnsDefaults" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="69f89b46-416e-7aed-ee5f-d6983dc4ee84">
+      <Execution id="64309c14-2160-4f17-9b3f-4ece77738e79" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="GetSnapshot_WithNoData_ReturnsDefaults" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests.FraudEvaluationService_AllRulesDisabled_NoScore" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="5e710f0a-f83c-f747-b18a-39b99acde272">
+      <Execution id="46671de9-b77c-43b7-873a-5e07e366c4d7" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Business.FraudRuleIntegrationTests" name="FraudEvaluationService_AllRulesDisabled_NoScore" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithValidToken_ReturnsOk" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="f2b44b90-f5d4-839d-fbd9-92761c24fb8a">
+      <Execution id="7647938b-a1e4-4727-93bf-bb7b286856dd" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests" name="QueryEvents_WithValidToken_ReturnsOk" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_PreservesTransactionEventDetails" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="5edc45a7-f7d9-da8f-82bb-7206df9274a8">
+      <Execution id="aeee7f49-565a-4573-8703-0be301f0009f" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="QueryEvents_PreservesTransactionEventDetails" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.MetricsSnapshot_ToString_FormatsCorrectly" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="6f583068-0b23-c7ee-471e-a96300a6ceb6">
+      <Execution id="07fc8e42-90ac-45ff-ba97-2440c93bcecd" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="MetricsSnapshot_ToString_FormatsCorrectly" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordAuthenticationAttempt_FailedLogin_UpdatesMetrics" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="438c07ef-a441-8648-3f15-96ddd364003f">
+      <Execution id="6eaa0c67-5619-4844-aeec-446e23447642" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordAuthenticationAttempt_FailedLogin_UpdatesMetrics" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Controllers.FraudControllerTests.QueryEvents_CallsRepositoryWithProvidedQuery" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="7b753e55-455e-8da6-cbfc-dc25de017bab">
+      <Execution id="f1416831-90e0-41a0-ac57-d714224d7d8c" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Controllers.FraudControllerTests" name="QueryEvents_CallsRepositoryWithProvidedQuery" />
+    </UnitTest>
+    <UnitTest name="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests.RecordTransactionProcessed_MultipleTransactions_CalculatesFraudRate" storage="c:\development\therron\training\src\tests\fraud_poc_project.tests\bin\release\net8.0\fraud_poc_project.tests.dll" id="fe70ae88-d4f9-f721-72c5-9237b7206763">
+      <Execution id="04472851-2524-4c5f-a30e-b97c62242049" />
+      <TestMethod codeBase="C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\bin\Release\net8.0\fraud_poc_project.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="fraud_poc_project.Tests.Integration.Metrics.MetricsServiceTests" name="RecordTransactionProcessed_MultipleTransactions_CalculatesFraudRate" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="83fe95ff-ac3b-c636-e0c4-7553d36623a3" executionId="32dccef8-37ab-449b-a8dc-3092db77ad49" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5e710f0a-f83c-f747-b18a-39b99acde272" executionId="46671de9-b77c-43b7-873a-5e07e366c4d7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5edc45a7-f7d9-da8f-82bb-7206df9274a8" executionId="aeee7f49-565a-4573-8703-0be301f0009f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c655818e-6dca-3e38-38d7-206bff7fbdd5" executionId="7a7676bb-72c4-4277-9b33-821cefeb37ac" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="23bc5272-b137-b50b-6959-cb86dba0260a" executionId="ff7b368a-4f75-4b34-af6f-cc94268ce1ea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="08a0cab9-0e46-99cb-8d70-25a48de2bb64" executionId="ff05ec17-2cbb-4284-b74f-1d0fffbbdac5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5ba28fd7-76b2-4dd9-ddf8-a6da7ab94925" executionId="55bc17da-c7b5-4f61-bc5a-de6bdd528c1b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6894e5b2-676a-27db-f6e9-2b475279887d" executionId="587f874f-c823-4594-8246-0dc69bc5aad5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="284bcd8f-e9d9-a5db-02ed-1e977d4cdd95" executionId="865b4afa-2b2d-4f06-825b-f8d7f8b1b4e6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ae672d30-54db-cbf5-fbec-ec8d00dd3ab9" executionId="13c9637d-79a2-468b-b130-5b852067a161" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa5049d7-0896-7db3-c84c-a30ecba7f02b" executionId="b8eb518b-f3fd-40fb-85b4-49d8310c3058" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="78a86d02-b269-55eb-f051-541328eb8022" executionId="4cf8d602-0032-4c85-a57b-3e0dd6e10586" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1e28224e-6939-ce7f-ab2a-39c283aa0d50" executionId="41daae4f-25ce-4e10-9ef2-fc234caa3be2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bc1b17a2-4b1f-d3e4-3d43-3be602aba518" executionId="7487b5d9-c46c-4a64-ad63-deb6245663a6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e816ca1e-a465-862d-7c5c-aa4ac5a7393a" executionId="4d7407b7-37a5-41b7-a666-8c1e6523d35c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8e79ade1-6641-51f1-41ae-c703751076d0" executionId="f6c4095d-e47f-4662-a91d-7f3cc1f112b1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a54b872c-6969-cd38-9ce2-b7dd1b4ecf37" executionId="b1c03bcd-35dd-4502-bec4-a92d431f3df8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ae91c151-2c81-24f6-0f5e-c7cd12e207f6" executionId="76de1563-d8a4-4273-9f97-3ff98c1bb305" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1ffab8c7-3ab0-5983-2f31-a06f501fa9d6" executionId="b650e2fb-6e12-4127-bb25-2c0b6ca01c61" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="90d18d78-322f-4d87-803c-ce9ff41ab309" executionId="76df66b9-253b-4c66-8b93-f8fc6711d30f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ef58bf4f-fe6a-abce-ebd4-56a7361a25d5" executionId="b588b03e-2a76-48a5-972a-23d0c3ca3368" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dd4f6ed9-4974-b294-af84-ab4e12e97d7c" executionId="bdb81288-7fc7-4e9e-bfd0-da8f69fe54fb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="40db2091-d512-bddc-2553-77561f02769d" executionId="5549b027-e100-44ba-a449-78d272d8ba62" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49fe3429-269b-d7d4-7626-22506010c721" executionId="1fdd5aa9-c10d-40ea-b0a0-de84de2d3e22" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b6e6c635-4c06-1c8f-8119-abb77d4e4e28" executionId="f19460ed-2324-4531-91e7-5abeaa452620" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6510438b-d06d-5f0c-36f7-512b53367c5f" executionId="cb294f49-4017-46f2-8b82-77d7b3aa0b72" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ad125620-3f15-099e-eb48-f6bc7f590b2a" executionId="58d0d95e-9c83-44ab-a1bb-46eb04591b37" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4915e52f-f06c-7d54-668a-fa417addadd7" executionId="6c906961-47ec-447d-9794-e2edd751ba1e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="438c07ef-a441-8648-3f15-96ddd364003f" executionId="6eaa0c67-5619-4844-aeec-446e23447642" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="aff42783-a114-7e33-1d43-23ac117b32d4" executionId="4781a305-ded3-445a-bbc5-98c2e3f9aa6a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5afc18ea-2580-e54b-b140-46021e5f26a1" executionId="538e3e67-cffe-4936-a23c-16a7e2d390eb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14495b46-7c76-c69a-a437-e7f37a96948d" executionId="a50e46b4-d50e-4647-864c-7c185d7cd448" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3d52d240-2554-03f2-2241-8ac8bde68372" executionId="e1dc6deb-f0fe-437d-b8e1-3db958a972cf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6f583068-0b23-c7ee-471e-a96300a6ceb6" executionId="07fc8e42-90ac-45ff-ba97-2440c93bcecd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="88b6d4f4-ef3c-667b-5e5b-5ee082854a74" executionId="d2a79528-8dba-4853-9921-624a787fc001" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f2369c94-5e85-31a3-d2da-5b899600de66" executionId="c019e6a3-1287-4760-bf80-e9abbedc2f6c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f2b44b90-f5d4-839d-fbd9-92761c24fb8a" executionId="7647938b-a1e4-4727-93bf-bb7b286856dd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9550fc5a-96bb-eefe-6d26-4a22899f5ab8" executionId="ce7d36b5-484c-4be8-a7a9-3ad0ef636e68" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4ff96120-1170-e455-7f22-e3d95ee25df2" executionId="40d7ac1c-9c58-40e3-bb60-2973b79b52db" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f1be5f38-f7b4-74e9-8dae-2038a0b5aa81" executionId="731259a5-82ce-49d1-addf-f38f186f0f0b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fe70ae88-d4f9-f721-72c5-9237b7206763" executionId="04472851-2524-4c5f-a30e-b97c62242049" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d1e1e976-8db5-aac1-608c-dd15df7b5346" executionId="9b25e636-cc46-418f-80e5-6c2be328dbcd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e08f8518-4694-a5d2-fd5c-ff727bae9627" executionId="a31bca34-e286-478e-bd5b-977317b20c8c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0ddc2849-0145-6d11-c9c8-5be7a1210e2d" executionId="d145005d-f624-4353-a406-4d91aefe9ed1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0b096346-1e07-d5b1-7afb-a6bc697c5b86" executionId="2aa66e27-4475-4e70-8d11-cde1e938d755" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4764ae63-95ab-241c-2367-f0f6700259bd" executionId="dc497e0e-819a-4a1e-a0ad-66661c48cba3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7b753e55-455e-8da6-cbfc-dc25de017bab" executionId="f1416831-90e0-41a0-ac57-d714224d7d8c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4ee943e4-db9a-2102-4940-fc0ec840fcdd" executionId="d4a79d86-1e02-44b8-b884-60c3397d5988" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="61b5bdbe-2a63-c668-a0b4-4e1206173e84" executionId="43a534a0-4855-445e-81f6-3b0820899d3e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b40a60b9-9dee-f070-f854-1ca3f4cbe345" executionId="37bb704e-240a-49d6-a654-e11c328688e7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="94cf1b27-11fc-848e-f04d-5e867223a1be" executionId="ede39f4a-3f4e-4da5-9d2b-39b913a8333a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b72b01a6-3612-7e04-e58c-3b9cc8b9bcea" executionId="14fe4969-e6ae-482a-8eaf-1204e0f4d79c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0a29e1fb-1399-05a0-1ae6-f23e6c131a8a" executionId="1fbcdbbf-3da5-4fc6-9174-88500c71180a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="41e55b4d-dde4-5fb0-0c81-6615e0ef5292" executionId="4fdeeff7-d7c4-4aff-846d-a2e4888937ee" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d0f8613c-1674-8ee3-5dac-792d684d7966" executionId="b516ae70-d672-45b1-bc30-1e3c71c97f79" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5fc7981b-0749-5f0f-e9b5-7da7c356faac" executionId="1f712c36-96a4-415c-a105-d02f59051396" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="534de068-df1a-7f09-f38a-cf8c8d04d11d" executionId="a3c4c0eb-2c2c-470f-a63a-f2a8be784600" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b7136c84-c504-6995-40bd-f739404b2429" executionId="56944763-300d-4080-a7fd-d335690813c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="69f89b46-416e-7aed-ee5f-d6983dc4ee84" executionId="64309c14-2160-4f17-9b3f-4ece77738e79" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f5f14cfd-c020-54e9-7b8c-a1c5fce40507" executionId="2e8b71be-774d-42db-b1f3-6cd91643a90f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a78db441-03ab-5f79-81b7-c71e706ba601" executionId="697ee807-bad8-4d52-b0ca-b8b8b5139b55" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="89255932-931f-2c88-3e82-3ce935be0e78" executionId="c3606238-c444-4552-8290-3b5b45fa2632" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="32d0517e-8b1f-5894-c5de-6feae221184a" executionId="8c807b49-88ee-4aaa-91de-8df68bf1e22a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="157d5034-dffc-ef59-c782-83da8c506e2d" executionId="39bdd899-ff8a-4dbf-8bba-b0b6df7c896e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0c4c467e-2f47-91ca-81e2-790bf47446bd" executionId="820bbd44-11a9-449b-8430-66d46cc51bb4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="65" executed="65" passed="62" failed="3" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.6+bf9b858c26 (64-bit .NET 8.0.30)&#xD;
+[xUnit.net 00:00:00.07]   Discovering: fraud_poc_project.Tests&#xD;
+[xUnit.net 00:00:00.12]   Discovered:  fraud_poc_project.Tests&#xD;
+[xUnit.net 00:00:00.12]   Starting:    fraud_poc_project.Tests&#xD;
+[13:59:00 INF] Starting Kafka consumer for topic: poc-fraud-dev with batch processing&#xD;
+[13:59:00 INF] AuthenticationService initialized&#xD;
+[13:59:00 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:00 INF] JWT token generated successfully for username: fraud-analyst&#xD;
+[13:59:00 INF] Successful login for username: fraud-analyst&#xD;
+[13:59:00 INF] Authentication attempt - Successful: True, Total: 1, Success Rate: 100.00 %&#xD;
+[13:59:00 INF] AuthenticationService initialized&#xD;
+[13:59:00 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:00 WRN] Login attempt with missing credentials&#xD;
+[13:59:00 INF] Authentication attempt - Successful: False, Total: 2, Success Rate: 50.00 %&#xD;
+[13:59:00 INF] AuthenticationService initialized&#xD;
+[13:59:00 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:00 WRN] Failed authentication attempt for username: invalid-user&#xD;
+[13:59:00 WRN] Token generation failed: invalid credentials for username invalid-user&#xD;
+[13:59:00 WRN] Failed login attempt for username: invalid-user&#xD;
+[13:59:00 INF] Authentication attempt - Successful: False, Total: 3, Success Rate: 33.33 %&#xD;
+[13:59:00 INF] AuthenticationService initialized&#xD;
+[13:59:00 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:00 WRN] Failed authentication attempt for username: fraud-analyst&#xD;
+[13:59:00 WRN] Token generation failed: invalid credentials for username fraud-analyst&#xD;
+[13:59:00 WRN] Failed login attempt for username: fraud-analyst&#xD;
+[13:59:00 INF] Authentication attempt - Successful: False, Total: 4, Success Rate: 25.00 %&#xD;
+[13:59:00 INF] AuthenticationService initialized&#xD;
+[13:59:00 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:00 INF] JWT token generated successfully for username: fraud-analyst&#xD;
+[13:59:00 INF] Successful login for username: fraud-analyst&#xD;
+[13:59:00 INF] Authentication attempt - Successful: True, Total: 5, Success Rate: 40.00 %&#xD;
+[13:59:00 INF] AuthenticationService initialized&#xD;
+[13:59:00 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:00 ERR] Customer ID: null - Failed to retrieve data for Query={"DateFrom":null,"DateTo":null,"CustomerId":null,"IsFlaggedOnly":null,"TransactionType":null,"MinFraudScore":null}&#xD;
+[xUnit.net 00:00:02.54]       System.InvalidOperationException : Parameter 'date_from' must have either its NpgsqlDbType or its DataTypeName or its Value set.&#xD;
+[xUnit.net 00:00:02.55]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.55]            at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)&#xD;
+[xUnit.net 00:00:02.55]            at Npgsql.NpgsqlParameter.&lt;ResolveTypeInfo&gt;g__ThrowNoTypeInfo|111_0()&#xD;
+[xUnit.net 00:00:02.55]            at Npgsql.NpgsqlParameter.ResolveTypeInfo(PgSerializerOptions options)&#xD;
+[xUnit.net 00:00:02.55]            at Npgsql.NpgsqlParameterCollection.ProcessParameters(PgSerializerOptions options, Boolean validateValues, CommandType commandType)&#xD;
+[xUnit.net 00:00:02.55]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.55]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.55]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(144,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.55]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(149,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.55]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(149,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.55]         C:\Development\Therron\training\src\fraud_poc_project_ui\Controllers\FraudController.cs(95,0): at fraud_poc_project.Controllers.FraudController.QueryEvents(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.55]            at lambda_method110(Closure, Object)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeInnerFilterAsync&gt;g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+[xUnit.net 00:00:02.55]            at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)&#xD;
+[xUnit.net 00:00:02.55]            at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)&#xD;
+[xUnit.net 00:00:02.55]         C:\Development\Therron\training\src\fraud_poc_project_ui\Middleware\CheckForXssMiddleware.cs(72,0): at fraud_poc_project.Middleware.CheckForXssMiddleware.InvokeAsync(HttpContext context)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.TestHost.HttpContextBuilder.&lt;&gt;c__DisplayClass23_0.&lt;&lt;SendAsync&gt;g__RunRequestAsync|0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:02.55]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.TestHost.ClientHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Testing.Handlers.CookieContainerHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.55]            at Microsoft.AspNetCore.Mvc.Testing.Handlers.RedirectHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.55]            at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+[xUnit.net 00:00:02.55]         C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\Integration\Api\FraudControllerApiTests.cs(287,0): at fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_ResponseContentValid()&#xD;
+[xUnit.net 00:00:02.55]         --- End of stack trace from previous location ---&#xD;
+[13:59:00 INF] AuthenticationService initialized&#xD;
+[13:59:00 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:00 ERR] Customer ID: CUST-TEST-001 - Failed to retrieve data for Query={"DateFrom":null,"DateTo":null,"CustomerId":"CUST-TEST-001","IsFlaggedOnly":null,"TransactionType":null,"MinFraudScore":null}&#xD;
+[xUnit.net 00:00:02.68]       System.InvalidOperationException : Parameter 'date_from' must have either its NpgsqlDbType or its DataTypeName or its Value set.&#xD;
+[xUnit.net 00:00:02.68]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.68]            at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)&#xD;
+[xUnit.net 00:00:02.68]            at Npgsql.NpgsqlParameter.&lt;ResolveTypeInfo&gt;g__ThrowNoTypeInfo|111_0()&#xD;
+[xUnit.net 00:00:02.68]            at Npgsql.NpgsqlParameter.ResolveTypeInfo(PgSerializerOptions options)&#xD;
+[xUnit.net 00:00:02.68]            at Npgsql.NpgsqlParameterCollection.ProcessParameters(PgSerializerOptions options, Boolean validateValues, CommandType commandType)&#xD;
+[xUnit.net 00:00:02.68]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.68]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.68]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(144,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.68]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(149,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.68]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(149,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.68]         C:\Development\Therron\training\src\fraud_poc_project_ui\Controllers\FraudController.cs(95,0): at fraud_poc_project.Controllers.FraudController.QueryEvents(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.68]            at lambda_method110(Closure, Object)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()&#xD;
+[xUnit.net 00:00:02.68]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+[xUnit.net 00:00:02.68]            at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)&#xD;
+[xUnit.net 00:00:02.68]            at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)&#xD;
+[xUnit.net 00:00:02.68]         C:\Development\Therron\training\src\fraud_poc_project_ui\Middleware\CheckForXssMiddleware.cs(72,0): at fraud_poc_project.Middleware.CheckForXssMiddleware.InvokeAsync(HttpContext context)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.TestHost.HttpContextBuilder.&lt;&gt;c__DisplayClass23_0.&lt;&lt;SendAsync&gt;g__RunRequestAsync|0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:02.68]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.TestHost.ClientHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Testing.Handlers.CookieContainerHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.68]            at Microsoft.AspNetCore.Mvc.Testing.Handlers.RedirectHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.68]            at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+[xUnit.net 00:00:02.68]         C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\Integration\Api\FraudControllerApiTests.cs(201,0): at fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithCustomerId_IncludesFilterParameter()&#xD;
+[xUnit.net 00:00:02.68]         --- End of stack trace from previous location ---&#xD;
+[13:59:00 INF] AuthenticationService initialized&#xD;
+[13:59:00 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:00 ERR] Customer ID: null - Failed to retrieve data for Query={"DateFrom":null,"DateTo":null,"CustomerId":null,"IsFlaggedOnly":null,"TransactionType":null,"MinFraudScore":null}&#xD;
+[xUnit.net 00:00:02.81]       System.InvalidOperationException : Parameter 'date_from' must have either its NpgsqlDbType or its DataTypeName or its Value set.&#xD;
+[xUnit.net 00:00:02.81]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.81]            at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)&#xD;
+[xUnit.net 00:00:02.81]            at Npgsql.NpgsqlParameter.&lt;ResolveTypeInfo&gt;g__ThrowNoTypeInfo|111_0()&#xD;
+[xUnit.net 00:00:02.81]            at Npgsql.NpgsqlParameter.ResolveTypeInfo(PgSerializerOptions options)&#xD;
+[xUnit.net 00:00:02.81]            at Npgsql.NpgsqlParameterCollection.ProcessParameters(PgSerializerOptions options, Boolean validateValues, CommandType commandType)&#xD;
+[xUnit.net 00:00:02.81]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.81]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.81]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(144,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.81]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(149,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.81]         C:\Development\Therron\training\src\fraud_poc_project_repo\FraudRepository.cs(149,0): at fraud_poc_project_repo.FraudRepository.QueryFraudEventsAsync(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.81]         C:\Development\Therron\training\src\fraud_poc_project_ui\Controllers\FraudController.cs(95,0): at fraud_poc_project.Controllers.FraudController.QueryEvents(FraudQueryDto query)&#xD;
+[xUnit.net 00:00:02.81]            at lambda_method110(Closure, Object)&#xD;
+[xUnit.net 00:00:02.81]            at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)&#xD;
+[xUnit.net 00:00:02.81]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)&#xD;
+[xUnit.net 00:00:02.81]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+[xUnit.net 00:00:02.81]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)&#xD;
+[xUnit.net 00:00:02.81]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)&#xD;
+[xUnit.net 00:00:02.81]            at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()&#xD;
+[xUnit.net 00:00:02.81]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:02.81]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)&#xD;
+[xUnit.net 00:00:02.81]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+[xUnit.net 00:00:02.82]            at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)&#xD;
+[xUnit.net 00:00:02.82]            at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)&#xD;
+[xUnit.net 00:00:02.82]            at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)&#xD;
+[xUnit.net 00:00:02.82]            at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)&#xD;
+[xUnit.net 00:00:02.82]            at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)&#xD;
+[xUnit.net 00:00:02.82]         C:\Development\Therron\training\src\fraud_poc_project_ui\Middleware\CheckForXssMiddleware.cs(72,0): at fraud_poc_project.Middleware.CheckForXssMiddleware.InvokeAsync(HttpContext context)&#xD;
+[xUnit.net 00:00:02.82]            at Microsoft.AspNetCore.TestHost.HttpContextBuilder.&lt;&gt;c__DisplayClass23_0.&lt;&lt;SendAsync&gt;g__RunRequestAsync|0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:02.82]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:02.82]            at Microsoft.AspNetCore.TestHost.ClientHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.82]            at Microsoft.AspNetCore.Mvc.Testing.Handlers.CookieContainerHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.82]            at Microsoft.AspNetCore.Mvc.Testing.Handlers.RedirectHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:02.82]            at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+[xUnit.net 00:00:02.82]         C:\Development\Therron\training\src\tests\fraud_poc_project.Tests\Integration\Api\FraudControllerApiTests.cs(159,0): at fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithValidToken_ReturnsOk()&#xD;
+[xUnit.net 00:00:02.82]         --- End of stack trace from previous location ---&#xD;
+[13:59:01 INF] AuthenticationService initialized&#xD;
+[13:59:01 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:01 INF] AuthenticationService initialized&#xD;
+[13:59:01 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:01 INF] AuthenticationService initialized&#xD;
+[13:59:01 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:01 INF] AuthenticationService initialized&#xD;
+[13:59:01 INF] JwtService initialized with issuer: fraud-poc-api, audience: fraud-poc-api-client&#xD;
+[13:59:01 INF] FraudKafkaConsumer initialized for topic: poc-fraud-dev, batchSize: 5, batchTimeout: 5s&#xD;
+[13:59:01 INF] Kafka consumer closed&#xD;
+[13:59:01 INF] FraudKafkaConsumer disposed&#xD;
+[13:59:01 INF] FraudKafkaConsumer disposed&#xD;
+[xUnit.net 00:00:03.11]   Finished:    fraud_poc_project.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="CWIN7KW59J4" outcome="Error" timestamp="2026-10-09T13:59:00.7307135+02:00">
+        <Text>[xUnit.net 00:00:02.54]     fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_ResponseContentValid [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CWIN7KW59J4" outcome="Error" timestamp="2026-10-09T13:59:00.8713600+02:00">
+        <Text>[xUnit.net 00:00:02.68]     fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithCustomerId_IncludesFilterParameter [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CWIN7KW59J4" outcome="Error" timestamp="2026-10-09T13:59:01.0030118+02:00">
+        <Text>[xUnit.net 00:00:02.81]     fraud_poc_project.Tests.Integration.Api.FraudControllerApiTests.QueryEvents_WithValidToken_ReturnsOk [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

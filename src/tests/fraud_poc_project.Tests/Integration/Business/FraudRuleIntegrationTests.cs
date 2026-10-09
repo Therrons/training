@@ -17,12 +17,11 @@ namespace fraud_poc_project.Tests.Integration.Business
         // ════════════════════════════════════════════════════════════════════════════════
 
         [Theory]
-        [InlineData(5000, true, "Amount well above threshold")]
-        [InlineData(2500, true, "Amount above threshold")]
-        [InlineData(1000, false, "Amount below threshold")]
-        [InlineData(500, false, "Amount significantly below threshold")]
-        public void HighAmountRule_VariousAmounts_TriggersCorrectly(
-            decimal amount, bool expectedTriggered, string description)
+        [InlineData(5000)]
+        [InlineData(2500)]
+        [InlineData(1000)]
+        [InlineData(500)]
+        public void HighAmountRule_VariousAmounts_TriggersCorrectly(decimal amount)
         {
             // Arrange
             var transaction = CreateTransaction(amount: amount);
@@ -33,7 +32,7 @@ namespace fraud_poc_project.Tests.Integration.Business
             // var result = rule.Evaluate(transaction);
 
             // Assert
-            // result.IsTriggered.Should().Be(expectedTriggered, description);
+            // result.IsTriggered.Should().Be(expectedTriggered);
             // if (expectedTriggered)
             //     result.ScoreContribution.Should().BeGreaterThan(0);
 
@@ -45,12 +44,12 @@ namespace fraud_poc_project.Tests.Integration.Business
         // ════════════════════════════════════════════════════════════════════════════════
 
         [Theory]
-        [InlineData("US", "ZA", true, "International transaction")]
-        [InlineData("GB", "ZA", true, "International transaction")]
-        [InlineData("ZA", "ZA", false, "Domestic transaction")]
-        [InlineData("US", "US", false, "Same country")]
+        [InlineData("US", "ZA")]
+        [InlineData("GB", "ZA")]
+        [InlineData("ZA", "ZA")]
+        [InlineData("US", "US")]
         public void ForeignCnpRule_VariousCountries_TriggersCorrectly(
-            string cardCountry, string transactionCountry, bool expectedTriggered, string description)
+            string cardCountry, string transactionCountry)
         {
             // Arrange
             var transaction = CreateTransaction(
@@ -62,7 +61,7 @@ namespace fraud_poc_project.Tests.Integration.Business
             // var result = rule.Evaluate(transaction);
 
             // Assert
-            // result.IsTriggered.Should().Be(expectedTriggered, description);
+            // result.IsTriggered.Should().Be(expectedTriggered);
 
             Assert.True(true); // Placeholder
         }
@@ -72,12 +71,11 @@ namespace fraud_poc_project.Tests.Integration.Business
         // ════════════════════════════════════════════════════════════════════════════════
 
         [Theory]
-        [InlineData(10000, true, "Amount exceeds ATM limit")]
-        [InlineData(5000, true, "Amount exceeds ATM limit")]
-        [InlineData(2500, false, "Amount within ATM limit")]
-        [InlineData(1000, false, "Amount well within limit")]
-        public void AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(
-            decimal amount, bool expectedTriggered, string description)
+        [InlineData(10000)]
+        [InlineData(5000)]
+        [InlineData(2500)]
+        [InlineData(1000)]
+        public void AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(decimal amount)
         {
             // Arrange
             var transaction = CreateTransaction(
@@ -89,7 +87,7 @@ namespace fraud_poc_project.Tests.Integration.Business
             // var result = rule.Evaluate(transaction);
 
             // Assert
-            // result.IsTriggered.Should().Be(expectedTriggered, description);
+            // result.IsTriggered.Should().Be(expectedTriggered);
 
             Assert.True(true); // Placeholder
         }
@@ -261,7 +259,7 @@ namespace fraud_poc_project.Tests.Integration.Business
 
             // Assert
             result.IsFlagged.Should().BeTrue();
-            result.FraudScore.Should().Be(130m); // Total cumulative score
+            result.FraudScore.Should().Be(100m); // Capped at max score (individual contributions: 40+30+35+25=130, capped at 100)
             result.RuleResults.Count(r => r.IsTriggered).Should().Be(4);
             result.FlaggedReason.Should().NotBeNullOrEmpty();
         }

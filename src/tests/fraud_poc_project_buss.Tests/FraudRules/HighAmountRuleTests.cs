@@ -142,7 +142,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
 
             // Assert
             result.RuleCode.Should().Be("HIGH_AMOUNT");
-            result.RuleDescription.Should().Contain("50000");
+            result.RuleDescription.Should().Contain("50,000");
         }
     }
 }

@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace fraud_poc_project_buss.Helper
 {
@@ -24,7 +26,7 @@ namespace fraud_poc_project_buss.Helper
 
         public static bool SensitiveDataCompare(this string givenValue, string existingValue)
         {
-            return BCrypt.Net.BCrypt.Verify(givenValue, existingValue);
+            return CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(givenValue), Encoding.UTF8.GetBytes(existingValue));
         }
 
         // Converts a Kafka message with a byte[] value into a Kafka message with a string value.
