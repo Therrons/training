@@ -1,4 +1,17 @@
-﻿using fraud_poc_project.Controllers;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+
+using Polly;
+using Polly.Retry;
+
+using fraud_poc_project.Controllers;
 using fraud_poc_project.Kafka.Consumer;
 using fraud_poc_project.Services;
 using fraud_poc_project.Settings;
@@ -12,16 +25,6 @@ using fraud_poc_project_repo.Connection;
 using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
 using fraud_poc_project_repo.Optimizations;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using Polly;
-using Polly.Retry;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace fraud_poc_project.Configuration
 {

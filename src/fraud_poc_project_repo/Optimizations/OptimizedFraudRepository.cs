@@ -121,7 +121,8 @@ namespace fraud_poc_project_repo.Optimizations
 
         private string GenerateQueryCacheKey(FraudQueryDto query, bool flaggedOnly = false)
         {
-            var hash = $"{query.DateFrom}_{query.DateTo}_{query.CustomerId}_{query.TransactionType}_{query.MinFraudScore}_{flaggedOnly}";
+            var hash = $"{query.DateFrom}_{query.DateTo}_{query.CustomerId}_" +
+                $"{query.TransactionType}_{query.MinFraudScore}_{flaggedOnly}";
             return $"{QueryCacheKeyPrefix}{hash.GetHashCode()}";
         }
 
@@ -183,7 +184,8 @@ namespace fraud_poc_project_repo.Optimizations
 
         private string GeneratePaginationCacheKey(FraudQueryDto query, int page, int size, bool flaggedOnly = false)
         {
-            var hash = $"{query.DateFrom}_{query.DateTo}_{query.CustomerId}_{page}_{size}_{flaggedOnly}";
+            var hash = $"{query.DateFrom}_{query.DateTo}_{query.CustomerId}_" +
+                $"{page}_{size}_{flaggedOnly}";
             return $"fraud_paginated_{hash.GetHashCode()}";
         }
 
@@ -223,9 +225,9 @@ namespace fraud_poc_project_repo.Optimizations
 
                 return results;
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to retrieve fraud events for Query={Query}", JsonConvert.SerializeObject(query));
+                _logger.LogError(ex, "Failed to retrieve fraud events for Query={Query}", JsonConvert.SerializeObject(query));
                 throw;
             }
         }
@@ -261,9 +263,9 @@ namespace fraud_poc_project_repo.Optimizations
 
                 return results;
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to retrieve flagged fraud events");
+                _logger.LogError(ex, "Failed to retrieve flagged fraud events");
                 throw;
             }
         }
@@ -334,9 +336,9 @@ namespace fraud_poc_project_repo.Optimizations
                     TotalCount = totalCount
                 };
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to retrieve paginated fraud events");
+                _logger.LogError(ex, "Failed to retrieve paginated fraud events");
                 throw;
             }
         }
@@ -363,11 +365,14 @@ namespace fraud_poc_project_repo.Optimizations
                 for (int i = 0; i < resultsList.Count; i++)
                 {
                     var rule = resultsList[i];
-                    valuesList.Add($"(@fraudEventId{i}, @ruleCode{i}, @ruleDescription{i}, @isTriggered{i}, @scoreContribution{i})");
+                    var valuePlaceholders = $"(@fraudEventId{i}, @ruleCode{i}, @ruleDescription{i}, " +
+                        $"@isTriggered{i}, @scoreContribution{i})";
+                    valuesList.Add(valuePlaceholders);
 
                     parameters.Add(new NpgsqlParameter($"@fraudEventId{i}", fraudEventId));
                     parameters.Add(new NpgsqlParameter($"@ruleCode{i}", rule.RuleCode ?? ""));
-                    parameters.Add(new NpgsqlParameter($"@ruleDescription{i}", (object?)rule.RuleDescription ?? DBNull.Value));
+                    parameters.Add(new NpgsqlParameter($"@ruleDescription{i}",
+                        (object?)rule.RuleDescription ?? DBNull.Value));
                     parameters.Add(new NpgsqlParameter($"@isTriggered{i}", rule.IsTriggered));
                     parameters.Add(new NpgsqlParameter($"@scoreContribution{i}", rule.ScoreContribution));
                 }
@@ -383,9 +388,9 @@ namespace fraud_poc_project_repo.Optimizations
                 await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
                 _logger.LogInformationOnly("Batch insert: {Count} rules for event {EventId}", resultsList.Count, fraudEventId);
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Batch insert failed for event {EventId}", fraudEventId);
+                _logger.LogError(ex, "Batch insert failed for event {EventId}", fraudEventId);
                 throw;
             }
         }
@@ -422,9 +427,9 @@ namespace fraud_poc_project_repo.Optimizations
 
                 return results;
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to load rule results for event {EventId}", fraudEventId);
+                _logger.LogError(ex, "Failed to load rule results for event {EventId}", fraudEventId);
                 throw;
             }
         }
@@ -484,9 +489,9 @@ namespace fraud_poc_project_repo.Optimizations
                 await tx.CommitAsync().ConfigureAwait(false);
                 return fraudEventId;
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to write Fraud data to Database for Model={Model}", JsonConvert.SerializeObject(result));
+                _logger.LogError(ex, "Failed to write Fraud data to Database for Model={Model}", JsonConvert.SerializeObject(result));
                 await tx.RollbackAsync().ConfigureAwait(false);
                 throw;
             }
@@ -509,9 +514,9 @@ namespace fraud_poc_project_repo.Optimizations
                 cmd.Parameters.AddWithValue("error", error.Length > 2000 ? error[..2000] : error);
                 await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to write Error to DLT for message={Message}", messageData);
+                _logger.LogError(ex, "Failed to write Error to DLT for message={Message}", messageData);
                 throw;
             }
         }
@@ -536,9 +541,9 @@ namespace fraud_poc_project_repo.Optimizations
                 }
                 return results;
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to retrieve rule results for fraud event={EventId}", fraudEventId);
+                _logger.LogError(ex, "Failed to retrieve rule results for fraud event={EventId}", fraudEventId);
                 throw;
             }
         }

@@ -1,4 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+using fraud_poc_project_buss;
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_repo.Optimizations;
 
 namespace fraud_poc_project_buss.Service
 {
