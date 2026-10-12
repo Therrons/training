@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-
-using Polly;
-using Polly.Retry;
-
-using fraud_poc_project.Controllers;
+﻿using fraud_poc_project.Controllers;
 using fraud_poc_project.Kafka.Consumer;
 using fraud_poc_project.Services;
 using fraud_poc_project.Settings;
@@ -24,7 +11,16 @@ using fraud_poc_project_repo;
 using fraud_poc_project_repo.Connection;
 using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
-using fraud_poc_project_repo.Optimizations;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using Polly;
+using Polly.Retry;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace fraud_poc_project.Configuration
 {
@@ -41,7 +37,6 @@ namespace fraud_poc_project.Configuration
             var connectionString = BuildDatabaseConnectionString(builder);
             RegisterDatabaseAccess(builder, connectionString);
             RegisterFraudRules(builder);
-            RegisterMemoryCache(builder);  // OPTIMIZATION: Add memory caching
             RegisterTestOnlyControllers(builder);
             RegisterRetryPipeline(builder);
             RegisterAuthentication(builder);
@@ -102,22 +97,8 @@ namespace fraud_poc_project.Configuration
         private static void RegisterDatabaseAccess(WebApplicationBuilder builder, string connectionString)
         {
             builder.Services.AddDbContextPool<IDBConnection, DBConnection>(options => options.UseNpgsql(connectionString));
-
-            // Use optimized repository
-            builder.Services.AddScoped<IOptimizedFraudRepository, OptimizedFraudRepository>();
-            builder.Services.AddScoped<IFraudRepository>(provider => provider.GetRequiredService<IOptimizedFraudRepository>());
-
+            builder.Services.AddScoped<IFraudRepository, FraudRepository>();
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
-        }
-
-        private static void RegisterMemoryCache(WebApplicationBuilder builder)
-        {
-            builder.Services.AddMemoryCache(options =>
-            {
-                options.SizeLimit = 100 * 1024 * 1024;
-            });
-
-            builder.Services.AddScoped<ICachedFraudRuleService, CachedFraudRuleService>();
         }
 
         private static void SetupDatabase(WebApplicationBuilder builder)
