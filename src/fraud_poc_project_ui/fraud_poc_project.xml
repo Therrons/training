@@ -90,5 +90,26 @@
             Thrown when authentication/JWT operations fail
             </summary>
         </member>
+        <member name="T:fraud_poc_project.Middleware.CorrelationIdMiddleware">
+            <summary>
+            Middleware for adding and propagating correlation IDs across the request pipeline.
+            Enables distributed tracing of requests through multiple services.
+            </summary>
+        </member>
+        <member name="T:fraud_poc_project.Middleware.CorrelationIdExtensions">
+            <summary>
+            Extension method to register CorrelationIdMiddleware in the pipeline.
+            </summary>
+        </member>
+        <member name="T:fraud_poc_project.Middleware.CorrelationIdAccessor">
+            <summary>
+            Helper class to access correlation ID from current request context.
+            </summary>
+        </member>
+        <member name="M:fraud_poc_project.Middleware.CorrelationIdAccessor.GetCorrelationId(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Gets the correlation ID from HTTP context items.
+            </summary>
+        </member>
     </members>
 </doc>

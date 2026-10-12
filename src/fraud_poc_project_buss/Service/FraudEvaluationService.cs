@@ -1,4 +1,6 @@
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Models.Settings;
+using Microsoft.Extensions.Options;
 
 namespace fraud_poc_project_buss.Service
 {
@@ -12,14 +14,17 @@ namespace fraud_poc_project_buss.Service
     public class FraudEvaluationService : IFraudEvaluationService
     {
         private readonly IEnumerable<IFraudRule> _rules;
+        private readonly decimal _flagThreshold;
+        private readonly decimal _maxScore;
 
-        private const decimal FlagThreshold = 40m;
-
-        private const decimal MaxScore = 100m;
-
-        public FraudEvaluationService(IEnumerable<IFraudRule> rules)
+        public FraudEvaluationService(
+            IEnumerable<IFraudRule> rules,
+            IOptions<FraudRulesSettings> options)
         {
             _rules = rules ?? Array.Empty<IFraudRule>();
+            var settings = options.Value;
+            _flagThreshold = settings.FlagThreshold;
+            _maxScore = settings.MaxScore;
         }
 
         public FraudEventRecord Evaluate(TransactionEvent kafkaEvent)
@@ -31,9 +36,9 @@ namespace fraud_poc_project_buss.Service
             var triggeredRules = ruleResults.Where(result => result.IsTriggered).ToList();
 
             var score = triggeredRules.Sum(result => result.ScoreContribution);
-            score = Math.Min(score, MaxScore);
+            score = Math.Min(score, _maxScore);
 
-            var isFlagged = score >= FlagThreshold;
+            var isFlagged = score >= _flagThreshold;
             var flaggedReason = isFlagged
                 ? string.Join(", ", triggeredRules.Select(result => result.RuleCode))
                 : null;
@@ -48,7 +53,8 @@ namespace fraud_poc_project_buss.Service
             };
         }
 
-        public async Task<FraudEventRecord> EvaluateAsync(TransactionEvent kafkaEvent)
-         => await Task.Run(() => Evaluate(kafkaEvent)).ConfigureAwait(false);
+        public Task<FraudEventRecord> EvaluateAsync(TransactionEvent kafkaEvent)
+            => Task.FromResult(Evaluate(kafkaEvent));
+
     }
 }

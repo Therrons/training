@@ -32,7 +32,7 @@ namespace fraud_poc_project.Configuration
                 kafkaBrokerSettingsSection.SaslUserName = environment_Variables.KAFKAUSER;
                 kafkaBrokerSettingsSection.SaslPassword = environment_Variables.KAFKAPASSWORD;
 
-                Extensions_Helper.ValidateOptions(kafkaBrokerSettingsSection);
+                ExtensionsHelper.ValidateOptions(kafkaBrokerSettingsSection);
                 services.AddSingleton<IOptions<FraudKafkaBrokerSettings>>(Options.Create(kafkaBrokerSettingsSection));
             }
 
@@ -61,8 +61,8 @@ namespace fraud_poc_project.Configuration
                 return;
 
             // Make sure the required settings were actually filled in before we try to use them.
-            Extensions_Helper.ValidateOptions(brokerSettings);
-            Extensions_Helper.ValidateOptions(kafkaAdminSettings);
+            ExtensionsHelper.ValidateOptions(brokerSettings);
+            ExtensionsHelper.ValidateOptions(kafkaAdminSettings);
 
             var noTopicsConfigured = kafkaAdminSettings.TopicOptions == null || !kafkaAdminSettings.TopicOptions.Any();
 

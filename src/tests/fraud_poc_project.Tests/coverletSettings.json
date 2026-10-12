@@ -1,0 +1,31 @@
+{
+  "include": [
+    "fraud_poc_project_buss*",
+    "fraud_poc_project_ui*",
+    "fraud_poc_project_repo*"
+  ],
+  "exclude": [
+    "[fraud_poc_project*]*.*.Migrations*",
+    "[fraud_poc_project*]*Program.cs",
+    "[fraud_poc_project*]*Startup.cs",
+    "[fraud_poc_project_buss]*Dto.*",
+    "[fraud_poc_project_buss]*Helper.*"
+  ],
+  "exclude-by-attribute": [
+    "ExcludeFromCodeCoverage",
+    "Obsolete"
+  ],
+  "exclude-by-file": [
+    "**/bin/**",
+    "**/obj/**",
+    "**/.vs/**"
+  ],
+  "include-test-assembly": false,
+  "single-hit-optimization": false,
+  "use-source-link": true,
+  "skip-auto-props": true,
+  "deterministic": true,
+  "threshold": 75,
+  "threshold-type": "line",
+  "threshold-stat": "average"
+}

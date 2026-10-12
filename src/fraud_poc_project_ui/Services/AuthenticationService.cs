@@ -1,9 +1,7 @@
 using fraud_poc_project_buss.Helper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Threading.Tasks;
 
 namespace fraud_poc_project.Services
 {
