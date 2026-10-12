@@ -1,4 +1,6 @@
-Rancher Desktop
-Kafka
-Traefik
-Ubuntu
+run metrics:
+1. login in to obtain token apply
+2. take snapshot
+3. load simulator
+4. check stats
+

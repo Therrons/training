@@ -48,17 +48,19 @@ namespace fraud_poc_project.Configuration
 
         private static void RegisterRetryPipeline(WebApplicationBuilder builder)
         {
+            var resilienceSettings = builder.Configuration.GetSection("ResiliencePipeLineSettings").Get<ResiliencePipeLineSettings>();
+
             builder.Services.AddResiliencePipeline("exception", x =>
             {
                 x.AddRetry(
                     new RetryStrategyOptions
                     {
                         BackoffType = DelayBackoffType.Exponential,
-                        Delay = TimeSpan.FromMilliseconds(1),
-                        MaxRetryAttempts = 2,
+                        Delay = TimeSpan.FromMilliseconds(resilienceSettings.DelayCount),
+                        MaxRetryAttempts = resilienceSettings.RetryCount,
                         UseJitter = true,
                         ShouldHandle = new PredicateBuilder().Handle<Exception>()
-                    }).AddTimeout(TimeSpan.FromSeconds(30));
+                    }).AddTimeout(TimeSpan.FromSeconds(resilienceSettings.TimeoutValue));
             });
         }
 
@@ -113,6 +115,8 @@ namespace fraud_poc_project.Configuration
 
         private static void RegisterFraudRules(WebApplicationBuilder builder)
         {
+            builder.Services.AddAndValidateOptions<FraudRulesSettings>("FraudRules");
+
             builder.Services
                 .AddSingleton<IFraudRule, HighAmountRule>()
                 .AddSingleton<IFraudRule, ForeignCnpRule>()
@@ -120,6 +124,7 @@ namespace fraud_poc_project.Configuration
                 .AddSingleton<IFraudRule, HighRiskMerchantCategoryRule>()
                 .AddSingleton<IFraudRule, RoundAmountRule>();
 
+            // Register the fraud evaluation service
             builder.Services
                 .AddSingleton<IFraudEvaluationService, FraudEvaluationService>();
         }
