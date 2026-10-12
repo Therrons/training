@@ -63,7 +63,7 @@ namespace fraud_poc_project.Tests.Controllers
             };
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(expectedRecords);
 
             // Act
@@ -73,7 +73,7 @@ namespace fraud_poc_project.Tests.Controllers
             result.Result.Should().BeOfType<OkObjectResult>();
             var okResult = result.Result as OkObjectResult;
             okResult?.Value.Should().Be(expectedRecords);
-            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query), Times.Once);
+            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query, false), Times.Once);
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace fraud_poc_project.Tests.Controllers
             var emptyRecords = new List<FraudEventRecord>();
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(emptyRecords);
 
             // Act
@@ -115,14 +115,14 @@ namespace fraud_poc_project.Tests.Controllers
             };
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(new List<FraudEventRecord>());
 
             // Act
             await _controller.QueryEvents(query);
 
             // Assert
-            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query), Times.Once);
+            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query, false), Times.Once);
         }
 
         [Fact]
@@ -230,7 +230,7 @@ namespace fraud_poc_project.Tests.Controllers
             };
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(filteredRecords);
 
             // Act
@@ -316,7 +316,7 @@ namespace fraud_poc_project.Tests.Controllers
             };
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(records);
 
             // Act

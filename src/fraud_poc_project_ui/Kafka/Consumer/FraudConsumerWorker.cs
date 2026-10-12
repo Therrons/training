@@ -31,7 +31,7 @@ namespace fraud_poc_project.Kafka.Consumer
         private readonly AppSettings _appSettings;
         private readonly ILogger<FraudConsumerWorker> _logger;
         private readonly IFraudRepository _fraudRepository;
-        private readonly IServiceScopeFactory _serviceLocator;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IFraudEvaluationService _evaluationService;
         private readonly ResiliencePipelineProvider<string> _resilienceProvider;
         private readonly IMetricsService _metricsService;
@@ -59,7 +59,7 @@ namespace fraud_poc_project.Kafka.Consumer
             _consumerOptions = consumerOptions.Value;
             _appSettings = appSettings.Value;
             _resilienceProvider = resilienceProvider;
-            _serviceLocator = serviceScopeFactory;
+            _serviceScopeFactory = serviceScopeFactory;
             _fraudRepository = fraudRepository;
             _evaluationService = evaluationService;
             _metricsService = metricsService;
@@ -373,7 +373,7 @@ namespace fraud_poc_project.Kafka.Consumer
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             var linkedToken = linkedCts.Token;
 
-            using var scope = _serviceLocator.CreateScope();
+            using var scope = _serviceScopeFactory.CreateScope();
             var batchFraudRepository = scope.ServiceProvider.GetRequiredService<IFraudRepository>();
             int iTotal = messages?.Count ?? 0;
 
@@ -428,7 +428,7 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 if (ct.IsCancellationRequested) return;
 
-                using var scope = _serviceLocator.CreateScope();
+                using var scope = _serviceScopeFactory.CreateScope();
                 var fraudRepository = scope.ServiceProvider.GetRequiredService<IFraudRepository>();
 
                 try

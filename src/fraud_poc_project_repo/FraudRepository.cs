@@ -121,7 +121,9 @@ namespace fraud_poc_project_repo
             }
         }
 
-        public async Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query)
+        // Queries fraud events based on the provided filter criteria.
+        // When forceFlaggedOnly is true, only flagged transactions are returned (ignores query.IsFlaggedOnly).
+        public async Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query, bool forceFlaggedOnly)
         {
             try
             {
@@ -141,7 +143,8 @@ namespace fraud_poc_project_repo
                 cmd.Parameters.AddWithValue("date_to",
                     (object?)(query.DateTo?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("is_flagged_only", (object?)query.IsFlaggedOnly ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("is_flagged_only",
+                    forceFlaggedOnly ? true : (object?)query.IsFlaggedOnly ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
 
@@ -154,50 +157,21 @@ namespace fraud_poc_project_repo
             }
             catch
             {
-                _logger.LogError("Customer ID: {customerid} - Failed to retrieve data for Query={msg}", query.CustomerId, JsonConvert.SerializeObject(query));
+                var logMessage = forceFlaggedOnly
+                    ? "Failed to retrieve only fraud data"
+                    : "Failed to retrieve data";
+                _logger.LogError("Customer ID: {customerid} - {logMessage} for Query={msg}",
+                    query.CustomerId, logMessage, JsonConvert.SerializeObject(query));
                 throw;
             }
         }
 
-        // Same as QueryFraudEventsAsync, but always forces is_flagged_only = true,
-        // so only the transactions that were flagged as fraud come back.
+        /// <summary>
+        /// Convenience method that returns only flagged fraud events (is_flagged_only = true).
+        /// Equivalent to calling QueryFraudEventsAsync(query, forceFlaggedOnly: true).
+        /// </summary>
         public async Task<IEnumerable<FraudEventRecord>> QueryFlaggedOnlyFraudEventsAsync(FraudQueryDto query)
-        {
-            try
-            {
-                var results = new List<FraudEventRecord>();
-
-                await using var conn = new NpgsqlConnection(_connectionString);
-                await conn.OpenAsync().ConfigureAwait(false);
-
-                await using var cmd = new NpgsqlCommand(
-                    $"SELECT id, kafka_topic, transaction_id, customer_id, account_id, amount, currency, " +
-                    $"merchant_name, merchant_category, transaction_type, channel, country_code, transaction_time, " +
-                    $"is_flagged, fraud_score, flagged_reason FROM \"{_schema}\".fn_select_fraud_events(" +
-                    $"@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
-                    conn);
-                cmd.Parameters.AddWithValue("date_from",
-                    (object?)(query.DateFrom?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("date_to",
-                    (object?)(query.DateTo?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("is_flagged_only", true);
-                cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
-
-                await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
-                while (await reader.ReadAsync().ConfigureAwait(false))
-                {
-                    results.Add(MapFraudEventRecord(reader));
-                }
-                return results;
-            }
-            catch
-            {
-                _logger.LogError("Customer ID: {customerid} - Failed to retrieve only fraud data for Query={msg}", query.CustomerId, JsonConvert.SerializeObject(query));
-                throw;
-            }
-        }
+            => await QueryFraudEventsAsync(query, forceFlaggedOnly: true).ConfigureAwait(false);
 
         // Looks up every rule result that was recorded for one specific fraud event.
         public async Task<IEnumerable<FraudRuleSetRecord>> GetRuleResultsForEventAsync(long fraudEventId)

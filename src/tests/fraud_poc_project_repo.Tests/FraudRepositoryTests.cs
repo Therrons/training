@@ -105,16 +105,16 @@ namespace fraud_poc_project_repo.Tests
             };
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(expectedRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFraudEventsAsync(query);
+            var result = await _mockRepository.Object.QueryFraudEventsAsync(query, false);
 
             // Assert
             result.Should().HaveCount(2);
             result.Should().AllSatisfy(r => r.Event.CustomerId.Should().Be("CUST-001"));
-            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query), Times.Once);
+            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query, false), Times.Once);
         }
 
         [Fact]
@@ -131,11 +131,11 @@ namespace fraud_poc_project_repo.Tests
             var emptyRecords = new List<FraudEventRecord>();
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(emptyRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFraudEventsAsync(query);
+            var result = await _mockRepository.Object.QueryFraudEventsAsync(query, false);
 
             // Assert
             result.Should().BeEmpty();
@@ -248,11 +248,11 @@ namespace fraud_poc_project_repo.Tests
             };
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(highScoreRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFraudEventsAsync(query);
+            var result = await _mockRepository.Object.QueryFraudEventsAsync(query, false);
 
             // Assert
             result.Should().AllSatisfy(r => r.FraudScore.Should().BeGreaterThanOrEqualTo(50m));
@@ -277,11 +277,11 @@ namespace fraud_poc_project_repo.Tests
             };
 
             _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query))
+                .Setup(r => r.QueryFraudEventsAsync(query, false))
                 .ReturnsAsync(cnpRecords);
 
             // Act
-            var result = await _mockRepository.Object.QueryFraudEventsAsync(query);
+            var result = await _mockRepository.Object.QueryFraudEventsAsync(query, false);
 
             // Assert
             result.Should().AllSatisfy(r => r.Event.TransactionType.Should().Be("CNP"));

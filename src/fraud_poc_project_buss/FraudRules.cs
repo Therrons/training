@@ -37,13 +37,7 @@ namespace fraud_poc_project_buss
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
             if (!_enabled)
-                return new FraudRuleSetRecord
-                {
-                    RuleCode = RuleCode,
-                    RuleDescription = "Rule disabled",
-                    IsTriggered = false,
-                    ScoreContribution = 0m
-                };
+                return this.CreateDisabledRuleResult();
 
             var triggered = Math.Abs(tx.Amount) > _threshold;
             return new FraudRuleSetRecord
@@ -80,13 +74,7 @@ namespace fraud_poc_project_buss
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
             if (!_enabled)
-                return new FraudRuleSetRecord
-                {
-                    RuleCode = RuleCode,
-                    RuleDescription = "Rule disabled",
-                    IsTriggered = false,
-                    ScoreContribution = 0m
-                };
+                return this.CreateDisabledRuleResult();
 
             var isCnp = string.Equals(tx.TransactionType, "CNP", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(tx.Channel, "Online", StringComparison.OrdinalIgnoreCase);
@@ -129,13 +117,7 @@ namespace fraud_poc_project_buss
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
             if (!_enabled)
-                return new FraudRuleSetRecord
-                {
-                    RuleCode = RuleCode,
-                    RuleDescription = "Rule disabled",
-                    IsTriggered = false,
-                    ScoreContribution = 0m
-                };
+                return this.CreateDisabledRuleResult();
 
             var isAtm = string.Equals(tx.TransactionType, "ATM", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(tx.Channel, "ATM", StringComparison.OrdinalIgnoreCase);
@@ -175,13 +157,7 @@ namespace fraud_poc_project_buss
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
             if (!_enabled)
-                return new FraudRuleSetRecord
-                {
-                    RuleCode = RuleCode,
-                    RuleDescription = "Rule disabled",
-                    IsTriggered = false,
-                    ScoreContribution = 0m
-                };
+                return this.CreateDisabledRuleResult();
 
             var triggered = !string.IsNullOrWhiteSpace(tx.MerchantCategory)
                             && _highRiskCategories.Contains(tx.MerchantCategory);
@@ -221,13 +197,7 @@ namespace fraud_poc_project_buss
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
             if (!_enabled)
-                return new FraudRuleSetRecord
-                {
-                    RuleCode = RuleCode,
-                    RuleDescription = "Rule disabled",
-                    IsTriggered = false,
-                    ScoreContribution = 0m
-                };
+                return this.CreateDisabledRuleResult();
 
             var abs = Math.Abs(tx.Amount);
 

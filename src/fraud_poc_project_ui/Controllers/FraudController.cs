@@ -92,7 +92,7 @@ namespace fraud_poc_project.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<FraudEventRecord>>> QueryEvents([FromQuery] FraudQueryDto query)
         {
-            var records = await _repository.QueryFraudEventsAsync(query).ConfigureAwait(false);
+            var records = await _repository.QueryFraudEventsAsync(query, false).ConfigureAwait(false);
             return Ok(records);
         }
 

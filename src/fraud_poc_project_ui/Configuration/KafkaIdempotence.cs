@@ -31,7 +31,7 @@ namespace fraud_poc_project.Configuration
                 healthResult = await preFlightHealthCheck.WaitForBrokerReadyWithFallbackAsync(
                     maxRetries: 10,
                     delayMs: 500,
-                    coordinatorTimeoutMs: 5000);
+                    coordinatorTimeoutMs: 5000).ConfigureAwait(false);
 
                 if (!healthResult.IdempotenceEnabled)
                 {
