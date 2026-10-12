@@ -135,9 +135,9 @@ namespace fraud_poc_project_repo
                     "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
                     conn);
                 cmd.Parameters.AddWithValue("date_from",
-                    (object?)(query.DateFrom?.ToDateTimeFrom_yyyyMMddHHmmss()) ?? DBNull.Value);
+                    (object?)(query.DateFrom?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("date_to",
-                    (object?)(query.DateTo?.ToDateTimeFrom_yyyyMMddHHmmss()) ?? DBNull.Value);
+                    (object?)(query.DateTo?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("is_flagged_only", (object?)query.IsFlaggedOnly ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
@@ -173,9 +173,9 @@ namespace fraud_poc_project_repo
                     "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
                     conn);
                 cmd.Parameters.AddWithValue("date_from",
-                    (object?)(query.DateFrom?.ToDateTimeFrom_yyyyMMddHHmmss()) ?? DBNull.Value);
+                    (object?)(query.DateFrom?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("date_to",
-                    (object?)(query.DateTo?.ToDateTimeFrom_yyyyMMddHHmmss()) ?? DBNull.Value);
+                    (object?)(query.DateTo?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("customer_id", (object?)query.CustomerId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("is_flagged_only", true);
                 cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);

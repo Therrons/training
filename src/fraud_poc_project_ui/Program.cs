@@ -1,5 +1,4 @@
 using fraud_poc_project.Configuration;
-using fraud_poc_project.Controllers;
 using fraud_poc_project.Middleware;
 using fraud_poc_project.Utilities;
 using HealthChecks.Kubernetes;

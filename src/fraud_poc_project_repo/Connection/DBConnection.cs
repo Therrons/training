@@ -14,8 +14,8 @@ namespace fraud_poc_project_repo.Connection
         private ILogger<DBConnection> _logger;
         private readonly IConfiguration _config;
 
-        public NpgsqlConnection DB_Connector { get { return _dbConnector; } }
-        public string DB_Schema { get { return _databaseOptions.DBSchema; } }
+        public NpgsqlConnection DbConnector { get { return _dbConnector; } }
+        public string DbSchema { get { return _databaseOptions.DBSchema; } }
 
         public DBConnection(
             ILogger<DBConnection> logger,

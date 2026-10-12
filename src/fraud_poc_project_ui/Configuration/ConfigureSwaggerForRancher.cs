@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using fraud_poc_project.Utilities;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using fraud_poc_project.Utilities;
-using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace fraud_poc_project.Configuration
 {

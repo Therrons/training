@@ -11,7 +11,7 @@ using System.Text;
 namespace fraud_poc_project_buss.Helper
 {
 
-    public static class Extensions_Helper
+    public static class ExtensionsHelper
     {
         public static readonly bool IsDebugMode = IsDebugBuild();
 
@@ -30,7 +30,7 @@ namespace fraud_poc_project_buss.Helper
         }
 
         // Converts a Kafka message with a byte[] value into a Kafka message with a string value.
-        public static Message<string, string> Stream_Byte_Key_Value_To_String_Key_Value(this Message<string, byte[]> kvp)
+        public static Message<string, string> StreamByteKeyValueToStringKeyValue(this Message<string, byte[]> kvp)
         {
             return new Message<string, string>
             {
@@ -78,7 +78,7 @@ namespace fraud_poc_project_buss.Helper
         }
 
         // Converts a string in the format "yyyy-MM-dd HH:mm:ss" to a nullable DateTime.
-        public static DateTime? ToDateTimeFrom_yyyyMMddHHmmss(this string dateString)
+        public static DateTime? ToDateTimeFromYyyyMmDdHhMmSs(this string dateString)
         {
             if (string.IsNullOrWhiteSpace(dateString))
             {

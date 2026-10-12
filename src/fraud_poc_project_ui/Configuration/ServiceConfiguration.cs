@@ -173,7 +173,7 @@ namespace fraud_poc_project.Configuration
 
         private static void RegisterTestOnlyControllers(WebApplicationBuilder builder)
         {
-            if (Extensions_Helper.IsDebugMode)
+            if (ExtensionsHelper.IsDebugMode)
             {
                 builder.Services.AddTransient<LoadSimulatorController>();
                 builder.Services.AddTransient<FraudController>();

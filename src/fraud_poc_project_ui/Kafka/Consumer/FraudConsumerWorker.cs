@@ -228,7 +228,7 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 try
                 {
-                    var eventObj = consumeResult.Message.Stream_Byte_Key_Value_To_String_Key_Value();
+                    var eventObj = consumeResult.Message.StreamByteKeyValueToStringKeyValue();
                     var transactionEvent = JsonConvert.DeserializeObject<TransactionEvent>(eventObj.Value);
 
                     if (transactionEvent == null)

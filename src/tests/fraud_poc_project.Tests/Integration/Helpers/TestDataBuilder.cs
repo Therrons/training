@@ -1,6 +1,4 @@
 using fraud_poc_project_buss.Dto;
-using System;
-using System.Collections.Generic;
 
 namespace fraud_poc_project.Tests.Integration.Helpers
 {
