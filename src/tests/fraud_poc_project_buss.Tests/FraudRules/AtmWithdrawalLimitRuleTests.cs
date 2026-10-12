@@ -1,5 +1,7 @@
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using Xunit;
+using fraud_poc_project_buss.Models.Settings;
 
 namespace fraud_poc_project_buss.Tests.FraudRules
 {
@@ -8,11 +10,25 @@ namespace fraud_poc_project_buss.Tests.FraudRules
     /// </summary>
     public class AtmWithdrawalLimitRuleTests
     {
+        private IOptions<FraudRulesSettings> CreateOptions(decimal limit = 5000m, bool enabled = true)
+        {
+            var settings = new FraudRulesSettings
+            {
+                AtmWithdrawalLimit = new AtmWithdrawalLimitRuleSettings
+                {
+                    Limit = limit,
+                    ScoreContribution = 30m,
+                    Enabled = enabled
+                }
+            };
+            return Options.Create(settings);
+        }
+
         [Fact]
         public void Evaluate_WithAtmWithdrawalBelowLimit_DoesNotTrigger()
         {
             // Arrange
-            var rule = new AtmWithdrawalLimitRule(limit: 5000m);
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("ATM")
                 .WithAmount(3000m)
@@ -30,7 +46,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithAtmWithdrawalExceedingLimit_Triggers()
         {
             // Arrange
-            var rule = new AtmWithdrawalLimitRule(limit: 5000m);
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("ATM")
                 .WithAmount(7000m)
@@ -48,7 +64,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithAtmWithdrawalEqualToLimit_DoesNotTrigger()
         {
             // Arrange
-            var rule = new AtmWithdrawalLimitRule(limit: 5000m);
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("ATM")
                 .WithAmount(5000m)
@@ -66,7 +82,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithAtmChannelAndHighAmount_Triggers()
         {
             // Arrange - Channel ATM also counts
-            var rule = new AtmWithdrawalLimitRule(limit: 5000m);
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m));
             var transaction = new TransactionEventBuilder()
                 .WithChannel("ATM")
                 .WithAmount(6000m)
@@ -84,7 +100,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithNonAtmTransaction_DoesNotTrigger()
         {
             // Arrange
-            var rule = new AtmWithdrawalLimitRule(limit: 5000m);
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("POS")
                 .WithAmount(7000m)
@@ -102,7 +118,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithAtmAndNegativeAmount_TriggersOnAbsoluteValue()
         {
             // Arrange
-            var rule = new AtmWithdrawalLimitRule(limit: 5000m);
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("ATM")
                 .WithAmount(-7000m)
@@ -117,10 +133,10 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         }
 
         [Fact]
-        public void Evaluate_WithDefaultLimit_Uses5000()
+        public void Evaluate_WithDisabledRule_DoesNotTrigger()
         {
             // Arrange
-            var rule = new AtmWithdrawalLimitRule();
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m, enabled: false));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("ATM")
                 .WithAmount(6000m)
@@ -130,14 +146,16 @@ namespace fraud_poc_project_buss.Tests.FraudRules
             var result = rule.Evaluate(transaction);
 
             // Assert
-            result.IsTriggered.Should().BeTrue("Default limit is 5000");
+            result.IsTriggered.Should().BeFalse("Disabled rule should not trigger");
+            result.ScoreContribution.Should().Be(0m);
+            result.RuleDescription.Should().Be("Rule disabled");
         }
 
         [Fact]
         public void Evaluate_WithCaseSensitivities_TriggersCorrectly()
         {
             // Arrange - Test case-insensitivity
-            var rule = new AtmWithdrawalLimitRule(limit: 5000m);
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("atm")
                 .WithAmount(7000m)
@@ -155,7 +173,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_ReturnsCorrectRuleMetadata()
         {
             // Arrange
-            var rule = new AtmWithdrawalLimitRule(limit: 5000m);
+            var rule = new AtmWithdrawalLimitRule(CreateOptions(5000m));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("ATM")
                 .WithAmount(7000m)

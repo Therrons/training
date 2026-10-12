@@ -56,6 +56,13 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddHealthChecks();
 
+        // Register FluentValidation
+        //builder.Services.AddFluentValidationAutoValidation();
+        //builder.Services.AddFluentValidationClientsideAdapters();
+        //builder.Services.AddValidatorsFromAssemblies(
+        //    typeof(Program).Assembly,
+        //    typeof(fraud_poc_project_buss.FraudRules).Assembly);
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -80,6 +87,9 @@ public class Program
 
         app.UseRouting();
         app.UseCors();
+
+        // Add correlation ID middleware for distributed tracing
+        app.UseCorrelationId();
 
         // XSS validation middleware - only on [ValidateXss] endpoints
         app.UseMiddleware<CheckForXssMiddleware>();

@@ -1,7 +1,10 @@
 using FluentAssertions;
 using fraud_poc_project_buss;
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
+using Microsoft.Extensions.Options;
+using System.Data;
 using Xunit;
 
 namespace fraud_poc_project.Tests.Integration.Business
@@ -12,85 +15,30 @@ namespace fraud_poc_project.Tests.Integration.Business
     /// </summary>
     public class FraudRuleIntegrationTests
     {
-        // ════════════════════════════════════════════════════════════════════════════════
-        // HIGH AMOUNT RULE TESTS
-        // ════════════════════════════════════════════════════════════════════════════════
+        //private readonly FraudEvaluationService _service;
+        private readonly FraudRulesSettings _fraudRuleSettings;
 
-        [Theory]
-        [InlineData(5000)]
-        [InlineData(2500)]
-        [InlineData(1000)]
-        [InlineData(500)]
-        public void HighAmountRule_VariousAmounts_TriggersCorrectly(decimal amount)
+        public FraudRuleIntegrationTests()
         {
-            // Arrange
-            var transaction = CreateTransaction(amount: amount);
+            _fraudRuleSettings = new FraudRulesSettings
+            {
+                HighAmount = new HighAmountRuleSettings { Threshold = 50000, ScoreContribution = 40, Enabled = true },
+                ForeignCnp = new ForeignCnpRuleSettings { HomeCountry = "ZA", ScoreContribution = 35, Enabled = true },
+                AtmWithdrawalLimit = new AtmWithdrawalLimitRuleSettings { Limit = 5000, ScoreContribution = 30, Enabled = true },
+                RoundAmount = new RoundAmountRuleSettings { MinimumAmount = 1000, ScoreContribution = 10, Enabled = true },
+                HighRiskMerchantCategory = new HighRiskMerchantCategoryRuleSettings
+                {
+                    HighRiskCategories = "gambling,casino,crypto",
+                    ScoreContribution = 25,
+                    Enabled = true
+                },
+                FlagThreshold = 40,
+                MaxScore = 100
+            };
 
-            // Act
-            // When HighAmountRule is public, uncomment:
-            // var rule = new HighAmountRule();
-            // var result = rule.Evaluate(transaction);
-
-            // Assert
-            // result.IsTriggered.Should().Be(expectedTriggered);
-            // if (expectedTriggered)
-            //     result.ScoreContribution.Should().BeGreaterThan(0);
-
-            Assert.True(true); // Placeholder - implement when rules are testable
+            var options = Options.Create(_fraudRuleSettings);
         }
 
-        // ════════════════════════════════════════════════════════════════════════════════
-        // FOREIGN CNP RULE TESTS
-        // ════════════════════════════════════════════════════════════════════════════════
-
-        [Theory]
-        [InlineData("US", "ZA")]
-        [InlineData("GB", "ZA")]
-        [InlineData("ZA", "ZA")]
-        [InlineData("US", "US")]
-        public void ForeignCnpRule_VariousCountries_TriggersCorrectly(
-            string cardCountry, string transactionCountry)
-        {
-            // Arrange
-            var transaction = CreateTransaction(
-                cardCountry: cardCountry,
-                transactionCountry: transactionCountry);
-
-            // Act
-            // var rule = new ForeignCnpRule();
-            // var result = rule.Evaluate(transaction);
-
-            // Assert
-            // result.IsTriggered.Should().Be(expectedTriggered);
-
-            Assert.True(true); // Placeholder
-        }
-
-        // ════════════════════════════════════════════════════════════════════════════════
-        // ATM WITHDRAWAL LIMIT RULE TESTS
-        // ════════════════════════════════════════════════════════════════════════════════
-
-        [Theory]
-        [InlineData(10000)]
-        [InlineData(5000)]
-        [InlineData(2500)]
-        [InlineData(1000)]
-        public void AtmWithdrawalLimitRule_VariousAmounts_TriggersCorrectly(decimal amount)
-        {
-            // Arrange
-            var transaction = CreateTransaction(
-                amount: amount,
-                type: "ATM_WITHDRAWAL");
-
-            // Act
-            // var rule = new AtmWithdrawalLimitRule();
-            // var result = rule.Evaluate(transaction);
-
-            // Assert
-            // result.IsTriggered.Should().Be(expectedTriggered);
-
-            Assert.True(true); // Placeholder
-        }
 
         // ════════════════════════════════════════════════════════════════════════════════
         // FRAUD EVALUATION SERVICE TESTS
@@ -106,7 +54,8 @@ namespace fraud_poc_project.Tests.Integration.Business
                 transactionCountry: "ZA");
 
             var mockRules = new List<IFraudRule>();
-            var service = new FraudEvaluationService(mockRules);
+
+           var service = new FraudEvaluationService(mockRules, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -128,7 +77,7 @@ namespace fraud_poc_project.Tests.Integration.Business
             var notTriggeredRule = CreateMockRule("FOREIGN_CNP", false, 0m);
 
             var rules = new List<IFraudRule> { triggeredRule, notTriggeredRule };
-            var service = new FraudEvaluationService(rules);
+            var service = new FraudEvaluationService(rules, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -154,7 +103,7 @@ namespace fraud_poc_project.Tests.Integration.Business
             var rule3 = CreateMockRule("OTHER_RULE", false, 0m);
 
             var rules = new List<IFraudRule> { rule1, rule2, rule3 };
-            var service = new FraudEvaluationService(rules);
+            var service = new FraudEvaluationService(rules, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -177,7 +126,7 @@ namespace fraud_poc_project.Tests.Integration.Business
             var rule3 = CreateMockRule("RULE3", true, 10m);
 
             var rules = new List<IFraudRule> { rule1, rule2, rule3 };
-            var service = new FraudEvaluationService(rules);
+            var service = new FraudEvaluationService(rules, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -195,7 +144,7 @@ namespace fraud_poc_project.Tests.Integration.Business
 
             var rule = CreateMockRule("TEST_RULE", true, 50m);
             var rules = new List<IFraudRule> { rule };
-            var service = new FraudEvaluationService(rules);
+            var service = new FraudEvaluationService(rules, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -222,7 +171,7 @@ namespace fraud_poc_project.Tests.Integration.Business
                 transactionCountry: "ZA");
 
             var noRules = new List<IFraudRule>();
-            var service = new FraudEvaluationService(noRules);
+            var service = new FraudEvaluationService(noRules, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -252,7 +201,7 @@ namespace fraud_poc_project.Tests.Integration.Business
                 CreateMockRule("HIGH_RISK_COUNTRY", true, 25m)
             };
 
-            var service = new FraudEvaluationService(rules);
+            var service = new FraudEvaluationService(rules, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -274,7 +223,7 @@ namespace fraud_poc_project.Tests.Integration.Business
             // Arrange
             var transaction = CreateTransaction(amount: 0);
             var rule = CreateMockRule("ANY_RULE", false, 0m);
-            var service = new FraudEvaluationService(new List<IFraudRule> { rule });
+            var service = new FraudEvaluationService(new List<IFraudRule> { rule }, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -290,7 +239,7 @@ namespace fraud_poc_project.Tests.Integration.Business
             // Arrange
             var transaction = CreateTransaction(amount: -1000);
             var rule = CreateMockRule("ANY_RULE", false, 0m);
-            var service = new FraudEvaluationService(new List<IFraudRule> { rule });
+            var service = new FraudEvaluationService(new List<IFraudRule> { rule }, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);
@@ -358,20 +307,5 @@ namespace fraud_poc_project.Tests.Integration.Business
                 };
             }
         }
-
-        /// <summary>
-        /// Placeholder transaction event class
-        /// </summary>
-        //private class TransactionEvent
-        //{
-        //    public string TransactionId { get; set; }
-        //    public string CustomerId { get; set; }
-        //    public decimal Amount { get; set; }
-        //    public string CardCountry { get; set; }
-        //    public string TransactionCountry { get; set; }
-        //    public string TransactionType { get; set; }
-        //    public string MerchantCategory { get; set; }
-        //    public DateTime Timestamp { get; set; }
-        //}
     }
 }

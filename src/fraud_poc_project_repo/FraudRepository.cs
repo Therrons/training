@@ -131,8 +131,10 @@ namespace fraud_poc_project_repo
                 await conn.OpenAsync().ConfigureAwait(false);
 
                 await using var cmd = new NpgsqlCommand(
-                    $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
-                    "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
+                    $"SELECT id, kafka_topic, transaction_id, customer_id, account_id, amount, currency, " +
+                    $"merchant_name, merchant_category, transaction_type, channel, country_code, transaction_time, " +
+                    $"is_flagged, fraud_score, flagged_reason FROM \"{_schema}\".fn_select_fraud_events(" +
+                    $"@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
                     conn);
                 cmd.Parameters.AddWithValue("date_from",
                     (object?)(query.DateFrom?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
@@ -169,8 +171,10 @@ namespace fraud_poc_project_repo
                 await conn.OpenAsync().ConfigureAwait(false);
 
                 await using var cmd = new NpgsqlCommand(
-                    $"SELECT * FROM \"{_schema}\".fn_select_fraud_events(" +
-                    "@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
+                    $"SELECT id, kafka_topic, transaction_id, customer_id, account_id, amount, currency, " +
+                    $"merchant_name, merchant_category, transaction_type, channel, country_code, transaction_time, " +
+                    $"is_flagged, fraud_score, flagged_reason FROM \"{_schema}\".fn_select_fraud_events(" +
+                    $"@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
                     conn);
                 cmd.Parameters.AddWithValue("date_from",
                     (object?)(query.DateFrom?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
@@ -206,7 +210,8 @@ namespace fraud_poc_project_repo
                 await conn.OpenAsync().ConfigureAwait(false);
 
                 await using var cmd = new NpgsqlCommand(
-                    $"SELECT * FROM \"{_schema}\".fn_select_fraud_rule_results(@fraud_event_id)", conn);
+                    $"SELECT id, fraud_event_id, rule_code, rule_description, is_triggered, score_contribution " +
+                    $"FROM \"{_schema}\".fn_select_fraud_rule_results(@fraud_event_id)", conn);
                 cmd.Parameters.AddWithValue("fraud_event_id", fraudEventId);
 
                 await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);

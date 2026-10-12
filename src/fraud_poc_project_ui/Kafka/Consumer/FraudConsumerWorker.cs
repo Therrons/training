@@ -294,57 +294,54 @@ namespace fraud_poc_project.Kafka.Consumer
                 if (linkedToken.IsCancellationRequested) { return; }
 
                 var model = JsonConvert.SerializeObject(consumeResult.transactionEvent);
-                if (model != null)
+                var evaluationStopwatch = Stopwatch.StartNew();
+                var result = _evaluationService.Evaluate(consumeResult.transactionEvent);
+                evaluationStopwatch.Stop();
+
+                if (result != null)
                 {
-                    var evaluationStopwatch = Stopwatch.StartNew();
-                    var result = _evaluationService.Evaluate(consumeResult.transactionEvent);
-                    evaluationStopwatch.Stop();
-
-                    if (result != null)
+                    var dbStopwatch = Stopwatch.StartNew();
+                    var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
+                    await pipeLineRetry.ExecuteAsync(async _ =>
                     {
-                        var dbStopwatch = Stopwatch.StartNew();
-                        var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
-                        await pipeLineRetry.ExecuteAsync(async _ =>
+                        await _fraudRepository.SaveFraudEvaluationAsync(result).ConfigureAwait(false);
+                    }).ConfigureAwait(false);
+                    dbStopwatch.Stop();
+
+                    // Record database operation metric (INSERT)
+                    _metricsService.RecordDatabaseOperation("INSERT", dbStopwatch.ElapsedMilliseconds);
+
+                    stopwatch.Stop();
+
+                    // Record transaction metrics
+                    _metricsService.RecordTransactionProcessed(
+                        result.IsFlagged,
+                        result.FraudScore,
+                        stopwatch.ElapsedMilliseconds
+                    );
+
+                    // Record individual rule metrics
+                    if (result.RuleResults != null && result.RuleResults.Count > 0)
+                    {
+                        // Distribute the evaluation time among all rules
+                        long timePerRule = Math.Max(1, evaluationStopwatch.ElapsedMilliseconds / result.RuleResults.Count);
+
+                        foreach (var ruleResult in result.RuleResults)
                         {
-                            await _fraudRepository.SaveFraudEvaluationAsync(result).ConfigureAwait(false);
-                        }).ConfigureAwait(false);
-                        dbStopwatch.Stop();
-
-                        // Record database operation metric (INSERT)
-                        _metricsService.RecordDatabaseOperation("INSERT", dbStopwatch.ElapsedMilliseconds);
-
-                        stopwatch.Stop();
-
-                        // Record transaction metrics
-                        _metricsService.RecordTransactionProcessed(
-                            result.IsFlagged,
-                            result.FraudScore,
-                            stopwatch.ElapsedMilliseconds
-                        );
-
-                        // Record individual rule metrics
-                        if (result.RuleResults != null && result.RuleResults.Count > 0)
-                        {
-                            // Distribute the evaluation time among all rules
-                            long timePerRule = Math.Max(1, evaluationStopwatch.ElapsedMilliseconds / result.RuleResults.Count);
-
-                            foreach (var ruleResult in result.RuleResults)
-                            {
-                                _metricsService.RecordRuleExecution(
-                                    ruleResult.RuleCode,
-                                    ruleResult.IsTriggered,
-                                    timePerRule
-                                );
-                            }
+                            _metricsService.RecordRuleExecution(
+                                ruleResult.RuleCode,
+                                ruleResult.IsTriggered,
+                                timePerRule
+                            );
                         }
-
-                        _logger.LogInformationOnly("Processed transaction {TransactionId}: flagged={IsFlagged}, score={FraudScore}",
-                            consumeResult.transactionEvent.TransactionId.ToString(), result.IsFlagged, result.FraudScore);
-                        _logger.LogSensitiveData("Transaction data {TransactionId}: ", result);
                     }
-                    else
-                        _logger.LogInformationOnly("No Fraud Event Records found for Transaction Event={event}", model);
+
+                    _logger.LogInformationOnly("Processed transaction {TransactionId}: flagged={IsFlagged}, score={FraudScore}",
+                        consumeResult.transactionEvent.TransactionId.ToString(), result.IsFlagged, result.FraudScore);
+                    _logger.LogSensitiveData("Transaction data {TransactionId}: ", result);
                 }
+                else
+                    _logger.LogInformationOnly("No Fraud Event Records found for Transaction Event={event}", model);
             }
             catch (FraudEvaluationException ex)
             {
