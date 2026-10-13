@@ -9,14 +9,6 @@
 # Visual Studio cache/settings folders
 **/.vs/
 
-# Certificates — never commit
-/certs/*.cer
-/certs/*.crt
-/certs/*.pem
-/src/CapitecRootCA.cer
-/src/CapitecRootCA.crt
-/src/CapitecRootCA.pem
-
 # Local secrets — never commit
 .env
 

@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Repo_Fraud_POC", "Repo_Frau
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{2056362F-EA1E-4492-96F9-5E1533A80924}"
 	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
 		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
 		..\.github\workflows\deploy.yml = ..\.github\workflows\deploy.yml
 		..\charts\fraud-poc-api\templates\deployment.yaml = ..\charts\fraud-poc-api\templates\deployment.yaml
