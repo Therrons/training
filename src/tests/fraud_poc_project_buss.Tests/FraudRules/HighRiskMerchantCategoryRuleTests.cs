@@ -1,6 +1,7 @@
 using FluentAssertions;
-using fraud_poc_project_buss;
+using Microsoft.Extensions.Options;
 using Xunit;
+using fraud_poc_project_buss.Models.Settings;
 
 namespace fraud_poc_project_buss.Tests.FraudRules
 {
@@ -9,11 +10,25 @@ namespace fraud_poc_project_buss.Tests.FraudRules
     /// </summary>
     public class HighRiskMerchantCategoryRuleTests
     {
+        private IOptions<FraudRulesSettings> CreateOptions(string categories = "gambling,casino,crypto,cryptocurrency,money_transfer,wire_transfer", bool enabled = true)
+        {
+            var settings = new FraudRulesSettings
+            {
+                HighRiskMerchantCategory = new HighRiskMerchantCategoryRuleSettings
+                {
+                    HighRiskCategories = categories,
+                    ScoreContribution = 25m,
+                    Enabled = enabled
+                }
+            };
+            return Options.Create(settings);
+        }
+
         [Fact]
         public void Evaluate_WithHighRiskCategory_Gambling_Triggers()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("gambling")
                 .Build();
@@ -30,7 +45,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithHighRiskCategory_Casino_Triggers()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("casino")
                 .Build();
@@ -47,7 +62,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithHighRiskCategory_Crypto_Triggers()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("crypto")
                 .Build();
@@ -64,7 +79,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithHighRiskCategory_Cryptocurrency_Triggers()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("cryptocurrency")
                 .Build();
@@ -81,7 +96,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithHighRiskCategory_MoneyTransfer_Triggers()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("money_transfer")
                 .Build();
@@ -98,7 +113,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithHighRiskCategory_WireTransfer_Triggers()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("wire_transfer")
                 .Build();
@@ -115,7 +130,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithLowRiskCategory_DoesNotTrigger()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("grocery")
                 .Build();
@@ -132,7 +147,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithNullMerchantCategory_DoesNotTrigger()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory(null)
                 .Build();
@@ -149,7 +164,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithEmptyMerchantCategory_DoesNotTrigger()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory(string.Empty)
                 .Build();
@@ -166,7 +181,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithCaseInsensitivity_Triggers()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("GAMBLING")
                 .Build();
@@ -183,7 +198,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithMixedCase_Triggers()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("Money_Transfer")
                 .Build();
@@ -197,10 +212,28 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         }
 
         [Fact]
+        public void Evaluate_WithDisabledRule_DoesNotTrigger()
+        {
+            // Arrange
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions(enabled: false));
+            var transaction = new TransactionEventBuilder()
+                .WithMerchantCategory("casino")
+                .Build();
+
+            // Act
+            var result = rule.Evaluate(transaction);
+
+            // Assert
+            result.IsTriggered.Should().BeFalse("Disabled rule should not trigger");
+            result.ScoreContribution.Should().Be(0m);
+            result.RuleDescription.Should().Be("Rule disabled");
+        }
+
+        [Fact]
         public void Evaluate_ReturnsCorrectRuleMetadata()
         {
             // Arrange
-            var rule = new HighRiskMerchantCategoryRule();
+            var rule = new HighRiskMerchantCategoryRule(CreateOptions());
             var transaction = new TransactionEventBuilder()
                 .WithMerchantCategory("casino")
                 .Build();

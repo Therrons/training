@@ -39,42 +39,25 @@ variable "kafka_password" {
   sensitive   = true
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
-# AWS SECRETS MANAGER - Single Secret with Multiple Key-Value Pairs
-# ══════════════════════════════════════════════════════════════════════════════
-
-resource "aws_secretsmanager_secret" "fraud_poc_secrets" {
-  name                    = "fraud_poc_secrets"
-  description             = "Consolidated credentials for fraud POC project (database and Kafka)"
-  recovery_window_in_days = 7
-
-  tags = {
-    Environment = "dev"
-    Project     = "fraud-poc-project"
-    ManagedBy   = "terraform"
-    Type        = "credentials"
-  }
-
-  # ✅ Prevent accidental deletion
-  lifecycle {
-    prevent_destroy = true
-  }
+variable "api_username" {
+  description = "API username for fraud POC project authentication"
+  type        = string
+  sensitive   = true
 }
 
-resource "aws_secretsmanager_secret_version" "fraud_poc_secrets_value" {
-  secret_id = aws_secretsmanager_secret.fraud_poc_secrets.id
-  secret_string = jsonencode({
-    db_username    = var.db_username
-    db_password    = var.db_password
-    kafka_user     = var.kafka_user
-    kafka_password = var.kafka_password
-  })
+variable "api_password" {
+  description = "API password for fraud POC project authentication"
+  type        = string
+  sensitive   = true
+}
 
-  # ✅ Uncomment below to prevent updates to existing secrets
-  # This keeps existing values and only updates new versions when values change
-  lifecycle {
-    ignore_changes = [secret_string]
-  }
+# ══════════════════════════════════════════════════════════════════════════════
+# AWS SECRETS MANAGER - Reference Existing Secret
+# Uses data source to reference existing secret instead of creating new one
+# ══════════════════════════════════════════════════════════════════════════════
+
+data "aws_secretsmanager_secret" "fraud_poc_secrets" {
+  name = "fraud_poc_secrets"
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -98,10 +81,7 @@ resource "aws_iam_role" "fraud_POC_role" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = [
-              "repo:Therrons/training:ref:refs/heads/K8S",
-              "repo:Therrons/training:ref:refs/heads/K8S"
-            ]
+            "token.actions.githubusercontent.com:sub": "repo:Therrons/training:*"
           }
         }
       }
@@ -115,7 +95,7 @@ resource "aws_iam_role" "fraud_POC_role" {
   }
 
   depends_on = [
-    aws_secretsmanager_secret.fraud_poc_secrets
+    data.aws_secretsmanager_secret.fraud_poc_secrets
   ]
 }
 
@@ -138,7 +118,7 @@ resource "aws_iam_role_policy" "read_fraud_poc_secrets" {
           "secretsmanager:DescribeSecret"
         ]
         Resource = [
-          aws_secretsmanager_secret.fraud_poc_secrets.arn
+          data.aws_secretsmanager_secret.fraud_poc_secrets.arn
         ]
       }
     ]
@@ -229,13 +209,13 @@ output "role_id" {
 
 output "fraud_poc_secrets_arn" {
   description = "ARN of the fraud_poc_secrets secret"
-  value       = aws_secretsmanager_secret.fraud_poc_secrets.arn
+  value       = data.aws_secretsmanager_secret.fraud_poc_secrets.arn
   sensitive   = true
 }
 
 output "fraud_poc_secrets_name" {
   description = "Name of the fraud_poc_secrets secret"
-  value       = aws_secretsmanager_secret.fraud_poc_secrets.name
+  value       = data.aws_secretsmanager_secret.fraud_poc_secrets.name
 }
 
 output "fraud_poc_secrets_keys" {
@@ -245,6 +225,8 @@ output "fraud_poc_secrets_keys" {
     db_password    = "password value"
     kafka_user     = "kafka user value"
     kafka_password = "kafka password value"
+    api_username   = "api username value"
+    api_password   = "api password value"
   }
   sensitive = true
 }
@@ -254,8 +236,8 @@ output "all_resources_summary" {
   value = {
     iam_role             = aws_iam_role.fraud_POC_role.name
     inline_policies      = ["ReadFraudPocSecrets", "TerraformExecution"]
-    secret_name          = aws_secretsmanager_secret.fraud_poc_secrets.name
-    secret_keys          = ["db_username", "db_password", "kafka_user", "kafka_password"]
+    secret_name          = data.aws_secretsmanager_secret.fraud_poc_secrets.name
+    secret_keys          = ["db_username", "db_password", "kafka_user", "kafka_password", "api_username", "api_password"]
     total_resources      = 3
     region               = "af-south-1"
   }

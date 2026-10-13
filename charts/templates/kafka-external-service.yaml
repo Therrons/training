@@ -1,0 +1,32 @@
+---
+# Service to reach Docker Kafka running on the host
+# Uses manual Endpoints to point to the external Docker host
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: kafka
+spec:
+  type: ClusterIP
+  ports:
+    - name: broker
+      port: 9092
+      targetPort: 9092
+      protocol: TCP
+  clusterIP: None  # Headless service for direct DNS resolution
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: kafka
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: kafka
+subsets:
+  - addresses:
+      - ip: 192.168.127.2
+    ports:
+      - name: broker
+        port: 9092

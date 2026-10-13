@@ -14,7 +14,9 @@
         "DB_PORT": "5432",
         "DB_NAME": "fraud_db",
         "KAFKA_USER": "",
-        "KAFKA_PASSWORD": ""
+        "KAFKA_PASSWORD": "",
+        "API_USERNAME": "",
+        "API_PASSWORD": ""
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5237"

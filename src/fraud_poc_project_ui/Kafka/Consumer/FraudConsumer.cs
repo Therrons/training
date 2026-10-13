@@ -1,3 +1,4 @@
+using fraud_poc_project.Services;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
@@ -34,6 +35,8 @@ namespace fraud_poc_project.Kafka.Consumer
         private readonly IFraudEvaluationService _evaluationService;
         private readonly ILogger<FraudConsumer> _logger;
 
+        private readonly IMetricsService _metricsService;
+
         private readonly string consumerTopic = "";
         private readonly int consumerCount = 0;
 
@@ -47,7 +50,8 @@ namespace fraud_poc_project.Kafka.Consumer
                     ResiliencePipelineProvider<string> resilienceProvider,
                     IFraudRepository fraudRepository,
                     IFraudEvaluationService evaluationService,
-                    ILogger<FraudConsumer> logger)
+                    ILogger<FraudConsumer> logger,
+                    IMetricsService metricsService)
         {
             _brokerOptions = brokerOptions;
             _consumerOptions = consumerOptions;
@@ -59,6 +63,7 @@ namespace fraud_poc_project.Kafka.Consumer
             _fraudRepository = fraudRepository;
             _evaluationService = evaluationService;
             _logger = logger;
+            _metricsService = metricsService;
 
             consumerTopic = _consumerOptions.Value.TransactionTopic.Trim();
 
@@ -78,12 +83,12 @@ namespace fraud_poc_project.Kafka.Consumer
                 foreach (var item in Enumerable.Range(0, consumerCount))
                 {
                     var workerLogger = _loggerFactory.CreateLogger<FraudConsumerWorker>();
-                    var itm = new FraudConsumerWorker(_brokerOptions, _consumerOptions, _appSettings, _resilienceProvider, _serviceScopeFactory, _fraudRepository, _evaluationService, workerLogger);
+                    var itm = new FraudConsumerWorker(_brokerOptions, _consumerOptions, _appSettings, _resilienceProvider, _serviceScopeFactory, _fraudRepository, _evaluationService, _metricsService, workerLogger);
                     workers.Add(itm);
                 }
                 ;
                 var tasks = workers.Select(w => RunWorkerWithRetryAsync(w, stoppingToken));
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             finally
             {
@@ -100,11 +105,12 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 try
                 {
-                    await worker.StartAsync(stoppingToken);
+                    await worker.StartAsync(stoppingToken).ConfigureAwait(false);
                     retryCount = 0;
                 }
                 catch (OperationCanceledException)
                 {
+                    _logger.LogInformationOnly("Consumer operation cancelled");
                     break;
                 }
                 catch (Exception ex)
@@ -112,7 +118,7 @@ namespace fraud_poc_project.Kafka.Consumer
                     retryCount++;
                     _logger.LogError(ex, "Worker failed. Retry {Retry}/{Max}", retryCount, maxRetries);
                     if (retryCount < maxRetries)
-                        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken).ConfigureAwait(false);
                 }
             }
         }
@@ -127,7 +133,6 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 _logger.LogError(ex, "Error disposing FraudKafkaConsumer");
             }
-
             base.Dispose();
         }
 

@@ -24,7 +24,7 @@ NC='\033[0m' # No Color
 NAMESPACE="fraud-poc-api"
 APP_NAME="fraud-poc-api"
 AWS_REGION="${AWS_REGION:-af-south-1}"
-AWS_SECRET_NAME="fraud-poc-secrets"  # Change this to your AWS secret name
+AWS_SECRET_NAME="fraud_poc_secrets"  # Change this to your AWS secret name
 
 # Step 1: Verify prerequisites
 echo -e "${BLUE}Step 1: Checking prerequisites...${NC}"
@@ -86,19 +86,26 @@ SECRET_JSON=$(aws secretsmanager get-secret-value \
 # Extract individual secret values
 DB_USERNAME=$(echo "$SECRET_JSON" | jq -r '.DB_USERNAME // empty' 2>/dev/null)
 DB_PASSWORD=$(echo "$SECRET_JSON" | jq -r '.DB_PASSWORD // empty' 2>/dev/null)
-KAFKA_USERNAME=$(echo "$SECRET_JSON" | jq -r '.KAFKA_USERNAME // empty' 2>/dev/null)
+KAFKA_USER=$(echo "$SECRET_JSON" | jq -r '.KAFKA_USER // empty' 2>/dev/null)
 KAFKA_PASSWORD=$(echo "$SECRET_JSON" | jq -r '.KAFKA_PASSWORD // empty' 2>/dev/null)
+API_USERNAME=$(echo "$SECRET_JSON" | jq -r '.API_USERNAME // empty' 2>/dev/null)
+API_PASSWORD=$(echo "$SECRET_JSON" | jq -r '.API_PASSWORD // empty' 2>/dev/null)
 
 if [ -z "$DB_USERNAME" ] || [ -z "$DB_PASSWORD" ]; then
     echo -e "${RED}✗ ERROR: Missing required secrets (DB_USERNAME or DB_PASSWORD)${NC}"
     exit 1
 fi
 
+if [ -z "$API_USERNAME" ] || [ -z "$API_PASSWORD" ]; then
+    echo -e "${RED}✗ ERROR: Missing API credentials in secrets (API_USERNAME or API_PASSWORD)${NC}"
+    exit 1
+fi
+
 echo -e "${GREEN}✓ Secrets retrieved successfully${NC}"
 echo -e "  DB_USERNAME: ${DB_USERNAME:0:3}***"
 echo -e "  DB_PASSWORD: ***"
-if [ -n "$KAFKA_USERNAME" ]; then
-    echo -e "  KAFKA_USERNAME: ${KAFKA_USERNAME:0:3}***"
+if [ -n "$KAFKA_USER" ]; then
+    echo -e "  KAFKA_USER: ${KAFKA_USER:0:3}***"
 fi
 echo ""
 
@@ -115,8 +122,10 @@ helm upgrade --install $APP_NAME ./charts \
   -f charts/values-localhost-https.yaml \
   --set env.DB_USERNAME="$DB_USERNAME" \
   --set env.DB_PASSWORD="$DB_PASSWORD" \
-  --set env.KAFKA_USERNAME="$KAFKA_USERNAME" \
+  --set env.KAFKA_USER="$KAFKA_USER" \
   --set env.KAFKA_PASSWORD="$KAFKA_PASSWORD" \
+  --set env.API_USERNAME="$API_USERNAME" \
+  --set env.API_PASSWORD="$API_PASSWORD" \
   --create-namespace \
   -n $NAMESPACE
 echo -e "${GREEN}✓ Helm deployment completed${NC}"

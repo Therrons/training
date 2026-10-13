@@ -1,6 +1,8 @@
 using fraud_poc_project.CustomAttributes;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -8,9 +10,7 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Middleware
 {
-    // checks if query string or request content has potential XSS attack,
-    // an additional filter has been applied to the endpoint to check for XSS attacks
-    // , if the filter is not applied, this middleware will not check for XSS attacks
+    // XSS validation for endpoints marked with [ValidateXss]
     public class CheckForXssMiddleware
     {
         private readonly RequestDelegate _next;
@@ -60,8 +60,7 @@ namespace fraud_poc_project.Middleware
                         }
                     }
 
-                    // Check XSS in request content
-                    var content = await ReadRequestBody(context);
+                    var content = await ReadRequestBody(context).ConfigureAwait(false);
 
                     if (XSSValidation.IsPotentialXSS(content))
                     {
@@ -76,13 +75,13 @@ namespace fraud_poc_project.Middleware
         private static async Task<string> ReadRequestBody(HttpContext context)
         {
             var buffer = new MemoryStream();
-            await context.Request.Body.CopyToAsync(buffer);
+            await context.Request.Body.CopyToAsync(buffer).ConfigureAwait(false);
             context.Request.Body = buffer;
             buffer.Position = 0;
 
             var encoding = Encoding.UTF8;
 
-            var requestContent = await new StreamReader(buffer, encoding).ReadToEndAsync();
+            var requestContent = await new StreamReader(buffer, encoding).ReadToEndAsync().ConfigureAwait(false);
             context.Request.Body.Position = 0;
 
             return requestContent;
@@ -90,7 +89,10 @@ namespace fraud_poc_project.Middleware
 
         private async Task FlagAsError(HttpContext context)
         {
-            context.Response.Headers.Add("XXSValidation", "Failed - Potential XSS attack");
+            KeyValuePair<string, StringValues> _xss = new KeyValuePair<string, StringValues>("XXSValidation", "Failed - Potential XSS attack");
+            if (!context.Response.Headers.Contains(_xss))
+                context.Response.Headers.Add(_xss.Key, _xss.Value);
+
             context.Response.StatusCode = _statusCode;
         }
     }

@@ -1,13 +1,9 @@
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Models.Settings;
+using Microsoft.Extensions.Options;
 
 namespace fraud_poc_project_buss
 {
-    // This file holds all the "fraud rules". Each rule looks at one transaction
-    // and answers a simple question: "does this look suspicious?"
-    // If it does, the rule adds some points ("ScoreContribution") to the transaction's
-    // overall fraud score. FraudEvaluationService (in the Service folder) adds up the
-    // points from every rule to decide if a transaction should be flagged.
-
     public interface IFraudRule
     {
         string RuleCode { get; }
@@ -19,14 +15,20 @@ namespace fraud_poc_project_buss
 
     /// <summary>
     /// Flags transactions whose absolute amount exceeds the configured threshold.
+    /// Threshold is loaded from configuration (appsettings.json).
     /// </summary>
     public class HighAmountRule : IFraudRule
     {
         private readonly decimal _threshold;
+        private readonly decimal _scoreContribution;
+        private readonly bool _enabled;
 
-        public HighAmountRule(decimal threshold = 50000m)
+        public HighAmountRule(IOptions<FraudRulesSettings> options)
         {
-            _threshold = threshold;
+            var settings = options.Value.HighAmount;
+            _threshold = settings.Threshold;
+            _scoreContribution = settings.ScoreContribution;
+            _enabled = settings.Enabled;
         }
 
         public string RuleCode => "HIGH_AMOUNT";
@@ -34,28 +36,36 @@ namespace fraud_poc_project_buss
 
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
-            // Triggered when the transaction's amount (ignoring +/-) is bigger than our limit.
+            if (!_enabled)
+                return this.CreateDisabledRuleResult();
+
             var triggered = Math.Abs(tx.Amount) > _threshold;
             return new FraudRuleSetRecord
             {
                 RuleCode = RuleCode,
                 RuleDescription = RuleDescription,
                 IsTriggered = triggered,
-                ScoreContribution = triggered ? 40m : 0m
+                ScoreContribution = triggered ? _scoreContribution : 0m
             };
         }
     }
 
     /// <summary>
     /// Flags card-not-present (CNP) transactions originating from outside the home country.
+    /// Home country is loaded from configuration (appsettings.json).
     /// </summary>
     public class ForeignCnpRule : IFraudRule
     {
         private readonly string _homeCountry;
+        private readonly decimal _scoreContribution;
+        private readonly bool _enabled;
 
-        public ForeignCnpRule(string homeCountry = "ZA")
+        public ForeignCnpRule(IOptions<FraudRulesSettings> options)
         {
-            _homeCountry = homeCountry;
+            var settings = options.Value.ForeignCnp;
+            _homeCountry = settings.HomeCountry;
+            _scoreContribution = settings.ScoreContribution;
+            _enabled = settings.Enabled;
         }
 
         public string RuleCode => "FOREIGN_CNP";
@@ -63,35 +73,42 @@ namespace fraud_poc_project_buss
 
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
-            // Card-not-present means the physical card wasn't swiped/tapped (e.g. an online purchase).
+            if (!_enabled)
+                return this.CreateDisabledRuleResult();
+
             var isCnp = string.Equals(tx.TransactionType, "CNP", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(tx.Channel, "Online", StringComparison.OrdinalIgnoreCase);
 
             var isForeign = !string.IsNullOrWhiteSpace(tx.CountryCode)
                             && !string.Equals(tx.CountryCode, _homeCountry, StringComparison.OrdinalIgnoreCase);
 
-            // Triggered only when both conditions are true at once.
             var triggered = isCnp && isForeign;
             return new FraudRuleSetRecord
             {
                 RuleCode = RuleCode,
                 RuleDescription = RuleDescription,
                 IsTriggered = triggered,
-                ScoreContribution = triggered ? 35m : 0m
+                ScoreContribution = triggered ? _scoreContribution : 0m
             };
         }
     }
 
     /// <summary>
     /// Flags ATM cash withdrawals that exceed the configured single-transaction limit.
+    /// Limit is loaded from configuration (appsettings.json).
     /// </summary>
     public class AtmWithdrawalLimitRule : IFraudRule
     {
         private readonly decimal _limit;
+        private readonly decimal _scoreContribution;
+        private readonly bool _enabled;
 
-        public AtmWithdrawalLimitRule(decimal limit = 5000m)
+        public AtmWithdrawalLimitRule(IOptions<FraudRulesSettings> options)
         {
-            _limit = limit;
+            var settings = options.Value.AtmWithdrawalLimit;
+            _limit = settings.Limit;
+            _scoreContribution = settings.ScoreContribution;
+            _enabled = settings.Enabled;
         }
 
         public string RuleCode => "ATM_WITHDRAWAL_LIMIT";
@@ -99,59 +116,79 @@ namespace fraud_poc_project_buss
 
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
+            if (!_enabled)
+                return this.CreateDisabledRuleResult();
+
             var isAtm = string.Equals(tx.TransactionType, "ATM", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(tx.Channel, "ATM", StringComparison.OrdinalIgnoreCase);
 
-            // Triggered only for ATM withdrawals over the limit
             var triggered = isAtm && Math.Abs(tx.Amount) > _limit;
             return new FraudRuleSetRecord
             {
                 RuleCode = RuleCode,
                 RuleDescription = RuleDescription,
                 IsTriggered = triggered,
-                ScoreContribution = triggered ? 30m : 0m
+                ScoreContribution = triggered ? _scoreContribution : 0m
             };
         }
     }
 
     /// <summary>
     /// Flags transactions in merchant categories associated with high-risk activity.
+    /// Categories are loaded from configuration (appsettings.json).
     /// </summary>
     public class HighRiskMerchantCategoryRule : IFraudRule
     {
-        private static readonly HashSet<string> HighRiskCategories = new(StringComparer.OrdinalIgnoreCase)
+        private readonly HashSet<string> _highRiskCategories;
+        private readonly decimal _scoreContribution;
+        private readonly bool _enabled;
+
+        public HighRiskMerchantCategoryRule(IOptions<FraudRulesSettings> options)
         {
-            "gambling", "casino", "crypto", "cryptocurrency", "money_transfer", "wire_transfer"
-        };
+            var settings = options.Value.HighRiskMerchantCategory;
+            _highRiskCategories = settings.GetCategories();
+            _scoreContribution = settings.ScoreContribution;
+            _enabled = settings.Enabled;
+        }
 
         public string RuleCode => "HIGH_RISK_MERCHANT";
         public string RuleDescription => "Transaction in a high-risk merchant category";
 
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
-            // Triggered when the merchant's category is one of the risky ones in our list above.
+            if (!_enabled)
+                return this.CreateDisabledRuleResult();
+
             var triggered = !string.IsNullOrWhiteSpace(tx.MerchantCategory)
-                            && HighRiskCategories.Contains(tx.MerchantCategory);
+                            && _highRiskCategories.Contains(tx.MerchantCategory);
             return new FraudRuleSetRecord
             {
                 RuleCode = RuleCode,
                 RuleDescription = RuleDescription,
                 IsTriggered = triggered,
-                ScoreContribution = triggered ? 25m : 0m
+                ScoreContribution = triggered ? _scoreContribution : 0m
             };
         }
     }
 
     /// <summary>
     /// Flags transactions with a round-number amount, which is a common indicator of fraud.
+    /// Minimum amount threshold and roundness multiple are loaded from configuration (appsettings.json).
     /// </summary>
     public class RoundAmountRule : IFraudRule
     {
         private readonly decimal _minimumAmount;
+        private readonly decimal _roundnessMultiple;
+        private readonly decimal _scoreContribution;
+        private readonly bool _enabled;
 
-        public RoundAmountRule(decimal minimumAmount = 1000m)
+        public RoundAmountRule(IOptions<FraudRulesSettings> options)
         {
-            _minimumAmount = minimumAmount;
+            var settings = options.Value.RoundAmount;
+            _minimumAmount = settings.MinimumAmount;
+            _roundnessMultiple = settings.RoundnessMultiple;
+            _scoreContribution = settings.ScoreContribution;
+            _enabled = settings.Enabled;
         }
 
         public string RuleCode => "ROUND_AMOUNT";
@@ -159,17 +196,20 @@ namespace fraud_poc_project_buss
 
         public FraudRuleSetRecord Evaluate(TransactionEvent tx)
         {
+            if (!_enabled)
+                return this.CreateDisabledRuleResult();
+
             var abs = Math.Abs(tx.Amount);
 
-            // Triggered when the amount is big AND lands exactly on a multiple of 1000
-            // (e.g. 5000.00) - fraudsters often pick round numbers.
-            var triggered = abs >= _minimumAmount && abs % 1000 == 0;
+            // Triggered when the amount is >= minimum AND is a multiple of roundness multiple
+            // (e.g. 5000.00 with multiple of 1000) - fraudsters often pick round numbers.
+            var triggered = abs >= _minimumAmount && abs % _roundnessMultiple == 0;
             return new FraudRuleSetRecord
             {
                 RuleCode = RuleCode,
                 RuleDescription = RuleDescription,
                 IsTriggered = triggered,
-                ScoreContribution = triggered ? 10m : 0m
+                ScoreContribution = triggered ? _scoreContribution : 0m
             };
         }
     }

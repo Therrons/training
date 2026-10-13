@@ -1,6 +1,7 @@
 using FluentAssertions;
-using fraud_poc_project_buss;
+using Microsoft.Extensions.Options;
 using Xunit;
+using fraud_poc_project_buss.Models.Settings;
 
 namespace fraud_poc_project_buss.Tests.FraudRules
 {
@@ -9,11 +10,26 @@ namespace fraud_poc_project_buss.Tests.FraudRules
     /// </summary>
     public class RoundAmountRuleTests
     {
+        private IOptions<FraudRulesSettings> CreateOptions(decimal minimumAmount = 1000m, bool enabled = true)
+        {
+            var settings = new FraudRulesSettings
+            {
+                RoundAmount = new RoundAmountRuleSettings
+                {
+                    MinimumAmount = minimumAmount,
+                    RoundnessMultiple = 1000m,
+                    ScoreContribution = 10m,
+                    Enabled = enabled
+                }
+            };
+            return Options.Create(settings);
+        }
+
         [Fact]
         public void Evaluate_WithRoundAmountBelowMinimum_DoesNotTrigger()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(500m)
                 .Build();
@@ -30,7 +46,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithRoundAmountAboveMinimum_Triggers()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(5000m)
                 .Build();
@@ -47,7 +63,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithNonRoundAmountAboveMinimum_DoesNotTrigger()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(5250m)
                 .Build();
@@ -64,7 +80,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithAmountEqualToMinimum_AndRound_Triggers()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(1000m)
                 .Build();
@@ -81,7 +97,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithNegativeRoundAmount_Triggers()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(-5000m)
                 .Build();
@@ -98,7 +114,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_With10000_Triggers()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(10000m)
                 .Build();
@@ -115,7 +131,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_With2000_Triggers()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(2000m)
                 .Build();
@@ -132,7 +148,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_With2100_DoesNotTrigger()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(2100m)
                 .Build();
@@ -146,42 +162,28 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         }
 
         [Fact]
-        public void Evaluate_WithDefaultMinimum_Uses1000()
+        public void Evaluate_WithDisabledRule_DoesNotTrigger()
         {
             // Arrange
-            var rule = new RoundAmountRule();
+            var rule = new RoundAmountRule(CreateOptions(1000m, enabled: false));
             var transaction = new TransactionEventBuilder()
-                .WithAmount(1000m)
+                .WithAmount(5000m)
                 .Build();
 
             // Act
             var result = rule.Evaluate(transaction);
 
             // Assert
-            result.IsTriggered.Should().BeTrue("Default minimum is 1000");
-        }
-
-        [Fact]
-        public void Evaluate_BelowDefaultMinimum_DoesNotTrigger()
-        {
-            // Arrange
-            var rule = new RoundAmountRule();
-            var transaction = new TransactionEventBuilder()
-                .WithAmount(500m)
-                .Build();
-
-            // Act
-            var result = rule.Evaluate(transaction);
-
-            // Assert
-            result.IsTriggered.Should().BeFalse("500 is below default minimum");
+            result.IsTriggered.Should().BeFalse("Disabled rule should not trigger");
+            result.ScoreContribution.Should().Be(0m);
+            result.RuleDescription.Should().Be("Rule disabled");
         }
 
         [Fact]
         public void Evaluate_WithZeroAmount_DoesNotTrigger()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(0m)
                 .Build();
@@ -198,7 +200,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_ReturnsCorrectRuleMetadata()
         {
             // Arrange
-            var rule = new RoundAmountRule(minimumAmount: 1000m);
+            var rule = new RoundAmountRule(CreateOptions(1000m));
             var transaction = new TransactionEventBuilder()
                 .WithAmount(5000m)
                 .Build();

@@ -1,5 +1,6 @@
 ﻿using fraud_poc_project.Controllers;
 using fraud_poc_project.Kafka.Consumer;
+using fraud_poc_project.Services;
 using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
 using fraud_poc_project_buss.Helper;
@@ -14,8 +15,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Polly;
-using Polly.CircuitBreaker;
 using Polly.Retry;
 using System;
 using System.Collections.Generic;
@@ -23,16 +24,10 @@ using System.Text;
 
 namespace fraud_poc_project.Configuration
 {
-    // This is where the app tells its Dependency Injection container about every
-    // service it needs: App settings, the database, the fraud rules,
-    // and Kafka. Each piece is split into its own small method below so it's easy to
-    // see, at a glance, everything the app is wired up to use.
     public static class ServiceConfiguration
     {
         private static Environment_Variables envVariables;
 
-        // This is the main entry point for registering services. It calls each of the
-        // smaller methods below to register specific services.
         public static void AddServices_AddDI(this WebApplicationBuilder builder)
         {
             envVariables = new Environment_Variables().Get_Environment_Values(builder);
@@ -44,41 +39,38 @@ namespace fraud_poc_project.Configuration
             RegisterFraudRules(builder);
             RegisterTestOnlyControllers(builder);
             RegisterRetryPipeline(builder);
+            RegisterAuthentication(builder);
+            RegisterJwt(builder);
+            RegisterMetrics(builder);
             RegisterKafka(builder);
             SetupDatabase(builder);
-
-            builder.ConfigureSwagger();
         }
 
         private static void RegisterRetryPipeline(WebApplicationBuilder builder)
         {
+            var resilienceSettings = builder.Configuration.GetSection("ResiliencePipeLineSettings").Get<ResiliencePipeLineSettings>();
+
             builder.Services.AddResiliencePipeline("exception", x =>
             {
                 x.AddRetry(
                     new RetryStrategyOptions
                     {
                         BackoffType = DelayBackoffType.Exponential,
-                        Delay = TimeSpan.FromMilliseconds(1),
-                        MaxRetryAttempts = 2,
+                        Delay = TimeSpan.FromMilliseconds(resilienceSettings.DelayCount),
+                        MaxRetryAttempts = resilienceSettings.RetryCount,
                         UseJitter = true,
                         ShouldHandle = new PredicateBuilder().Handle<Exception>()
-                    }).AddTimeout(TimeSpan.FromSeconds(30));
+                    }).AddTimeout(TimeSpan.FromSeconds(resilienceSettings.TimeoutValue));
             });
         }
 
-        // Loads AppSettings and Database settings from config (e.g. appsettings.json)
-        // and checks that all their required fields are filled in.
         private static void RegisterAppSettings(WebApplicationBuilder builder)
         {
-            // AppSettings is bound here so the Kafka configuration (added later) can resolve it.
             builder.Services.AddAndValidateOptions<AppSettings>("AppSettings");
             builder.Services.AddAndValidateOptions<Database>("Database");
         }
 
         #region Database Operations
-        // Builds the PostgreSQL connection string from environment variables (falling
-        // back to config values), then adds it to the app's configuration so anything
-        // that asks for "ConnectionStrings:PostgreSQL" can find it.
         private static string BuildDatabaseConnectionString(WebApplicationBuilder builder)
         {
             var isLocal = true; // builder.Environment.EnvironmentName.Contains("loc", StringComparison.InvariantCultureIgnoreCase);
@@ -92,8 +84,6 @@ namespace fraud_poc_project.Configuration
             connectionString.Append($"Pooling=true;");
             connectionString.Append($"Connection Lifetime=0;");
 
-            // Disable SSL for local or Rancher deployments (no SSL in Docker/K8s) as
-            // these are docker containers and SSL is not needed. For other environments, require SSL for security.
             connectionString.Append((isLocal || isRancher) ? "SSLMode=Disable;" : "SSLMode=Require;");
             connectionString.Append("Trust Server Certificate = true;");
 
@@ -106,7 +96,6 @@ namespace fraud_poc_project.Configuration
             return result;
         }
 
-        // Registers everything needed to read from and write to the database.
         private static void RegisterDatabaseAccess(WebApplicationBuilder builder, string connectionString)
         {
             builder.Services.AddDbContextPool<IDBConnection, DBConnection>(options => options.UseNpgsql(connectionString));
@@ -114,8 +103,6 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
         }
 
-        // If the app is configured to create the database on startup, this method
-        // sets up the necessary services.
         private static void SetupDatabase(WebApplicationBuilder builder)
         {
             var createDbFlag = builder.Configuration["Database:CreateDatabaseOnStartup"]?.ToLowerInvariant();
@@ -126,9 +113,10 @@ namespace fraud_poc_project.Configuration
         }
         #endregion
 
-        // Registers every fraud rule (see FraudRules.cs) and the service that runs them.
         private static void RegisterFraudRules(WebApplicationBuilder builder)
         {
+            builder.Services.AddAndValidateOptions<FraudRulesSettings>("FraudRules");
+
             builder.Services
                 .AddSingleton<IFraudRule, HighAmountRule>()
                 .AddSingleton<IFraudRule, ForeignCnpRule>()
@@ -136,12 +124,11 @@ namespace fraud_poc_project.Configuration
                 .AddSingleton<IFraudRule, HighRiskMerchantCategoryRule>()
                 .AddSingleton<IFraudRule, RoundAmountRule>();
 
+            // Register the fraud evaluation service
             builder.Services
                 .AddSingleton<IFraudEvaluationService, FraudEvaluationService>();
         }
 
-        // Registers Kafka configuration, creates any missing topics, and wires up the
-        // producer/consumer that use them.
         private static void RegisterKafka(WebApplicationBuilder builder)
         {
             builder.Services.AddKafkaConfigurations(builder.Configuration, envVariables)
@@ -153,13 +140,54 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddTransient<ITransactionEventHandler, FraudConsumerWorker>();
         }
 
+        private static void RegisterAuthentication(WebApplicationBuilder builder)
+        {
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+        }
+
+        private static void RegisterJwt(WebApplicationBuilder builder)
+        {
+            builder.Services.AddScoped<IJwtService, JwtService>();
+
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var secret = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
+            var key = System.Text.Encoding.ASCII.GetBytes(secret);
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+            })
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings["Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            builder.Services.AddAuthorization();
+        }
+
         private static void RegisterTestOnlyControllers(WebApplicationBuilder builder)
         {
-            if (Extensions_Helper.IsDebugMode)
+            if (ExtensionsHelper.IsDebugMode)
             {
                 builder.Services.AddTransient<LoadSimulatorController>();
                 builder.Services.AddTransient<FraudController>();
             }
+        }
+
+        private static void RegisterMetrics(WebApplicationBuilder builder)
+        {
+            builder.Services.AddSingleton<IMetricsService, MetricsService>();
         }
     }
 }

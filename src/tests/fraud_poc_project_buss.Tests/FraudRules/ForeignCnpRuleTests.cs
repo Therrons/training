@@ -1,6 +1,7 @@
 using FluentAssertions;
-using fraud_poc_project_buss;
+using Microsoft.Extensions.Options;
 using Xunit;
+using fraud_poc_project_buss.Models.Settings;
 
 namespace fraud_poc_project_buss.Tests.FraudRules
 {
@@ -9,11 +10,25 @@ namespace fraud_poc_project_buss.Tests.FraudRules
     /// </summary>
     public class ForeignCnpRuleTests
     {
+        private IOptions<FraudRulesSettings> CreateOptions(string homeCountry = "ZA", bool enabled = true)
+        {
+            var settings = new FraudRulesSettings
+            {
+                ForeignCnp = new ForeignCnpRuleSettings
+                {
+                    HomeCountry = homeCountry,
+                    ScoreContribution = 35m,
+                    Enabled = enabled
+                }
+            };
+            return Options.Create(settings);
+        }
+
         [Fact]
         public void Evaluate_WithDomesticCnp_DoesNotTrigger()
         {
             // Arrange
-            var rule = new ForeignCnpRule(homeCountry: "ZA");
+            var rule = new ForeignCnpRule(CreateOptions("ZA"));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("CNP")
                 .WithCountryCode("ZA")
@@ -31,7 +46,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithForeignCnp_Triggers()
         {
             // Arrange
-            var rule = new ForeignCnpRule(homeCountry: "ZA");
+            var rule = new ForeignCnpRule(CreateOptions("ZA"));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("CNP")
                 .WithCountryCode("US")
@@ -49,7 +64,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithForeignNonCnp_DoesNotTrigger()
         {
             // Arrange
-            var rule = new ForeignCnpRule(homeCountry: "ZA");
+            var rule = new ForeignCnpRule(CreateOptions("ZA"));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("POS")
                 .WithCountryCode("US")
@@ -67,7 +82,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithOnlineChannelAndForeignCountry_Triggers()
         {
             // Arrange - Online transactions are treated as CNP
-            var rule = new ForeignCnpRule(homeCountry: "ZA");
+            var rule = new ForeignCnpRule(CreateOptions("ZA"));
             var transaction = new TransactionEventBuilder()
                 .WithChannel("Online")
                 .WithCountryCode("GB")
@@ -85,7 +100,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithOnlineChannelAndDomesticCountry_DoesNotTrigger()
         {
             // Arrange
-            var rule = new ForeignCnpRule(homeCountry: "ZA");
+            var rule = new ForeignCnpRule(CreateOptions("ZA"));
             var transaction = new TransactionEventBuilder()
                 .WithChannel("Online")
                 .WithCountryCode("ZA")
@@ -103,7 +118,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithNullCountryCode_DoesNotTrigger()
         {
             // Arrange
-            var rule = new ForeignCnpRule(homeCountry: "ZA");
+            var rule = new ForeignCnpRule(CreateOptions("ZA"));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("CNP")
                 .WithCountryCode(null)
@@ -121,7 +136,7 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         public void Evaluate_WithCaseSensitivities_TriggersCorrectly()
         {
             // Arrange - Test case-insensitivity
-            var rule = new ForeignCnpRule(homeCountry: "za");
+            var rule = new ForeignCnpRule(CreateOptions("za"));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("cnp")
                 .WithCountryCode("us")
@@ -136,10 +151,10 @@ namespace fraud_poc_project_buss.Tests.FraudRules
         }
 
         [Fact]
-        public void Evaluate_WithDefaultHomeCountry_UsesZa()
+        public void Evaluate_WithDisabledRule_DoesNotTrigger()
         {
             // Arrange
-            var rule = new ForeignCnpRule();
+            var rule = new ForeignCnpRule(CreateOptions("ZA", enabled: false));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("CNP")
                 .WithCountryCode("US")
@@ -149,14 +164,16 @@ namespace fraud_poc_project_buss.Tests.FraudRules
             var result = rule.Evaluate(transaction);
 
             // Assert
-            result.IsTriggered.Should().BeTrue("Default home country is ZA");
+            result.IsTriggered.Should().BeFalse("Disabled rule should not trigger");
+            result.ScoreContribution.Should().Be(0m);
+            result.RuleDescription.Should().Be("Rule disabled");
         }
 
         [Fact]
         public void Evaluate_ReturnsCorrectRuleMetadata()
         {
             // Arrange
-            var rule = new ForeignCnpRule();
+            var rule = new ForeignCnpRule(CreateOptions("ZA"));
             var transaction = new TransactionEventBuilder()
                 .WithTransactionType("CNP")
                 .WithCountryCode("US")

@@ -1,15 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using fraud_poc_project.Utilities;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using System;
-using System.IO;
+using System.Collections.Generic;
 
 namespace fraud_poc_project.Configuration
 {
     public static class ConfigureSwaggerForRancher
     {
-        // This method sets up the Swagger documentation and UI, including the 
-        // title, version, description, and contact information. It also includes XML comments for better documentation.
         public static void ConfigureSwagger(this WebApplicationBuilder builder)
         {
             builder.Services.AddSwaggerGen(c =>
@@ -25,10 +23,43 @@ namespace fraud_poc_project.Configuration
                         Name = "Centralised Systems"
                     }
                 });
+
+                // JWT Bearer security for Swagger
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Description = "JWT Authorization header using the Bearer scheme. " +
+                                  "Example: \"Authorization: Bearer {token}\"\n\n" +
+                                  "Steps:\n" +
+                                  "1. Call POST /api/fraud/login with username='XXX' and password='YYY'\n" +
+                                  "2. Copy the token from the response\n" +
+                                  "3. Click the Authorize button and paste the token (with or without 'Bearer ' prefix)\n" +
+                                  "4. All subsequent requests will include the token in the Authorization header"
+                });
+
+                // Apply JWT security requirement to all endpoints
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new List<string>()
+                    }
+                });
+
                 // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
+                // Uses PathUtility for cross-platform path management
+                var assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+                var xmlPath = PathUtility.GetXmlDocumentationPath(assemblyName);
+                if (!string.IsNullOrEmpty(xmlPath))
                 {
                     c.IncludeXmlComments(xmlPath);
                 }
