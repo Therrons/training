@@ -24,23 +24,23 @@ namespace fraud_poc_project.Services
         private readonly object _lockObject = new object();
 
         // Transaction metrics
-        private long _totalTransactions;
-        private long _flaggedTransactions;
-        private long _totalFraudScore;
-        private List<long> _transactionProcessingTimes = new();
+        private static long _totalTransactions;
+        private static long _flaggedTransactions;
+        private static long _totalFraudScore;
+        private static List<long> _transactionProcessingTimes = new();
 
         // Rule metrics
-        private Dictionary<string, RuleMetrics> _ruleMetrics = new();
+        private static Dictionary<string, RuleMetrics> _ruleMetrics = new();
 
         // Authentication metrics
-        private long _totalLoginAttempts;
-        private long _successfulLogins;
+        private static long _totalLoginAttempts;
+        private static long _successfulLogins;
 
         // Database metrics
         private Dictionary<string, OperationMetrics> _databaseOperations = new();
 
         // Kafka metrics
-        private Dictionary<string, OperationMetrics> _kafkaOperations = new();
+        private static Dictionary<string, OperationMetrics> _kafkaOperations = new();
 
         public MetricsService(ILogger<MetricsService> logger)
         {
