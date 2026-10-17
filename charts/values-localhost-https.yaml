@@ -39,9 +39,9 @@ service:
 probes:
   readinessPath: /health/readiness
   livenessPath: /health/liveness
-  readinessInitialDelaySeconds: 5
-  readinessPeriodSeconds: 5
-  livenessInitialDelaySeconds: 15
+  readinessInitialDelaySeconds: 30
+  readinessPeriodSeconds: 10
+  livenessInitialDelaySeconds: 60
   livenessPeriodSeconds: 10
 
 # Persistence
