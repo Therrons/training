@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Castle.Core" Version="5.2.1" />
+        <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
         <PackageReference Include="FluentAssertions" Version="8.11.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
         <PackageReference Include="Moq" Version="4.21.0" />
