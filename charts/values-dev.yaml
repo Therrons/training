@@ -28,9 +28,9 @@ service:
 probes:
   readinessPath: /health/readiness     # change to your actual readiness path
   livenessPath: /health/liveness       # change to your actual liveness path
-  readinessInitialDelaySeconds: 5
-  readinessPeriodSeconds: 5
-  livenessInitialDelaySeconds: 15
+  readinessInitialDelaySeconds: 30
+  readinessPeriodSeconds: 10
+  livenessInitialDelaySeconds: 60
   livenessPeriodSeconds: 10
 
 # Persistence: your container writes to /repo/data and must survive restarts
