@@ -39,8 +39,8 @@ namespace fraud_poc_project.Services
         public PodIdentityService(ILogger<PodIdentityService> logger)
         {
             // Set at instantiation time - read from Kubernetes downward API environment variables
-            PodName = System.Environment.GetEnvironmentVariable("HOSTNAME") ?? "local-pod";
-            PodNamespace = System.Environment.GetEnvironmentVariable("POD_NAMESPACE") ?? "default";
+            PodName = "local-pod";
+            PodNamespace = "default";
             Environment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
             logger.LogInformation(

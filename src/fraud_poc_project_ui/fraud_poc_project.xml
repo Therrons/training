@@ -170,9 +170,7 @@
         <member name="M:fraud_poc_project.Services.KubernetesPodDiscoveryService.DiscoverViaHardcodedEndpointsAsync">
             <summary>
             Hardcoded mode: Uses comma-separated pod endpoints from configuration
-            Configuration format: "pod1:10.42.0.10:8080,pod2:10.42.0.20:8080,pod3:10.42.0.25:8080"
-            Environment variable: POD_ENDPOINTS
-            Configuration key: MetricsAggregation:PodEndpoints
+            Configuration format: "pod1:10.42.0.10:8083,pod2:10.42.0.20:8083,pod3:10.42.0.25:8083"
             </summary>
         </member>
         <member name="T:fraud_poc_project.Services.IMetricsAggregatorService">

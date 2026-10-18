@@ -24,7 +24,7 @@ namespace fraud_poc_project.Services
         public string Name { get; set; }
         public string PodIP { get; set; }
         public string Namespace { get; set; }
-        public int Port { get; set; } = 8080;
+        public int Port { get; set; } = 8083    ;
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
     }
@@ -52,15 +52,10 @@ namespace fraud_poc_project.Services
             _configuration = configuration;
 
             // Get pod identification from environment
-            _currentPodName = Environment.GetEnvironmentVariable("HOSTNAME") ?? "local-pod";
-            _podNamespace = Environment.GetEnvironmentVariable("POD_NAMESPACE")
-                ?? configuration["Kubernetes:Namespace"]
-                ?? "default";
+            _currentPodName = "local-pod";
+            _podNamespace = "default";
 
-            // Determine discovery mode from configuration
-            _discoveryMode = configuration["MetricsAggregation:DiscoveryMode"]
-                ?? Environment.GetEnvironmentVariable("DISCOVERY_MODE")
-                ?? "local";
+            _discoveryMode = "local";
 
             _logger.LogInformation($"Pod discovery initialized - Mode: {_discoveryMode}, Pod: {_currentPodName}, Namespace: {_podNamespace}");
         }
@@ -105,7 +100,7 @@ namespace fraud_poc_project.Services
                     Name = _currentPodName,
                     PodIP = "localhost",
                     Namespace = _podNamespace,
-                    Port = 8080,
+                    Port = 8083,
                     Status = "Running",
                     CreatedAt = DateTime.UtcNow
                 }
@@ -121,12 +116,10 @@ namespace fraud_poc_project.Services
         {
             _logger.LogInformation("Pod discovery mode: SERVICE - Using Kubernetes service DNS");
 
-            var serviceName = _configuration["MetricsAggregation:ServiceName"]
-                ?? Environment.GetEnvironmentVariable("FRAUD_API_SERVICE_NAME")
-                ?? "fraud-api-service";
+            var serviceName = "fraud-api-service";
 
             var serviceHost = $"{serviceName}.{_podNamespace}.svc.cluster.local";
-            var port = int.Parse(_configuration["MetricsAggregation:PodPort"] ?? "8080");
+            var port = int.Parse("8083");
 
             _logger.LogInformation($"Connecting to service: {serviceHost}:{port}");
 
@@ -147,17 +140,13 @@ namespace fraud_poc_project.Services
 
         /// <summary>
         /// Hardcoded mode: Uses comma-separated pod endpoints from configuration
-        /// Configuration format: "pod1:10.42.0.10:8080,pod2:10.42.0.20:8080,pod3:10.42.0.25:8080"
-        /// Environment variable: POD_ENDPOINTS
-        /// Configuration key: MetricsAggregation:PodEndpoints
+        /// Configuration format: "pod1:10.42.0.10:8083,pod2:10.42.0.20:8083,pod3:10.42.0.25:8083"
         /// </summary>
         private async Task<List<PodInfo>> DiscoverViaHardcodedEndpointsAsync()
         {
             _logger.LogInformation("Pod discovery mode: HARDCODED - Using configured pod endpoints");
 
-            var podEndpoints = _configuration["MetricsAggregation:PodEndpoints"]
-                ?? Environment.GetEnvironmentVariable("POD_ENDPOINTS")
-                ?? "fraud-api-pod-1:localhost:8080";
+            var podEndpoints = "fraud-api-pod-1:localhost:8083";
 
             var pods = new List<PodInfo>();
             var endpointsList = podEndpoints.Split(',', StringSplitOptions.RemoveEmptyEntries);
