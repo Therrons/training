@@ -1,16 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
-using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Service;
 using fraud_poc_project_buss;
+using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Models.Settings;
+using fraud_poc_project_buss.Service;
 using fraud_poc_project_buss.Tests;
 using Microsoft.Extensions.Options;
+using System.Diagnostics;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace fraud_poc_project.Tests.LoadTests
 {

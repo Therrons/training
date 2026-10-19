@@ -188,13 +188,6 @@ namespace fraud_poc_project.Configuration
         private static void RegisterMetrics(WebApplicationBuilder builder)
         {
             builder.Services.AddSingleton<IMetricsService, MetricsService>();
-
-            // Pod identity - set once at startup from Kubernetes downward API
-            builder.Services.AddSingleton<IPodIdentityService, PodIdentityService>();
-
-            // Kubernetes pod discovery and metrics aggregation (Solution 1: Cross-Pod Aggregation)
-            builder.Services.AddSingleton<IPodDiscoveryService, KubernetesPodDiscoveryService>();
-            builder.Services.AddSingleton<IMetricsAggregatorService, MetricsAggregatorService>();
             builder.Services.AddHttpClient();
         }
     }

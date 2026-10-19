@@ -1,7 +1,4 @@
 ﻿using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Helper;
-using Newtonsoft.Json;
-using Npgsql;
 
 namespace fraud_poc_project_repo.Interfaces
 {
@@ -15,7 +12,7 @@ namespace fraud_poc_project_repo.Interfaces
 
         // Look up fraud-evaluated transactions matching the given filters.
         Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query, bool forceFlaggedOnly);
-       
+
         // Same as above, but only returns transactions that were flagged as fraud.
         Task<IEnumerable<FraudEventRecord>> QueryFlaggedOnlyFraudEventsAsync(FraudQueryDto query);
 

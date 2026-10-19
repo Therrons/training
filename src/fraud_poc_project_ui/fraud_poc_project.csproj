@@ -13,6 +13,12 @@
     <PropertyGroup>
         <RestorePackagesPath>../nuget-packages</RestorePackagesPath>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Services\KubernetesPodDiscoveryService.cs" />
+      <Compile Remove="Services\MetricsAggregatorService.cs" />
+      <Compile Remove="Services\PodIdentityService.cs" />
+    </ItemGroup>
    
     <ItemGroup>
       <PackageReference Include="Confluent.Kafka" Version="2.10.0" />

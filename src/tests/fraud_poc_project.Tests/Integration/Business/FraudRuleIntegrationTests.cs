@@ -4,7 +4,6 @@ using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
 using Microsoft.Extensions.Options;
-using System.Data;
 using Xunit;
 
 namespace fraud_poc_project.Tests.Integration.Business
@@ -55,7 +54,7 @@ namespace fraud_poc_project.Tests.Integration.Business
 
             var mockRules = new List<IFraudRule>();
 
-           var service = new FraudEvaluationService(mockRules, Options.Create(_fraudRuleSettings));
+            var service = new FraudEvaluationService(mockRules, Options.Create(_fraudRuleSettings));
 
             // Act
             var result = service.Evaluate(transaction);

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace fraud_poc_project.Controllers
 {
@@ -23,19 +22,13 @@ namespace fraud_poc_project.Controllers
     public class MetricsController : ControllerBase
     {
         private readonly IMetricsService _metricsService;
-        private readonly IMetricsAggregatorService _metricsAggregatorService;
-        private readonly IPodIdentityService _podIdentity;
         private readonly ILogger<MetricsController> _logger;
 
         public MetricsController(
             IMetricsService metricsService,
-            IMetricsAggregatorService metricsAggregatorService,
-            IPodIdentityService podIdentity,
             ILogger<MetricsController> logger)
         {
             _metricsService = metricsService;
-            _metricsAggregatorService = metricsAggregatorService;
-            _podIdentity = podIdentity;
             _logger = logger;
         }
 
@@ -283,112 +276,6 @@ namespace fraud_poc_project.Controllers
                 _logger.LogError(ex, "Error retrieving Kafka metrics");
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { error = "Failed to retrieve Kafka metrics" });
-            }
-        }
-
-        /// <summary>
-        /// Get static metrics from this pod only (raw snapshot without aggregation).
-        /// Used internally by aggregator service to query each pod's metrics.
-        /// </summary>
-        [HttpGet("static")]
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public IActionResult GetStaticMetrics()
-        {
-            _logger.LogDebug($"[{_podIdentity.PodName}] Static metrics requested from this pod");
-
-            try
-            {
-                var snapshot = _metricsService.GetSnapshot();
-                return Ok(new
-                {
-                    podName = _podIdentity.PodName,
-                    podNamespace = _podIdentity.PodNamespace,
-                    environment = _podIdentity.Environment,
-                    timestamp = DateTime.UtcNow,
-                    metrics = snapshot
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"[{_podIdentity.PodName}] Error retrieving static metrics");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { error = "Failed to retrieve static metrics", podName = _podIdentity.PodName });
-            }
-        }
-
-        /// <summary>
-        /// Get aggregated metrics from all pods in the cluster.
-        /// Queries all running instances and combines their metrics.
-        /// Only available when running in Kubernetes; falls back to local metrics when not in cluster.
-        /// </summary>
-        [HttpGet("aggregated")]
-        [Authorize]
-        [ProducesResponseType(typeof(AggregatedMetrics), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> GetAggregatedMetricsAsync()
-        {
-            _logger.LogInformationOnly($"[{_podIdentity.PodName}] Aggregated metrics requested");
-
-            try
-            {
-                var aggregated = await _metricsAggregatorService.GetAggregatedMetricsAsync();
-                return Ok(aggregated);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"[{_podIdentity.PodName}] Error retrieving aggregated metrics");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { error = "Failed to retrieve aggregated metrics", podName = _podIdentity.PodName });
-            }
-        }
-
-        /// <summary>
-        /// Get per-pod metrics breakdown.
-        /// Shows metrics from each pod with status and response time.
-        /// Only available when running in Kubernetes; falls back to local metrics when not in cluster.
-        /// </summary>
-        [HttpGet("per-pod")]
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> GetPerPodMetricsAsync()
-        {
-            _logger.LogInformationOnly($"[{_podIdentity.PodName}] Per-pod metrics requested");
-
-            try
-            {
-                var perPodMetrics = await _metricsAggregatorService.GetPerPodMetricsAsync();
-                return Ok(new
-                {
-                    aggregatingPodName = _podIdentity.PodName,
-
-                    timestamp = DateTime.UtcNow,
-                    podCount = perPodMetrics.Count,
-                    healthyPods = perPodMetrics.Count(m => m.IsHealthy == true),
-                    pods = perPodMetrics.Select(m => new
-                    {
-                        name = m.PodName,
-                        status = m.Status,
-                        isHealthy = m.IsHealthy,
-                        responseTimeMs = m.ResponseTimeMs,
-                        errorMessage = m.ErrorMessage,
-                        metrics = m.Metrics != null ? new
-                        {
-                            totalTransactions = m.Metrics.TotalTransactions,
-                            flaggedTransactions = m.Metrics.FlaggedTransactions,
-                            fraudRate = m.Metrics.FraudRate,
-                            avgProcessingTime = m.Metrics.AvgProcessingTime
-                        } : null
-                    })
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"[{_podIdentity.PodName}] Error retrieving per-pod metrics");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { error = "Failed to retrieve per-pod metrics", aggregatingPodName = _podIdentity.PodName });
             }
         }
 

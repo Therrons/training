@@ -1,5 +1,4 @@
 using FluentAssertions;
-using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
 using Microsoft.Extensions.Options;
