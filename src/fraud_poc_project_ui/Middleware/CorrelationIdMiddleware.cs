@@ -33,7 +33,7 @@ namespace fraud_poc_project.Middleware
             context.Items[CorrelationIdHeaderName] = correlationId;
 
             // Add to response headers
-            context.Response.Headers.Add(CorrelationIdHeaderName, correlationId);
+            context.Response.Headers.Append(CorrelationIdHeaderName, correlationId);
 
             // Add to log context for structured logging
             using (_logger.BeginScope(new { CorrelationId = correlationId }))

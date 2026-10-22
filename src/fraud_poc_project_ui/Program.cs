@@ -55,14 +55,6 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddHealthChecks();
-
-        // Register FluentValidation
-        //builder.Services.AddFluentValidationAutoValidation();
-        //builder.Services.AddFluentValidationClientsideAdapters();
-        //builder.Services.AddValidatorsFromAssemblies(
-        //    typeof(Program).Assembly,
-        //    typeof(fraud_poc_project_buss.FraudRules).Assembly);
-
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>

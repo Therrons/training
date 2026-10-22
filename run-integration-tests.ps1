@@ -10,10 +10,11 @@ param(
 )
 
 # Navigate to the solution directory (where the .sln file is)
-$solutionDir = "C:\Development\Therron\training\nuget-config"
+$scriptRoot = $PSScriptRoot
+$solutionDir = Join-Path $scriptRoot "nuget-config"
 if (-not (Test-Path $solutionDir)) {
-    # Fallback to training directory if nuget-config doesn't exist
-    $solutionDir = "C:\Development\Therron\training"
+    # Fallback to the script's own directory if nuget-config doesn't exist
+    $solutionDir = $scriptRoot
 }
 
 Push-Location $solutionDir
