@@ -251,6 +251,9 @@ namespace fraud_poc_project.Controllers
             }
         }
 
+        /// <summary>
+        /// Reset all metrics (testing only).
+        /// </summary>
         [HttpPost("reset")]
         [Authorize(Roles = "Analyst")]
         [ProducesResponseType(StatusCodes.Status200OK)]

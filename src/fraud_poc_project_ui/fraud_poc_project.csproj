@@ -15,7 +15,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Configuration\RateLimitingConfiguration.cs" />
       <Compile Remove="Services\KubernetesPodDiscoveryService.cs" />
       <Compile Remove="Services\MetricsAggregatorService.cs" />
       <Compile Remove="Services\PodIdentityService.cs" />

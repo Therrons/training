@@ -10,6 +10,7 @@ namespace fraud_poc_project_repo.Interfaces
 
         Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query, bool forceFlaggedOnly);
 
+        // Same as above, but only returns transactions that were flagged as fraud.
         Task<IEnumerable<FraudEventRecord>> QueryFlaggedOnlyFraudEventsAsync(FraudQueryDto query);
 
         Task<IEnumerable<FraudRuleSetRecord>> GetRuleResultsForEventAsync(long fraudEventId);
