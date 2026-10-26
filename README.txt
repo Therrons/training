@@ -7,7 +7,7 @@ Setup Instructions
 4. Run the following script with docker command to install Traefik and postgreSql
    docker-compose -f docker-compose.traefik.postgresql.yml up -d
 5. Check the 'Testing_deployed_App.docx' for the urls for the
-   postgreSql and Traefik to ensure they have a user interface
+   postgreSql and Traefik to ensure they have an user interface
 6. Run C# solution locally to ensure it can connect and do local testing
 7. Run .\deploy-https.ps1 as ADMINISTRATOR in powershell to install the C# solution into Rancher Desktop
    if asked for aws credentials then run 'aws configure' and supply the credentials for the 
@@ -15,6 +15,14 @@ Setup Instructions
    
    the region        = af-south-1
    the output format = json
+   
+   NOTE: .\deploy-https.ps1 only installs the docker image from Docker Hub to Rancher Desktop
+         It DOES NOT upload the latest docker image from your PC to Docker Hub, this is done
+         by kicking off a workflow or checking in the code.
+         
+         So if you have made code changes but not uploaded it to Docker Hub then this script
+         will just pull the old code (last updated Docker Image) from Docker Hub
+   
 8. When the C# app is installed in Rancher Desktop run 'https://localhost/swagger' in your browser
 9. For the Fraud Login endpoint the
    Username = 'fraud-analyst'

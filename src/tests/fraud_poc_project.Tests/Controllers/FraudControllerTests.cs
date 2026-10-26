@@ -164,8 +164,8 @@ namespace fraud_poc_project.Tests.Controllers
 
             // Assert
             result.Result.Should().BeOfType<OkObjectResult>();
-            var okResult = result.Result as OkObjectResult;
-            okResult?.Value.Should().Be(expectedRuleResults);
+                    var okResult = result.Result as OkObjectResult;
+            okResult?.Value.Should().BeEquivalentTo(expectedRuleResults);
             _mockRepository.Verify(r => r.GetRuleResultsForEventAsync(fraudEventId), Times.Once);
         }
 
