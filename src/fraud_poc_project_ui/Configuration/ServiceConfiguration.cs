@@ -100,7 +100,6 @@ namespace fraud_poc_project.Configuration
 
         private static void RegisterDatabaseAccess(WebApplicationBuilder builder, string connectionString)
         {
-            builder.Services.AddDbContextPool<IDBConnection, DBConnection>(options => options.UseNpgsql(connectionString));
             builder.Services.AddScoped<IFraudRepository, FraudRepository>();
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
         }
@@ -139,7 +138,6 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddSingleton<IFraudProducer, FraudProducer>();
             builder.Services.AddSingleton<FraudConsumer>();
             builder.Services.AddHostedService(sp => sp.GetRequiredService<FraudConsumer>());
-            builder.Services.AddTransient<ITransactionEventHandler, FraudConsumerWorker>();
         }
 
         private static void RegisterAuthentication(WebApplicationBuilder builder)

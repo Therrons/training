@@ -1,6 +1,5 @@
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
-using fraud_poc_project_repo.Connection;
 using fraud_poc_project_repo.Exceptions;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -12,17 +11,20 @@ namespace fraud_poc_project_repo
 {
     public class FraudRepository : IFraudRepository
     {
+        private const int DefaultPageSize = 50;
+        private const int MaxPageSize = 500;
+
         private readonly string _connectionString;
         private readonly string _schema;
         private readonly ILogger<FraudRepository> _logger;
 
         public FraudRepository(IConfiguration configuration,
-            ILogger<FraudRepository> logger,
-            IDBConnection dbConnection)
+            ILogger<FraudRepository> logger)
         {
             _connectionString = configuration.GetConnectionString("PostgreSQL")
                 ?? throw new InvalidOperationException("ConnectionStrings:PostgreSQL is not configured.");
-            _schema = configuration["Database:DBSchema"] ?? "public";
+            // Must match DatabaseConfiguration's default so reads and writes always target the same schema.
+            _schema = configuration["Database:DBSchema"] ?? "fr";
             _logger = logger;
         }
 
@@ -36,7 +38,7 @@ namespace fraud_poc_project_repo
             {
                 long fraudEventId;
 
-                await using (var cmd = new NpgsqlCommand($"CALL \"fr\".sp_insert_fraud_event(" +
+                await using (var cmd = new NpgsqlCommand($"CALL \"{_schema}\".sp_insert_fraud_event(" +
                     "@p_kafka_topic, @p_transaction_id, @p_customer_id, @p_account_id, " +
                     "@p_amount, @p_currency, @p_merchant_name, @p_merchant_category, " +
                     "@p_transaction_type, @p_channel, @p_country_code, @p_transaction_time, " +
@@ -90,7 +92,8 @@ namespace fraud_poc_project_repo
             }
             catch (Exception ex)
             {
-                string errMsg = $"Correlation ID: {result?.Event?.CorrelationId ?? Guid.NewGuid()} - Failed to write Fraud data to Database for Model={JsonConvert.SerializeObject(result)}, error={ex.Message}";
+                // Identifiers only: the payload contains customer, account and amount data and must not be logged.
+                string errMsg = $"Correlation ID: {result?.Event?.CorrelationId} - Failed to write fraud event for TransactionId={result?.Event?.TransactionId}, error={ex.Message}";
 
                 _logger.LogError(errMsg);
                 await tx.RollbackAsync().ConfigureAwait(false);
@@ -115,20 +118,26 @@ namespace fraud_poc_project_repo
                 cmd.Parameters.AddWithValue("error", error.Length > 2000 ? error[..2000] : error);
                 await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to write Error to DLT for message={msg}", messageData);
+                // The message body is deliberately not logged: it is the transaction payload.
+                _logger.LogError(ex, "Failed to write error to DLT for topic {Topic}", topic);
                 throw;
             }
         }
 
-        // Queries fraud events based on the provided filter criteria.
+        // Queries fraud events based on the provided filter criteria. Every filter is optional.
+        // Results are paged (default 50 per page, max 500).
         // When forceFlaggedOnly is true, only flagged transactions are returned (ignores query.IsFlaggedOnly).
         public async Task<IEnumerable<FraudEventRecord>> QueryFraudEventsAsync(FraudQueryDto query, bool forceFlaggedOnly)
         {
             try
             {
                 var results = new List<FraudEventRecord>();
+
+                var pageSize = Math.Clamp(query.PageSize ?? DefaultPageSize, 1, MaxPageSize);
+                var page = Math.Max(query.Page ?? 1, 1);
+                var offset = (int)Math.Min((long)(page - 1) * pageSize, int.MaxValue);
 
                 await using var conn = new NpgsqlConnection(_connectionString);
                 await conn.OpenAsync().ConfigureAwait(false);
@@ -137,7 +146,7 @@ namespace fraud_poc_project_repo
                     $"SELECT id, kafka_topic, transaction_id, customer_id, account_id, amount, currency, " +
                     $"merchant_name, merchant_category, transaction_type, channel, country_code, transaction_time, " +
                     $"is_flagged, fraud_score, flagged_reason FROM \"{_schema}\".fn_select_fraud_events(" +
-                    $"@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score)",
+                    $"@date_from, @date_to, @customer_id, @is_flagged_only, @transaction_type, @min_fraud_score, @page_size, @page_offset)",
                     conn);
                 cmd.Parameters.AddWithValue("date_from",
                     (object?)(query.DateFrom?.ToDateTimeFromYyyyMmDdHhMmSs()) ?? DBNull.Value);
@@ -148,6 +157,8 @@ namespace fraud_poc_project_repo
                     forceFlaggedOnly ? true : (object?)query.IsFlaggedOnly ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("transaction_type", (object?)query.TransactionType ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("min_fraud_score", (object?)query.MinFraudScore ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("page_size", pageSize);
+                cmd.Parameters.AddWithValue("page_offset", offset);
 
                 await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
                 while (await reader.ReadAsync().ConfigureAwait(false))
@@ -156,21 +167,19 @@ namespace fraud_poc_project_repo
                 }
                 return results;
             }
-            catch
+            catch (Exception ex)
             {
+                // Filter values (customer ID, query JSON) are not logged; they can identify a customer.
                 var logMessage = forceFlaggedOnly
-                    ? "Failed to retrieve only fraud data"
-                    : "Failed to retrieve data";
-                _logger.LogError("Customer ID: {customerid} - {logMessage} for Query={msg}",
-                    query.CustomerId, logMessage, JsonConvert.SerializeObject(query));
+                    ? "Failed to retrieve flagged fraud events"
+                    : "Failed to retrieve fraud events";
+                _logger.LogError(ex, "{LogMessage}", logMessage);
                 throw;
             }
         }
 
-        /// <summary>
-        /// Convenience method that returns only flagged fraud events (is_flagged_only = true).
-        /// Equivalent to calling QueryFraudEventsAsync(query, forceFlaggedOnly: true).
-        /// </summary>
+        // Convenience method that returns only flagged fraud events (is_flagged_only = true).
+        // Equivalent to calling QueryFraudEventsAsync(query, forceFlaggedOnly: true).
         public async Task<IEnumerable<FraudEventRecord>> QueryFlaggedOnlyFraudEventsAsync(FraudQueryDto query)
             => await QueryFraudEventsAsync(query, forceFlaggedOnly: true).ConfigureAwait(false);
 
@@ -196,9 +205,9 @@ namespace fraud_poc_project_repo
                 }
                 return results;
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Failed to retrieve rule results for fraud event={fraudid}", fraudEventId);
+                _logger.LogError(ex, "Failed to retrieve rule results for fraud event={FraudEventId}", fraudEventId);
                 throw;
             }
         }
@@ -207,8 +216,8 @@ namespace fraud_poc_project_repo
         private static FraudRuleSetRecord MapFraudRuleResultRecord(NpgsqlDataReader r) => new()
         {
             FraudEventId = r.GetInt64(r.GetOrdinal("fraud_event_id")),
-            RuleCode = r.DBNullString("rule_code"),
-            RuleDescription = r.DBNullString("rule_description"),
+            RuleCode = r.DBNullString("rule_code") ?? string.Empty,
+            RuleDescription = r.DBNullString("rule_description") ?? string.Empty,
             IsTriggered = r.GetBoolean(r.GetOrdinal("is_triggered")),
             ScoreContribution = r.GetDecimal(r.GetOrdinal("score_contribution"))
         };
@@ -219,15 +228,15 @@ namespace fraud_poc_project_repo
             Event = new TransactionEvent
             {
                 Id = r.GetInt64(r.GetOrdinal("id")),
-                KafkaTopic = r.DBNullString("kafka_topic"),
+                KafkaTopic = r.DBNullString("kafka_topic") ?? string.Empty,
                 TransactionId = r.GetGuid(r.GetOrdinal("transaction_id")),
-                CustomerId = r.DBNullString("customer_id"),
-                AccountId = r.DBNullString("account_id"),
+                CustomerId = r.DBNullString("customer_id") ?? string.Empty,
+                AccountId = r.DBNullString("account_id") ?? string.Empty,
                 Amount = r.GetDecimal(r.GetOrdinal("amount")),
-                Currency = r.DBNullString("currency"),
+                Currency = r.DBNullString("currency") ?? string.Empty,
                 MerchantName = r.DBNullString("merchant_name"),
                 MerchantCategory = r.DBNullString("merchant_category"),
-                TransactionType = r.DBNullString("transaction_type"),
+                TransactionType = r.DBNullString("transaction_type") ?? string.Empty,
                 Channel = r.DBNullString("channel"),
                 CountryCode = r.DBNullString("country_code"),
                 TransactionTime = r.GetDateTime(r.GetOrdinal("transaction_time")),

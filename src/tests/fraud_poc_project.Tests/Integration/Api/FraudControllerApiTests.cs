@@ -257,7 +257,7 @@ namespace fraud_poc_project.Tests.Integration.Api
         }
 
         [Fact]
-        public async Task GetRuleResults_WithInvalidEventId_ReturnsNotFoundOrEmpty()
+        public async Task GetRuleResults_WithInvalidEventId_ReturnsNotFound()
         {
             // Arrange
             _fixture.AuthorizeClient();
@@ -267,9 +267,51 @@ namespace fraud_poc_project.Tests.Integration.Api
             var response = await _fixture.Client.GetAsync($"/api/fraud/events/{invalidEventId}/rules");
 
             // Assert
-            response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NotFound);
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
             // Cleanup
+            _fixture.DeauthorizeClient();
+        }
+
+        [Fact]
+        public async Task QueryEvents_WithoutDateRange_ReturnsOk()
+        {
+            // Regression: dates are optional. Omitting them must not silently filter every row out
+            // (the previous BETWEEN NULL behaviour). Asserts the request succeeds and returns a list.
+            _fixture.AuthorizeClient();
+
+            var response = await _fixture.Client.GetAsync("/api/fraud/events?customerId=CUST-001");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
+            content.Should().NotBeNull();
+
+            _fixture.DeauthorizeClient();
+        }
+
+        [Fact]
+        public async Task QueryEvents_WithPageSize_ReturnsAtMostPageSizeRecords()
+        {
+            _fixture.AuthorizeClient();
+
+            var response = await _fixture.Client.GetAsync("/api/fraud/events?page=1&pageSize=2");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var content = await response.Content.ReadFromJsonAsync<List<FraudEventRecord>>();
+            content!.Count.Should().BeLessThanOrEqualTo(2);
+
+            _fixture.DeauthorizeClient();
+        }
+
+        [Fact]
+        public async Task QueryEvents_WithPageSizeAboveMaximum_ReturnsBadRequest()
+        {
+            _fixture.AuthorizeClient();
+
+            var response = await _fixture.Client.GetAsync("/api/fraud/events?pageSize=501");
+
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
             _fixture.DeauthorizeClient();
         }
 
