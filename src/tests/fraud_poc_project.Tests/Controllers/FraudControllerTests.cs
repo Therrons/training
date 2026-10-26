@@ -170,9 +170,9 @@ namespace fraud_poc_project.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetRuleResults_WithNoRuleResults_ReturnsOkResultWithEmptyList()
+        public async Task GetRuleResults_WithNoRuleResults_ReturnsNotFound()
         {
-            // Arrange
+            // Arrange: no rule results means the fraud event does not exist
             const long fraudEventId = 999;
             var emptyResults = new List<FraudRuleSetRecord>();
 
@@ -184,10 +184,7 @@ namespace fraud_poc_project.Tests.Controllers
             var result = await _controller.GetRuleResults(fraudEventId);
 
             // Assert
-            result.Result.Should().BeOfType<OkObjectResult>();
-            var okResult = result.Result as OkObjectResult;
-            var returnedList = okResult?.Value as IEnumerable<FraudRuleSetRecord>;
-            returnedList.Should().BeEmpty();
+            result.Result.Should().BeOfType<NotFoundObjectResult>();
         }
 
         [Fact]

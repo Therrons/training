@@ -32,7 +32,6 @@ namespace fraud_poc_project.Kafka.Consumer
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly ResiliencePipelineProvider<string> _resilienceProvider;
-        private readonly IFraudRepository _fraudRepository;
         private readonly IFraudEvaluationService _evaluationService;
         private readonly ILogger<FraudConsumer> _logger;
 
@@ -51,7 +50,6 @@ namespace fraud_poc_project.Kafka.Consumer
                     IServiceScopeFactory serviceScopeFactory,
                     IOptions<AppSettings> appSettings,
                     ResiliencePipelineProvider<string> resilienceProvider,
-                    IFraudRepository fraudRepository,
                     IFraudEvaluationService evaluationService,
                     ILogger<FraudConsumer> logger,
                     IMetricsService metricsService,
@@ -64,7 +62,6 @@ namespace fraud_poc_project.Kafka.Consumer
             _serviceScopeFactory = serviceScopeFactory;
             _appSettings = appSettings;
             _resilienceProvider = resilienceProvider;
-            _fraudRepository = fraudRepository;
             _evaluationService = evaluationService;
             _logger = logger;
             _metricsService = metricsService;
@@ -87,7 +84,7 @@ namespace fraud_poc_project.Kafka.Consumer
                 foreach (var item in Enumerable.Range(0, consumerCount))
                 {
                     var workerLogger = _loggerFactory.CreateLogger<FraudConsumerWorker>();
-                    var itm = new FraudConsumerWorker(_brokerOptions, _consumerOptions, _appSettings, _resilienceProvider, _serviceScopeFactory, _fraudRepository, _evaluationService, _metricsService, _producer, workerLogger);
+                    var itm = new FraudConsumerWorker(_brokerOptions, _consumerOptions, _appSettings, _resilienceProvider, _serviceScopeFactory, _evaluationService, _metricsService, _producer, workerLogger);
                     workers.Add(itm);
                 }
                 ;
@@ -160,10 +157,5 @@ namespace fraud_poc_project.Kafka.Consumer
             base.Dispose();
         }
 
-        ~FraudConsumer()
-        {
-            _logger.LogInformationOnly("Stopping FraudConsumer...");
-            base.StopAsync(CancellationToken.None);
-        }
     }
 }
