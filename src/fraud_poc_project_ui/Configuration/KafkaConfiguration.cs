@@ -13,8 +13,6 @@ using System.Linq;
 
 namespace fraud_poc_project.Configuration
 {
-    // Loads all the Kafka-related settings from config, and can create any Kafka
-    // topics that don't exist yet (only when auto-create is turned on).
     // Setup Consumer events
     public static class KafkaConfiguration
     {

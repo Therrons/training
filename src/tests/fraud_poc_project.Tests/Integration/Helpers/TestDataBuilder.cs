@@ -142,30 +142,6 @@ namespace fraud_poc_project.Tests.Integration.Helpers
         }
 
         /// <summary>
-        /// Builds a batch of test transactions
-        /// </summary>
-        public static List<TransactionEvent> BuildBatch(int count, Func<int, TestDataBuilder>? configure = null)
-        {
-            var transactions = new List<TransactionEvent>();
-
-            for (int i = 0; i < count; i++)
-            {
-                var builder = Create()
-                    .WithCustomerId($"CUST-{i:D5}")
-                    .WithTransactionId(Guid.NewGuid());
-
-                if (configure != null)
-                {
-                    builder = configure(i);
-                }
-
-                transactions.Add(builder.Build());
-            }
-
-            return transactions;
-        }
-
-        /// <summary>
         /// Builds the transaction event
         /// </summary>
         public TransactionEvent Build()
@@ -200,24 +176,6 @@ namespace fraud_poc_project.Tests.Integration.Helpers
         }
 
         /// <summary>
-        /// Adds a transaction to the scenario
-        /// </summary>
-        public TestScenarioBuilder AddTransaction(TransactionEvent transaction)
-        {
-            _transactions.Add(transaction);
-            return this;
-        }
-
-        /// <summary>
-        /// Adds multiple transactions
-        /// </summary>
-        public TestScenarioBuilder AddTransactions(params TransactionEvent[] transactions)
-        {
-            _transactions.AddRange(transactions);
-            return this;
-        }
-
-        /// <summary>
         /// Adds a transaction from a builder
         /// </summary>
         public TestScenarioBuilder AddTransaction(TestDataBuilder builder)
@@ -225,56 +183,5 @@ namespace fraud_poc_project.Tests.Integration.Helpers
             _transactions.Add(builder.Build());
             return this;
         }
-
-        /// <summary>
-        /// Builds a scenario with progressive fraud indicators
-        /// Starting with normal transactions, gradually increasing risk
-        /// </summary>
-        public static TestScenarioBuilder BuildGradualFraudEscalation()
-        {
-            return Create("Gradual Fraud Escalation")
-                .AddTransaction(TestDataBuilder.BuildNormalTransaction(50))
-                .AddTransaction(TestDataBuilder.BuildNormalTransaction(100))
-                .AddTransaction(TestDataBuilder.BuildNormalTransaction(150))
-                .AddTransaction(TestDataBuilder.BuildHighValueTransaction(2000))
-                .AddTransaction(TestDataBuilder.BuildHighValueTransaction(5000))
-                .AddTransaction(TestDataBuilder.BuildInternationalTransaction("US", "ZA", 10000));
-        }
-
-        /// <summary>
-        /// Builds a scenario with mixed transaction types
-        /// </summary>
-        public static TestScenarioBuilder BuildMixedTransactions()
-        {
-            return Create("Mixed Transactions")
-                .AddTransaction(TestDataBuilder.BuildNormalTransaction(100))
-                .AddTransaction(TestDataBuilder.BuildAtmWithdrawal(3000))
-                .AddTransaction(TestDataBuilder.BuildInternationalTransaction("GB", "ZA", 2000))
-                .AddTransaction(TestDataBuilder.BuildNormalTransaction(50));
-        }
-
-        /// <summary>
-        /// Builds a scenario with suspicious activity
-        /// </summary>
-        public static TestScenarioBuilder BuildSuspiciousActivity()
-        {
-            return Create("Suspicious Activity")
-                .AddTransaction(TestDataBuilder.BuildHighValueTransaction(8000))
-                .AddTransaction(TestDataBuilder.BuildAtmWithdrawal(7000))
-                .AddTransaction(TestDataBuilder.BuildHighRiskScenario());
-        }
-
-        /// <summary>
-        /// Gets the built scenario
-        /// </summary>
-        public List<TransactionEvent> Build()
-        {
-            return _transactions;
-        }
-
-        /// <summary>
-        /// Gets the scenario name
-        /// </summary>
-        public string GetName() => _scenarioName;
     }
 }

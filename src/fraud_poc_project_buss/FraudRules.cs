@@ -13,10 +13,9 @@ namespace fraud_poc_project_buss
         FraudRuleSetRecord Evaluate(TransactionEvent transaction);
     }
 
-    /// <summary>
-    /// Flags transactions whose absolute amount exceeds the configured threshold.
-    /// Threshold is loaded from configuration (appsettings.json).
-    /// </summary>
+
+    // Flags transactions whose absolute amount exceeds the configured threshold.
+    // Threshold is loaded from configuration (appsettings.json).
     public class HighAmountRule : IFraudRule
     {
         private readonly decimal _threshold;
@@ -50,10 +49,9 @@ namespace fraud_poc_project_buss
         }
     }
 
-    /// <summary>
-    /// Flags card-not-present (CNP) transactions originating from outside the home country.
-    /// Home country is loaded from configuration (appsettings.json).
-    /// </summary>
+
+    // Flags card-not-present (CNP) transactions originating from outside the home country.
+    // Home country is loaded from configuration (appsettings.json).
     public class ForeignCnpRule : IFraudRule
     {
         private readonly string _homeCountry;
@@ -93,10 +91,9 @@ namespace fraud_poc_project_buss
         }
     }
 
-    /// <summary>
-    /// Flags ATM cash withdrawals that exceed the configured single-transaction limit.
-    /// Limit is loaded from configuration (appsettings.json).
-    /// </summary>
+
+    // Flags ATM cash withdrawals that exceed the configured single-transaction limit.
+    // Limit is loaded from configuration (appsettings.json).
     public class AtmWithdrawalLimitRule : IFraudRule
     {
         private readonly decimal _limit;
@@ -133,10 +130,9 @@ namespace fraud_poc_project_buss
         }
     }
 
-    /// <summary>
-    /// Flags transactions in merchant categories associated with high-risk activity.
-    /// Categories are loaded from configuration (appsettings.json).
-    /// </summary>
+
+    // Flags transactions in merchant categories associated with high-risk activity.
+    // Categories are loaded from configuration (appsettings.json).
     public class HighRiskMerchantCategoryRule : IFraudRule
     {
         private readonly HashSet<string> _highRiskCategories;
@@ -171,10 +167,9 @@ namespace fraud_poc_project_buss
         }
     }
 
-    /// <summary>
-    /// Flags transactions with a round-number amount, which is a common indicator of fraud.
-    /// Minimum amount threshold and roundness multiple are loaded from configuration (appsettings.json).
-    /// </summary>
+
+    // Flags transactions with a round-number amount, which is a common indicator of fraud.
+    // Minimum amount threshold and roundness multiple are loaded from configuration (appsettings.json).
     public class RoundAmountRule : IFraudRule
     {
         private readonly decimal _minimumAmount;

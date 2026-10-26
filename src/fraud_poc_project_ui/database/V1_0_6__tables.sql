@@ -61,7 +61,7 @@ CREATE INDEX IF NOT EXISTS idx_fraud_event_is_flagged
 CREATE TABLE IF NOT EXISTS "${Schema}".fraud_rule_result (
     id              bigint       NOT NULL DEFAULT nextval('"${Schema}".fraud_rule_result_id_seq'::regclass),
     fraud_event_id  bigint       NOT NULL,
-    rule_code       VARCHAR(100) NOT NULL,   -- e.g. HIGH_AMOUNT, VELOCITY, GEO_ANOMALY
+    rule_code       VARCHAR(100) NOT NULL,
     rule_description VARCHAR(500),
     is_triggered    BOOLEAN      NOT NULL DEFAULT FALSE,
     score_contribution NUMERIC(5,2) NOT NULL DEFAULT 0,

@@ -2,10 +2,8 @@ using fraud_poc_project_buss.Dto;
 
 namespace fraud_poc_project_repo.Kafka
 {
-    /// <summary>
-    /// Sends transaction events to Kafka. Messages go to whichever topic is set on
-    /// the message itself (message.KafkaTopic).
-    /// </summary>
+    // Sends transaction events to Kafka. Messages go to whichever topic is set on
+    // the message itself (message.KafkaTopic).
     public interface IFraudProducer : IDisposable
     {
         bool Produce<T>(T message) where T : TransactionEvent;

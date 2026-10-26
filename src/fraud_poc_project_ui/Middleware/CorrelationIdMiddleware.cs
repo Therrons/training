@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace fraud_poc_project.Middleware
 {
-    /// <summary>
-    /// Middleware for adding and propagating correlation IDs across the request pipeline.
-    /// Enables distributed tracing of requests through multiple services.
-    /// </summary>
+    // Middleware for adding and propagating correlation IDs across the request pipeline.
+    // Enables distributed tracing of requests through multiple services.
     public class CorrelationIdMiddleware
     {
         private readonly RequestDelegate _next;
@@ -51,30 +49,11 @@ namespace fraud_poc_project.Middleware
         }
     }
 
-    /// <summary>
-    /// Extension method to register CorrelationIdMiddleware in the pipeline.
-    /// </summary>
     public static class CorrelationIdExtensions
     {
         public static IApplicationBuilder UseCorrelationId(this IApplicationBuilder app)
         {
             return app.UseMiddleware<CorrelationIdMiddleware>();
-        }
-    }
-
-    /// <summary>
-    /// Helper class to access correlation ID from current request context.
-    /// </summary>
-    public static class CorrelationIdAccessor
-    {
-        /// <summary>
-        /// Gets the correlation ID from HTTP context items.
-        /// </summary>
-        public static string GetCorrelationId(this HttpContext context)
-        {
-            return context?.Items.TryGetValue("X-Correlation-ID", out var correlationId) == true
-                ? correlationId?.ToString() ?? Guid.NewGuid().ToString()
-                : Guid.NewGuid().ToString();
         }
     }
 }

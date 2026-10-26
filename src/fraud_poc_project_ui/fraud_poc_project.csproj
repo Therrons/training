@@ -13,6 +13,13 @@
     <PropertyGroup>
         <RestorePackagesPath>../nuget-packages</RestorePackagesPath>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Configuration\RateLimitingConfiguration.cs" />
+      <Compile Remove="Services\KubernetesPodDiscoveryService.cs" />
+      <Compile Remove="Services\MetricsAggregatorService.cs" />
+      <Compile Remove="Services\PodIdentityService.cs" />
+    </ItemGroup>
    
     <ItemGroup>
       <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
@@ -58,6 +65,9 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="database\V1_0_6__tables.sql">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="database\V1_0_7__rule_result_idempotency.sql">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
