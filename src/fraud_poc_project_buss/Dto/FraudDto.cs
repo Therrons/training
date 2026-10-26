@@ -25,5 +25,13 @@ namespace fraud_poc_project_buss.Dto
         public string? TransactionType { get; set; }
 
         public decimal? MinFraudScore { get; set; }
+
+        // 1-based page number. Defaults to 1 when omitted.
+        [Range(1, int.MaxValue)]
+        public int? Page { get; set; }
+
+        // Number of events per page. Defaults to 50 when omitted; capped at 500.
+        [Range(1, 500)]
+        public int? PageSize { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace fraud_poc_project.Controllers
@@ -110,7 +111,11 @@ namespace fraud_poc_project.Controllers
         [Authorize(Roles = "Analyst")]
         public async Task<ActionResult<IEnumerable<FraudRuleSetRecord>>> GetRuleResults(long fraudEventId)
         {
-            var records = await _repository.GetRuleResultsForEventAsync(fraudEventId).ConfigureAwait(false);
+            // Every stored fraud event has one result per rule, so an empty list means the event does not exist.
+            var records = (await _repository.GetRuleResultsForEventAsync(fraudEventId).ConfigureAwait(false)).ToList();
+            if (records.Count == 0)
+                return NotFound(new { error = $"No fraud event found with id {fraudEventId}." });
+
             return Ok(records);
         }
     }

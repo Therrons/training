@@ -1,13 +1,20 @@
 /**================================**==========================================================================**/
 -- fn_select_fraud_events - retrieve fraud events filtered by date range, customer, and/or flagged status
+-- Every filter is optional: a NULL date bound means "unbounded" on that side.
+-- Paged with p_limit / p_offset. Dropping the previous 6-argument signature keeps this script
+-- re-runnable on startup without leaving an overload behind.
 /**================================**==========================================================================**/
+DROP FUNCTION IF EXISTS "${Schema}".fn_select_fraud_events(TIMESTAMP, TIMESTAMP, TEXT, BOOLEAN, TEXT, NUMERIC);
+
 CREATE OR REPLACE FUNCTION "${Schema}".fn_select_fraud_events(
     IN p_date_from          TIMESTAMP,
     IN p_date_to            TIMESTAMP,
     IN p_customer_id        TEXT        DEFAULT NULL,
     IN p_is_flagged_only    BOOLEAN     DEFAULT NULL,
     IN p_transaction_type   TEXT        DEFAULT NULL,
-    IN p_min_fraud_score    NUMERIC     DEFAULT NULL
+    IN p_min_fraud_score    NUMERIC     DEFAULT NULL,
+    IN p_limit              INTEGER     DEFAULT 50,
+    IN p_offset             INTEGER     DEFAULT 0
 )
 RETURNS TABLE (
     id                  bigint,
@@ -51,16 +58,18 @@ BEGIN
         fe.flagged_reason,
         fe.time_logged
     FROM "${Schema}".fraud_event fe
-    WHERE fe.transaction_time BETWEEN p_date_from AND p_date_to
-      AND (p_customer_id       IS NULL OR fe.customer_id = p_customer_id)
-      AND (p_is_flagged_only   IS NULL OR fe.is_flagged  = p_is_flagged_only)
-      AND (p_transaction_type  IS NULL OR fe.transaction_type = p_transaction_type)
-      AND (p_min_fraud_score   IS NULL OR fe.fraud_score >= p_min_fraud_score)
-    ORDER BY fe.transaction_time DESC;
+    WHERE (p_date_from       IS NULL OR fe.transaction_time >= p_date_from)
+      AND (p_date_to         IS NULL OR fe.transaction_time <= p_date_to)
+      AND (p_customer_id     IS NULL OR fe.customer_id = p_customer_id)
+      AND (p_is_flagged_only IS NULL OR fe.is_flagged  = p_is_flagged_only)
+      AND (p_transaction_type IS NULL OR fe.transaction_type = p_transaction_type)
+      AND (p_min_fraud_score IS NULL OR fe.fraud_score >= p_min_fraud_score)
+    ORDER BY fe.transaction_time DESC, fe.id DESC
+    LIMIT p_limit OFFSET p_offset;
 END;
 $BODY$;
 
-ALTER FUNCTION "${Schema}".fn_select_fraud_events(TIMESTAMP, TIMESTAMP, TEXT, BOOLEAN, TEXT, NUMERIC)
+ALTER FUNCTION "${Schema}".fn_select_fraud_events(TIMESTAMP, TIMESTAMP, TEXT, BOOLEAN, TEXT, NUMERIC, INTEGER, INTEGER)
     OWNER TO "${db_user}";
 
 
