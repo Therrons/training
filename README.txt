@@ -32,13 +32,3 @@ Test Metrics
 3. load simulator
 4. check stats
 
-
-Run Integration and Performance Tests
-=====================================
-
-
-
-run the following files in powershell:
-.\run-integration-tests.ps1
-.\run-performance-tests.ps1
-

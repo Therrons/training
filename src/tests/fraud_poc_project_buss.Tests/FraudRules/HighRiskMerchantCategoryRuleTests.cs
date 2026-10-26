@@ -1,7 +1,7 @@
 using FluentAssertions;
+using fraud_poc_project_buss.Models.Settings;
 using Microsoft.Extensions.Options;
 using Xunit;
-using fraud_poc_project_buss.Models.Settings;
 
 namespace fraud_poc_project_buss.Tests.FraudRules
 {

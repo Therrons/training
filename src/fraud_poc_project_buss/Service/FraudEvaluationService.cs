@@ -1,16 +1,10 @@
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Interfaces;
 using fraud_poc_project_buss.Models.Settings;
 using Microsoft.Extensions.Options;
 
 namespace fraud_poc_project_buss.Service
 {
-    public interface IFraudEvaluationService
-    {
-        FraudEventRecord Evaluate(TransactionEvent kafkaEvent);
-
-        Task<FraudEventRecord> EvaluateAsync(TransactionEvent kafkaEvent);
-    }
-
     public class FraudEvaluationService : IFraudEvaluationService
     {
         private readonly IEnumerable<IFraudRule> _rules;

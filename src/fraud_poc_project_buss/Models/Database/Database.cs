@@ -11,14 +11,6 @@
         public string ConnectionStringReadWrite { get; init; }
 
         public string DBSchema { get; init; }
-
-        // How often (in minutes) to refresh the RDS login token when it's working fine.
-        public int SuccessRefreshInterval { get; init; }
-
-        // How often (in seconds) to retry refreshing the RDS login token after a failure.
-        public int FailureRefreshInterval { get; init; }
-
-        public string Host { get; init; }
     }
 }
 

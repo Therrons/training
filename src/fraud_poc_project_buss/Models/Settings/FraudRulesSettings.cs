@@ -2,181 +2,148 @@ using System.ComponentModel.DataAnnotations;
 
 namespace fraud_poc_project_buss.Models.Settings
 {
-    /// <summary>
-    /// Configuration settings for fraud detection rules.
-    /// These values are loaded from appsettings and can be modified without code changes.
-    /// </summary>
+
     public class FraudRulesSettings
     {
         public const string SectionName = "FraudRules";
 
-        /// <summary>
-        /// Settings for the HighAmountRule - flags transactions exceeding this amount
-        /// </summary>
+        // Settings for the HighAmountRule - flags transactions exceeding this amount
         [Required]
         public HighAmountRuleSettings HighAmount { get; set; } = new();
 
-        /// <summary>
-        /// Settings for the ForeignCnpRule - flags card-not-present transactions from foreign countries
-        /// </summary>
+
+        // Settings for the ForeignCnpRule - flags card-not-present transactions from foreign countries
         [Required]
         public ForeignCnpRuleSettings ForeignCnp { get; set; } = new();
 
-        /// <summary>
-        /// Settings for the AtmWithdrawalLimitRule - flags ATM withdrawals exceeding this limit
-        /// </summary>
+
+        // Settings for the AtmWithdrawalLimitRule - flags ATM withdrawals exceeding this limit
         [Required]
         public AtmWithdrawalLimitRuleSettings AtmWithdrawalLimit { get; set; } = new();
 
-        /// <summary>
-        /// Settings for the RoundAmountRule - flags large round-number transactions
-        /// </summary>
+
+        // Settings for the RoundAmountRule - flags large round-number transactions
         [Required]
         public RoundAmountRuleSettings RoundAmount { get; set; } = new();
 
-        /// <summary>
-        /// Settings for the HighRiskMerchantCategoryRule - flags high-risk merchant categories
-        /// </summary>
+
+        // Settings for the HighRiskMerchantCategoryRule - flags high-risk merchant categories
         [Required]
         public HighRiskMerchantCategoryRuleSettings HighRiskMerchantCategory { get; set; } = new();
 
-        /// <summary>
-        /// Overall fraud scoring threshold - transactions with score >= this are flagged
-        /// </summary>
+
+        // Overall fraud scoring threshold - transactions with score >= this are flagged
         [Range(0, 100)]
         public decimal FlagThreshold { get; set; } = 40m;
 
-        /// <summary>
-        /// Maximum possible fraud score (capped at this value)
-        /// </summary>
+
+        // Maximum possible fraud score (capped at this value)
         [Range(1, 1000)]
         public decimal MaxScore { get; set; } = 100m;
     }
 
-    /// <summary>
-    /// High Amount Rule Configuration
-    /// </summary>
+
+    // High Amount Rule Configuration
     public class HighAmountRuleSettings
     {
-        /// <summary>
-        /// Transaction amount threshold in base currency
-        /// </summary>
+
+        // Transaction amount threshold in base currency
         [Range(0, 999999999.99)]
         public decimal Threshold { get; set; } = 50000m;
 
-        /// <summary>
-        /// Score contribution when rule is triggered
-        /// </summary>
+
+        // Score contribution when rule is triggered
         [Range(0, 100)]
         public decimal ScoreContribution { get; set; } = 40m;
 
-        /// <summary>
-        /// Whether this rule is enabled
-        /// </summary>
+
+        // Whether this rule is enabled
         public bool Enabled { get; set; } = true;
     }
 
-    /// <summary>
-    /// Foreign CNP Rule Configuration
-    /// </summary>
+
+    // Foreign CNP Rule Configuration
     public class ForeignCnpRuleSettings
     {
-        /// <summary>
-        /// Home country code (transactions from other countries are flagged)
-        /// </summary>
+
+        // Home country code (transactions from other countries are flagged)
         [Required]
         [StringLength(10)]
         public string HomeCountry { get; set; } = "ZA";
 
-        /// <summary>
-        /// Score contribution when rule is triggered
-        /// </summary>
+
+        // Score contribution when rule is triggered
+
         [Range(0, 100)]
         public decimal ScoreContribution { get; set; } = 35m;
 
-        /// <summary>
-        /// Whether this rule is enabled
-        /// </summary>
+
+        // Whether this rule is enabled
         public bool Enabled { get; set; } = true;
     }
 
-    /// <summary>
-    /// ATM Withdrawal Limit Rule Configuration
-    /// </summary>
+
+    // ATM Withdrawal Limit Rule Configuration
     public class AtmWithdrawalLimitRuleSettings
     {
-        /// <summary>
-        /// Single transaction ATM withdrawal limit
-        /// </summary>
+
+        // Single transaction ATM withdrawal limit
         [Range(0, 999999999.99)]
         public decimal Limit { get; set; } = 5000m;
 
-        /// <summary>
-        /// Score contribution when rule is triggered
-        /// </summary>
+
+        // Score contribution when rule is triggered
         [Range(0, 100)]
         public decimal ScoreContribution { get; set; } = 30m;
 
-        /// <summary>
-        /// Whether this rule is enabled
-        /// </summary>
+
+        // Whether this rule is enabled
         public bool Enabled { get; set; } = true;
     }
 
-    /// <summary>
-    /// Round Amount Rule Configuration
-    /// </summary>
+    // Round Amount Rule Configuration
     public class RoundAmountRuleSettings
     {
-        /// <summary>
-        /// Minimum transaction amount to check for round numbers
-        /// </summary>
+
+        // Minimum transaction amount to check for round numbers
         [Range(0, 999999999.99)]
         public decimal MinimumAmount { get; set; } = 1000m;
 
-        /// <summary>
-        /// Amount must be multiple of this value to trigger (e.g., 1000 for thousands)
-        /// </summary>
+
+        // Amount must be multiple of this value to trigger (e.g., 1000 for thousands)
         [Range(1, 999999999.99)]
         public decimal RoundnessMultiple { get; set; } = 1000m;
 
-        /// <summary>
-        /// Score contribution when rule is triggered
-        /// </summary>
+
+        // Score contribution when rule is triggered
         [Range(0, 100)]
         public decimal ScoreContribution { get; set; } = 10m;
 
-        /// <summary>
-        /// Whether this rule is enabled
-        /// </summary>
+
+        // Whether this rule is enabled
         public bool Enabled { get; set; } = true;
     }
 
-    /// <summary>
-    /// High Risk Merchant Category Rule Configuration
-    /// </summary>
+
+    // High Risk Merchant Category Rule Configuration
     public class HighRiskMerchantCategoryRuleSettings
     {
-        /// <summary>
-        /// Comma-separated list of high-risk merchant categories
-        /// </summary>
+
+        // Comma-separated list of high-risk merchant categories
         [Required]
         public string HighRiskCategories { get; set; } = "gambling,casino,crypto,cryptocurrency,money_transfer,wire_transfer";
 
-        /// <summary>
-        /// Score contribution when rule is triggered
-        /// </summary>
+
+        // Score contribution when rule is triggered
         [Range(0, 100)]
         public decimal ScoreContribution { get; set; } = 25m;
 
-        /// <summary>
-        /// Whether this rule is enabled
-        /// </summary>
+
+        // Whether this rule is enabled
         public bool Enabled { get; set; } = true;
 
-        /// <summary>
-        /// Parse the comma-separated categories into a HashSet
-        /// </summary>
+
+        // Parse the comma-separated categories into a HashSet
         public HashSet<string> GetCategories()
         {
             return new HashSet<string>(

@@ -84,10 +84,13 @@ namespace fraud_poc_project_repo.Kafka
         {
             string topic = message.KafkaTopic;
             string key = message.CustomerId;
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
             try
             {
                 var kafkaMessage = BuildKafkaMessage(message);
-                var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage, cancellationToken).ConfigureAwait(false);
+
+                var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage, cts.Token).ConfigureAwait(false);
 
                 if (deliveryResult.Status == PersistenceStatus.Persisted)
                 {
@@ -150,12 +153,13 @@ namespace fraud_poc_project_repo.Kafka
         public async Task<bool> ProduceDltAsync<T>(T message, CancellationToken cancellationToken = default) where T : TransactionEvent
         {
             string _topic = message.KafkaTopic;
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             if (string.IsNullOrEmpty(_topic))
             {
                 _logger.LogError("DeadLetterTopic is not configured");
                 return false;
             }
-            return await ProduceAsync(message, cancellationToken).ConfigureAwait(false);
+            return await ProduceAsync(message, cts.Token).ConfigureAwait(false);
         }
 
         public void Flush(TimeSpan? timeout = null)
@@ -185,9 +189,10 @@ namespace fraud_poc_project_repo.Kafka
             else
             {
                 _logger.LogError(ex,
-                    "Unhandled exception producing message to topic: {Topic}, correlationId: {CorrelationId}",
+                    "Unhandled exception producing message to topic: {Topic}, correlationId: {CorrelationId}, error: {Error}",
                     topic,
-                    message.CorrelationId);
+                    message.CorrelationId,
+                    ex.Message);
             }
         }
 

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using fraud_poc_project.Interfaces;
 using fraud_poc_project.Services;
 using Microsoft.Extensions.Logging;
 using Moq;

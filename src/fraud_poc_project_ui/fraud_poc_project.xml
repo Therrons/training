@@ -4,21 +4,6 @@
         <name>fraud_poc_project</name>
     </assembly>
     <members>
-        <member name="M:fraud_poc_project.Controllers.FraudController.Login(fraud_poc_project.Controllers.LoginRequest)">
-            <summary>
-            Authenticate with username and password. Returns JWT token for use in Authorization header.
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
-            <summary>
-            Query fraud events by date range and filters. Date format: yyyy-MM-dd HH:mm:ss
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.FraudController.GetRuleResults(System.Int64)">
-            <summary>
-            Get all rule results for a fraud event.
-            </summary>
-        </member>
         <member name="T:fraud_poc_project.Controllers.LoadSimulatorController">
             <summary>
             Produces synthetic transaction events to Kafka to simulate load.
@@ -80,26 +65,6 @@
             Get Kafka operation metrics (produce/consume timings).
             </summary>
         </member>
-        <member name="M:fraud_poc_project.Controllers.MetricsController.GetStaticMetrics">
-            <summary>
-            Get static metrics from this pod only (raw snapshot without aggregation).
-            Used internally by aggregator service to query each pod's metrics.
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.MetricsController.GetAggregatedMetricsAsync">
-            <summary>
-            Get aggregated metrics from all pods in the cluster.
-            Queries all running instances and combines their metrics.
-            Only available when running in Kubernetes; falls back to local metrics when not in cluster.
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.MetricsController.GetPerPodMetricsAsync">
-            <summary>
-            Get per-pod metrics breakdown.
-            Shows metrics from each pod with status and response time.
-            Only available when running in Kubernetes; falls back to local metrics when not in cluster.
-            </summary>
-        </member>
         <member name="M:fraud_poc_project.Controllers.MetricsController.ResetMetrics">
             <summary>
             Reset all metrics (testing only).
@@ -129,109 +94,6 @@
         <member name="M:fraud_poc_project.Middleware.CorrelationIdAccessor.GetCorrelationId(Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
             Gets the correlation ID from HTTP context items.
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.IPodDiscoveryService">
-            <summary>
-            Discovers pod endpoints for metrics aggregation using configuration or environment variables.
-            Solution 1: Cross-Pod Aggregation - Simple, no Kubernetes API required.
-            Supports both local development (localhost) and Kubernetes deployments (service DNS or hardcoded IPs).
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.KubernetesPodDiscoveryService">
-            <summary>
-            Cross-pod aggregation service using configuration-based pod discovery.
-            Works in three modes:
-            1. Local development: Uses localhost
-            2. Kubernetes with service DNS: Uses fraud-api-service.default.svc.cluster.local
-            3. Kubernetes with hardcoded pods: Uses environment-configured pod endpoints
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.KubernetesPodDiscoveryService.DiscoverPodsAsync(System.String)">
-            <summary>
-            Discovers pods based on configured discovery mode:
-            - "local": Returns localhost endpoint
-            - "service": Uses Kubernetes service DNS name
-            - "hardcoded": Uses comma-separated POD_ENDPOINTS environment variable
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.KubernetesPodDiscoveryService.DiscoverLocalAsync">
-            <summary>
-            Local mode: Single localhost endpoint for development
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.KubernetesPodDiscoveryService.DiscoverViaServiceDnsAsync">
-            <summary>
-            Service DNS mode: Uses Kubernetes service discovery
-            Requires: MetricsAggregation:ServiceName config (e.g., "fraud-api-service")
-            In Kubernetes, this resolves to: service-name.namespace.svc.cluster.local
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.KubernetesPodDiscoveryService.DiscoverViaHardcodedEndpointsAsync">
-            <summary>
-            Hardcoded mode: Uses comma-separated pod endpoints from configuration
-            Configuration format: "pod1:10.42.0.10:8080,pod2:10.42.0.20:8080,pod3:10.42.0.25:8080"
-            Environment variable: POD_ENDPOINTS
-            Configuration key: MetricsAggregation:PodEndpoints
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.IMetricsAggregatorService">
-            <summary>
-            Aggregates metrics from all pods discovered via IPodDiscoveryService.
-            Queries each pod's local metrics endpoint and combines results.
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsAggregatorService.GetAggregatedMetricsAsync">
-            <summary>
-            Get metrics from all pods and aggregate them (default 30 second timeout)
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsAggregatorService.GetAggregatedMetricsWithTimeoutAsync(System.TimeSpan)">
-            <summary>
-            Get aggregated metrics with custom timeout
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsAggregatorService.GetPerPodMetricsAsync">
-            <summary>
-            Get metrics from each pod individually
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsAggregatorService.GetPerPodMetricsWithTimeoutAsync(System.TimeSpan)">
-            <summary>
-            Get per-pod metrics with custom timeout
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Services.MetricsAggregatorService.QueryPodMetricsAsync(fraud_poc_project.Services.PodInfo,System.Net.Http.HttpClient)">
-            <summary>
-            Query a single pod for its metrics snapshot
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.IPodIdentityService">
-            <summary>
-            Provides read-only pod identity information set at instantiation time.
-            In Kubernetes, these values come from the downward API environment variables.
-            Useful for identifying the current pod in logs, metrics, and responses.
-            </summary>
-        </member>
-        <member name="P:fraud_poc_project.Services.IPodIdentityService.PodName">
-            <summary>
-            Name of the current pod (from HOSTNAME environment variable)
-            </summary>
-        </member>
-        <member name="P:fraud_poc_project.Services.IPodIdentityService.PodNamespace">
-            <summary>
-            Kubernetes namespace the pod is running in
-            </summary>
-        </member>
-        <member name="P:fraud_poc_project.Services.IPodIdentityService.Environment">
-            <summary>
-            ASP.NET Core environment (Development, Staging, Production)
-            </summary>
-        </member>
-        <member name="T:fraud_poc_project.Services.PodIdentityService">
-            <summary>
-            Pod identity service that reads pod information at instantiation.
-            These values are immutable for the lifetime of the service.
             </summary>
         </member>
     </members>
