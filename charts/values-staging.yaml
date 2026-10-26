@@ -6,9 +6,9 @@ namespace:
 image:
   # You are using offline images loaded into the cluster (containerd).
   # Keep these as-is if you've loaded fraud-poc-api:offline with nerdctl.
-  repository: fraud-poc-api
-  tag: offline
-  pullPolicy: IfNotPresent
+  repository: therrons982/fraud-poc-api
+  tag: latest
+  pullPolicy: Always
 
 replicaCount: 1   # default; overridden per environment below
 
