@@ -1,6 +1,6 @@
 using fraud_poc_project.CustomAttributes;
+using fraud_poc_project.Interfaces;
 using fraud_poc_project.Models;
-using fraud_poc_project.Services;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Models.Kafka;
@@ -50,14 +50,9 @@ namespace fraud_poc_project.Controllers
             _serviceScopeFactory = serviceScopeFactor;
         }
 
-        /// <summary>
-        /// Produce a batch of synthetic transaction events to the fraud topic.
-        /// </summary>
-        /// <param name="count">Number of events to produce (1–1000, default 50).</param>
-        /// <param name="highFraudRatio">Fraction of events that should look fraudulent (0.0–1.0, default 0.2).</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
+        // Produce a batch of synthetic transaction events to the fraud topic.
         [HttpPost("simulate")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<LoadSimulationResult>> Simulate(
             [FromQuery] int count = 50,
             [FromQuery] double highFraudRatio = 0.2,

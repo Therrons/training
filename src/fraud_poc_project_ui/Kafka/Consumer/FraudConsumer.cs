@@ -1,9 +1,10 @@
-using fraud_poc_project.Services;
+using fraud_poc_project.Interfaces;
 using fraud_poc_project_buss.Helper;
+using fraud_poc_project_buss.Interfaces;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
-using fraud_poc_project_buss.Service;
 using fraud_poc_project_repo.Interfaces;
+using fraud_poc_project_repo.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -40,6 +41,8 @@ namespace fraud_poc_project.Kafka.Consumer
         private readonly string consumerTopic = "";
         private readonly int consumerCount = 0;
 
+        private readonly IFraudProducer _producer;
+
         public FraudConsumer(
                     IOptions<FraudKafkaBrokerSettings> brokerOptions,
                     IOptions<FraudKafkaConsumerSettings> consumerOptions,
@@ -51,7 +54,8 @@ namespace fraud_poc_project.Kafka.Consumer
                     IFraudRepository fraudRepository,
                     IFraudEvaluationService evaluationService,
                     ILogger<FraudConsumer> logger,
-                    IMetricsService metricsService)
+                    IMetricsService metricsService,
+                    IFraudProducer producer)
         {
             _brokerOptions = brokerOptions;
             _consumerOptions = consumerOptions;
@@ -64,7 +68,7 @@ namespace fraud_poc_project.Kafka.Consumer
             _evaluationService = evaluationService;
             _logger = logger;
             _metricsService = metricsService;
-
+            _producer = producer;
             consumerTopic = _consumerOptions.Value.TransactionTopic.Trim();
 
             var consumerInstances = _kafkaAdminOptionsSettings.TopicOptions.FirstOrDefault(t => t.Topic.ToLower().Trim() == consumerTopic.ToLower()) ?? new KafkaTopicOptions();
@@ -83,11 +87,13 @@ namespace fraud_poc_project.Kafka.Consumer
                 foreach (var item in Enumerable.Range(0, consumerCount))
                 {
                     var workerLogger = _loggerFactory.CreateLogger<FraudConsumerWorker>();
-                    var itm = new FraudConsumerWorker(_brokerOptions, _consumerOptions, _appSettings, _resilienceProvider, _serviceScopeFactory, _fraudRepository, _evaluationService, _metricsService, workerLogger);
+                    var itm = new FraudConsumerWorker(_brokerOptions, _consumerOptions, _appSettings, _resilienceProvider, _serviceScopeFactory, _fraudRepository, _evaluationService, _metricsService, _producer, workerLogger);
                     workers.Add(itm);
                 }
                 ;
-                var tasks = workers.Select(w => RunWorkerWithRetryAsync(w, stoppingToken));
+                // One source for all workers: if any worker gives up, the whole consumer stops.
+                using var consumerCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                var tasks = workers.Select(w => RunWorkerWithRetryAsync(w, consumerCts));
                 await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             finally
@@ -96,29 +102,47 @@ namespace fraud_poc_project.Kafka.Consumer
             }
         }
 
-        private async Task RunWorkerWithRetryAsync(FraudConsumerWorker worker, CancellationToken stoppingToken)
+        private async Task RunWorkerWithRetryAsync(FraudConsumerWorker worker, CancellationTokenSource consumerCts)
         {
             int maxRetries = _consumerOptions.Value.StartWorkerRetry;
-            int retryCount = 0;
+            int failures = 0;
+            var stoppingToken = consumerCts.Token;
 
-            while (retryCount < maxRetries && !stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
+                    // StartAsync only returns normally on shutdown; any failure is an exception.
                     await worker.StartAsync(stoppingToken).ConfigureAwait(false);
-                    retryCount = 0;
+                    return;
                 }
                 catch (OperationCanceledException)
                 {
                     _logger.LogInformationOnly("Consumer operation cancelled");
-                    break;
+                    return;
                 }
                 catch (Exception ex)
                 {
-                    retryCount++;
-                    _logger.LogError(ex, "Worker failed. Retry {Retry}/{Max}", retryCount, maxRetries);
-                    if (retryCount < maxRetries)
+                    failures++;
+
+                    if (failures > maxRetries)
+                    {
+                        // Stop this worker only. The API keeps running; restart the service to resume consuming.
+                        _logger.LogCritical(ex, "Consumer stopped after {Attempts} attempts", failures);
+                        consumerCts.Cancel();
+                        return;
+                    }
+
+                    _logger.LogError(ex, "Worker failed. Retry {Retry}/{Max}", failures, maxRetries);
+
+                    try
+                    {
                         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
                 }
             }
         }

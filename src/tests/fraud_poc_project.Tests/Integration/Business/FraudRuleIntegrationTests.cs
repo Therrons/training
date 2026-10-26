@@ -119,9 +119,9 @@ namespace fraud_poc_project.Tests.Integration.Business
             // Arrange
             TransactionEvent transaction = CreateTransaction();
 
-            // Create rules that exceed the fraud flag threshold (typically 50-75)
+            // Create rules whose combined score exceeds the flag threshold (40)
             var rule1 = CreateMockRule("RULE1", true, 40m);
-            var rule2 = CreateMockRule("RULE2", true, 50m); // Total = 90, above threshold
+            var rule2 = CreateMockRule("RULE2", true, 50m); // 40 + 50 + 10 = 100, capped at MaxScore
             var rule3 = CreateMockRule("RULE3", true, 10m);
 
             var rules = new List<IFraudRule> { rule1, rule2, rule3 };
@@ -291,9 +291,9 @@ namespace fraud_poc_project.Tests.Integration.Business
                 _scoreContribution = scoreContribution;
             }
 
-            public string RuleCode => throw new NotImplementedException();
+            public string RuleCode => _ruleCode;
 
-            public string RuleDescription => throw new NotImplementedException();
+            public string RuleDescription => $"Mock rule: {_ruleCode}";
 
             public fraud_poc_project_buss.Dto.FraudRuleSetRecord Evaluate(fraud_poc_project_buss.Dto.TransactionEvent transaction)
             {

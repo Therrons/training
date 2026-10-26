@@ -95,7 +95,6 @@ namespace fraud_poc_project_buss.Helper
             return null;
         }
 
-        // Adds options of type T to the service collection, binds them to a configuration section, and validates them using data annotations.
         public static IServiceCollection AddAndValidateOptions<T>(
             this IServiceCollection services,
             string configurationSection) where T : class
@@ -108,7 +107,7 @@ namespace fraud_poc_project_buss.Helper
             return services;
         }
 
-        // Converts a FraudKafkaBrokerSettings object into an AdminClientConfig object for Kafka administration.
+
         public static AdminClientConfig CreateAdminClientConfig(this FraudKafkaBrokerSettings brokerSettings)
         {
             return new AdminClientConfig
@@ -123,7 +122,6 @@ namespace fraud_poc_project_buss.Helper
             };
         }
 
-        // Logs a Kafka message with the appropriate log level based on the SyslogLevel of the message.
         public static void LogKafkaMessage<T>(this ILogger<T> logger, LogMessage logMessage)
         {
             var level = logMessage.Level switch
@@ -137,7 +135,6 @@ namespace fraud_poc_project_buss.Helper
             logger.Log(level, "Kafka (librdkafka): {Message}", logMessage.Message);
         }
 
-        // Logs a Kafka error with the appropriate log level based on whether the error is fatal or not.
         public static void LogKafkaError<T>(this ILogger<T> logger, Error error)
         {
             if (error.IsFatal)

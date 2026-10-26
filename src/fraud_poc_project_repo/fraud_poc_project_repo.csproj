@@ -12,8 +12,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Helpers\**" />
       <Compile Remove="Kafka\Helpers\**" />
+      <EmbeddedResource Remove="Helpers\**" />
       <EmbeddedResource Remove="Kafka\Helpers\**" />
+      <None Remove="Helpers\**" />
       <None Remove="Kafka\Helpers\**" />
     </ItemGroup>
 

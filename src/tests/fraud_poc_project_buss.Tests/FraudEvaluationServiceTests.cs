@@ -55,7 +55,7 @@ namespace fraud_poc_project_buss.Tests
         {
             // Arrange: Create a low-risk domestic transaction
             var transaction = new TransactionEventBuilder()
-                .WithAmount(1000m)                    // Below 50,000 threshold
+                .WithAmount(999m)                     // Below 50,000 threshold and below the 1,000 round-amount minimum
                 .WithTransactionType("POS")           // Not CNP, not ATM
                 .WithCountryCode("ZA")                // Domestic
                 .WithMerchantCategory("retail")       // Not high-risk
@@ -78,7 +78,7 @@ namespace fraud_poc_project_buss.Tests
         {
             // Arrange: Create a high-amount domestic transaction (triggers only HighAmountRule)
             var transaction = new TransactionEventBuilder()
-                .WithAmount(60000m)                   // Exceeds 50,000 threshold → score 40
+                .WithAmount(60123m)                   // Exceeds 50,000 threshold → score 40 (not a round amount)
                 .WithTransactionType("POS")           // Not CNP/ATM
                 .WithCountryCode("ZA")                // Domestic
                 .WithMerchantCategory("retail")       // Not high-risk
@@ -101,7 +101,7 @@ namespace fraud_poc_project_buss.Tests
         {
             // Arrange: High-amount foreign CNP transaction
             var transaction = new TransactionEventBuilder()
-                .WithAmount(60000m)                   // HIGH_AMOUNT: +40
+                .WithAmount(60123m)                   // HIGH_AMOUNT: +40 (not a round amount)
                 .WithTransactionType("CNP")           // FOREIGN_CNP trigger (with foreign country)
                 .WithCountryCode("US")                // Foreign
                 .WithMerchantCategory("retail")       // Not high-risk
@@ -128,7 +128,7 @@ namespace fraud_poc_project_buss.Tests
             // - High amount (60,000) → +40
             // - Foreign CNP (Online + US) → +35
             // - ATM over limit (6,000) → +30
-            // - Round amount (5,000) → +10
+            // - Round amount (60,000) → +10
             // - High-risk merchant (crypto) → +25
             // Total = 140, but capped at 100
             var transaction = new TransactionEventBuilder()
@@ -288,7 +288,7 @@ namespace fraud_poc_project_buss.Tests
             var service = new FraudEvaluationService(rules, options);
 
             var transaction = new TransactionEventBuilder()
-                .WithAmount(60000m)                   // Would trigger HIGH_AMOUNT if enabled
+                .WithAmount(60123m)                   // Would trigger HIGH_AMOUNT if enabled
                 .WithTransactionType("POS")
                 .WithCountryCode("ZA")
                 .Build();
@@ -308,7 +308,7 @@ namespace fraud_poc_project_buss.Tests
         {
             // Arrange
             var transaction = new TransactionEventBuilder()
-                .WithAmount(60000m)
+                .WithAmount(60123m)
                 .WithTransactionType("CNP")
                 .WithCountryCode("US")
                 .Build();

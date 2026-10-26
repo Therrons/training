@@ -1,9 +1,8 @@
 namespace fraud_poc_project_buss.Dto
 {
-    /// <summary>
-    /// Extra tracking info attached to every Kafka event, so we can tell when a message
-    /// was published and match related messages together using the CorrelationId.
-    /// </summary>
+    // Extra tracking info attached to every Kafka event, so we can tell when a message
+    // was published and match related messages together using the CorrelationId.
+
     public record EventMetadata
     {
         public DateTime PublishedAt { get; set; } = DateTime.UtcNow;
@@ -11,10 +10,6 @@ namespace fraud_poc_project_buss.Dto
         public Guid CorrelationId { get; set; } = Guid.NewGuid();
     }
 
-    /// <summary>
-    /// A single card/account transaction, read from Kafka, before or after fraud checks
-    /// have been run against it.
-    /// </summary>
     public record TransactionEvent : EventMetadata
     {
         public long Id { get; set; }
@@ -32,10 +27,6 @@ namespace fraud_poc_project_buss.Dto
         public DateTime TransactionTime { get; set; }
     }
 
-    /// <summary>
-    /// The outcome of running one fraud rule (see FraudRules.cs) against one transaction:
-    /// did it trigger, and how many points does it add to the fraud score?
-    /// </summary>
     public record FraudRuleSetRecord
     {
         public long FraudEventId { get; set; }
@@ -45,11 +36,6 @@ namespace fraud_poc_project_buss.Dto
         public decimal ScoreContribution { get; set; }
     }
 
-    /// <summary>
-    /// The full result of evaluating one transaction: the original transaction, every
-    /// rule's result, and the final flagged/score decision. This is what gets saved to
-    /// the database and returned by the API.
-    /// </summary>
     public record FraudEventRecord
     {
         public TransactionEvent Event { get; set; } = new();

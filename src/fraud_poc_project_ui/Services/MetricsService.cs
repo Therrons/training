@@ -1,3 +1,4 @@
+using fraud_poc_project.Interfaces;
 using fraud_poc_project_buss.Helper;
 using Microsoft.Extensions.Logging;
 using System;
@@ -6,41 +7,32 @@ using System.Linq;
 
 namespace fraud_poc_project.Services
 {
-    public interface IMetricsService
-    {
-        void RecordTransactionProcessed(bool isFlagged, decimal fraudScore, long elapsedMilliseconds);
-        void RecordRuleExecution(string ruleCode, bool triggered, long elapsedMilliseconds);
-        void RecordAuthenticationAttempt(bool successful);
-        void RecordDatabaseOperation(string operationType, long elapsedMilliseconds);
-        void RecordKafkaEvent(string eventType, long elapsedMilliseconds);
-
-        MetricsSnapshot GetSnapshot();
-        void Reset();
-    }
-
     public class MetricsService : IMetricsService
     {
         private readonly ILogger<MetricsService> _logger;
         private readonly object _lockObject = new object();
 
+        // Metrics are per instance. The service is registered as a singleton, so one instance
+        // is shared by the whole app and tests get their own counts.
+
         // Transaction metrics
-        private static long _totalTransactions;
-        private static long _flaggedTransactions;
-        private static long _totalFraudScore;
-        private static List<long> _transactionProcessingTimes = new();
+        private long _totalTransactions;
+        private long _flaggedTransactions;
+        private long _totalFraudScore;
+        private List<long> _transactionProcessingTimes = new();
 
         // Rule metrics
-        private static Dictionary<string, RuleMetrics> _ruleMetrics = new();
+        private Dictionary<string, RuleMetrics> _ruleMetrics = new();
 
         // Authentication metrics
-        private static long _totalLoginAttempts;
-        private static long _successfulLogins;
+        private long _totalLoginAttempts;
+        private long _successfulLogins;
 
         // Database metrics
         private Dictionary<string, OperationMetrics> _databaseOperations = new();
 
         // Kafka metrics
-        private static Dictionary<string, OperationMetrics> _kafkaOperations = new();
+        private Dictionary<string, OperationMetrics> _kafkaOperations = new();
 
         public MetricsService(ILogger<MetricsService> logger)
         {

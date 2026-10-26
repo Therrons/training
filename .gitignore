@@ -31,6 +31,5 @@ terraform.tfvars
 /src/Kafka/src/nuget-packages
 /.claude-flow
 /Traefik Kakfa Installation/run traefik kafka ui.txt
-/src/REFACTORING_SUMMARY.md
 /Deployment_Flow.docx
 /.gitignore

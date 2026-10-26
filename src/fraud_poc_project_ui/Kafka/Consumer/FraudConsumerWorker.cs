@@ -1,11 +1,11 @@
 ﻿using Confluent.Kafka;
-using fraud_poc_project.Services;
+using fraud_poc_project.Interfaces;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Exceptions;
 using fraud_poc_project_buss.Helper;
+using fraud_poc_project_buss.Interfaces;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
-using fraud_poc_project_buss.Service;
 using fraud_poc_project_repo.Exceptions;
 using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,14 +36,12 @@ namespace fraud_poc_project.Kafka.Consumer
         private readonly IFraudEvaluationService _evaluationService;
         private readonly ResiliencePipelineProvider<string> _resilienceProvider;
         private readonly IMetricsService _metricsService;
-
         private readonly List<ConsumeResult<string, byte[]>> _batch = [];
-
         private readonly bool _batchSequentialProcessing = false;
         private readonly string _topic = "";
-
         private readonly int _concurrency = 1;
 
+        private readonly IFraudProducer _producer;
 
         public FraudConsumerWorker(
             IOptions<FraudKafkaBrokerSettings> brokerOptions,
@@ -53,6 +52,7 @@ namespace fraud_poc_project.Kafka.Consumer
             IFraudRepository fraudRepository,
             IFraudEvaluationService evaluationService,
             IMetricsService metricsService,
+            IFraudProducer producer,
             ILogger<FraudConsumerWorker> logger)
         {
             _brokerOptions = brokerOptions.Value;
@@ -63,6 +63,7 @@ namespace fraud_poc_project.Kafka.Consumer
             _fraudRepository = fraudRepository;
             _evaluationService = evaluationService;
             _metricsService = metricsService;
+            _producer = producer;
             _logger = logger;
 
             _batchSequentialProcessing = _consumerOptions.SequentialProcessing;
@@ -115,13 +116,43 @@ namespace fraud_poc_project.Kafka.Consumer
                 })
                 .Build();
 
-            await Task.Run(async () => await Consume(stoppingToken)).ConfigureAwait(false);
+            // A restart must not reuse messages from the failed attempt; Kafka redelivers them from the last commit.
+            _batch.Clear();
+
+            try
+            {
+                await Task.Run(async () => await Consume(stoppingToken)).ConfigureAwait(false);
+            }
+            finally
+            {
+                CloseConsumer();
+            }
 
             _logger.LogInformationOnly(
                 "FraudKafkaConsumer initialized for topic: {Topic}, batchSize: {BatchSize}, batchTimeout: {BatchTimeout}s",
                 _consumerOptions.TransactionTopic,
                 _consumerOptions.BatchSize,
                 _consumerOptions.BatchProcessTimeout);
+        }
+
+        // Leaves the consumer group promptly. Offsets are committed manually, so Close does not commit.
+        private void CloseConsumer()
+        {
+            if (_consumer == null) return;
+
+            try
+            {
+                _consumer.Close();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error closing Kafka consumer");
+            }
+            finally
+            {
+                _consumer.Dispose();
+                _consumer = null;
+            }
         }
 
         private async Task Consume(CancellationToken stoppingToken)
@@ -189,8 +220,9 @@ namespace fraud_poc_project.Kafka.Consumer
 
                     if (ex.Error.IsFatal)
                     {
-                        _logger.LogCritical("Fatal consume error, stopping consumer");
-                        break;
+                        // Rethrown so the consumer retries this worker, then stops it.
+                        _logger.LogCritical("Fatal consume error, failing this worker");
+                        throw;
                     }
                 }
                 catch (OperationCanceledException)
@@ -211,7 +243,9 @@ namespace fraud_poc_project.Kafka.Consumer
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error in batch consumption loop");
+                    // Not retried in place. The worker fails and the consumer restarts it from the last committed offset.
+                    _logger.LogError(ex, "Batch consumption failed; failing this worker");
+                    throw;
                 }
             }
         }
@@ -226,27 +260,28 @@ namespace fraud_poc_project.Kafka.Consumer
             // Step 1: turn each raw Kafka message into a TransactionEvent object.
             foreach (var consumeResult in batch)
             {
+                // Malformed payloads go to the DLT as raw text. Retrying them would fail the batch forever and block the partition.
+                var raw = consumeResult.Message.Value is null ? string.Empty : Encoding.UTF8.GetString(consumeResult.Message.Value);
+                TransactionEvent transactionEvent;
                 try
                 {
-                    var eventObj = consumeResult.Message.StreamByteKeyValueToStringKeyValue();
-                    var transactionEvent = JsonConvert.DeserializeObject<TransactionEvent>(eventObj.Value);
-
-                    if (transactionEvent == null)
-                    {
-                        _logger.LogWarning("Deserialization returned null for offset: {Offset}", consumeResult.Offset.Value);
-                        continue;
-                    }
-
-                    deserializedBatch.Add((transactionEvent, consumeResult));
-                }
-                catch (Newtonsoft.Json.JsonException ex)
-                {
-                    _logger.LogError(ex, "JSON deserialization error for offset: {Offset}", consumeResult.Offset.Value);
+                    transactionEvent = JsonConvert.DeserializeObject<TransactionEvent>(raw);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected deserialization error for offset: {Offset}", consumeResult.Offset.Value);
+                    _logger.LogError(ex, "JSON deserialization error for offset: {Offset}", consumeResult.Offset.Value);
+                    await SendToDltTableAsync(raw, ex.Message).ConfigureAwait(false);
+                    continue;
                 }
+
+                if (transactionEvent == null)
+                {
+                    _logger.LogWarning("Deserialization returned null for offset: {Offset}", consumeResult.Offset.Value);
+                    await SendToDltTableAsync(raw, "Deserialization returned null").ConfigureAwait(false);
+                    continue;
+                }
+
+                deserializedBatch.Add((transactionEvent, consumeResult));
             }
 
             if (deserializedBatch.Count == 0) return;
@@ -275,9 +310,8 @@ namespace fraud_poc_project.Kafka.Consumer
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing batch of {Count} messages", deserializedBatch.Count);
-                foreach (var itm in deserializedBatch)
-                    await SendToDltAsync(JsonConvert.SerializeObject(itm.Event), $"Batch processing error: {ex.Message}").ConfigureAwait(false);
+                _logger.LogError(ex, "Error processing batch of {Count} messages; failing this worker", deserializedBatch.Count);
+                throw;
             }
         }
 
@@ -293,7 +327,6 @@ namespace fraud_poc_project.Kafka.Consumer
             {
                 if (linkedToken.IsCancellationRequested) { return; }
 
-                var model = JsonConvert.SerializeObject(consumeResult.transactionEvent);
                 var evaluationStopwatch = Stopwatch.StartNew();
                 var result = _evaluationService.Evaluate(consumeResult.transactionEvent);
                 evaluationStopwatch.Stop();
@@ -341,28 +374,30 @@ namespace fraud_poc_project.Kafka.Consumer
                     _logger.LogSensitiveData("Transaction data {TransactionId}: ", result);
                 }
                 else
-                    _logger.LogInformationOnly("No Fraud Event Records found for Transaction Event={event}", model);
+                {
+                    throw new FraudEvaluationException(
+                        $"No Fraud Event Records found for Transaction Event:{Environment.NewLine}{JsonConvert.SerializeObject(consumeResult.transactionEvent)}");
+                }
             }
             catch (FraudEvaluationException ex)
             {
                 stopwatch.Stop();
-                _logger.LogError(ex, "Fraud evaluation failed for transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
                 linkedCts.Cancel();
-                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Fraud evaluation error: {ex.Message}").ConfigureAwait(false);
+                _logger.LogError(ex.ToString());
+                await SendToDltAsync(consumeResult.transactionEvent, cancellationToken).ConfigureAwait(false);
             }
             catch (FraudRepositoryException ex)
             {
                 stopwatch.Stop();
-                _logger.LogError(ex, "Database error processing transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
                 linkedCts.Cancel();
-                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Database error: {ex.Message}").ConfigureAwait(false);
+                await SendToDltTableAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Database error: {ex.Message}").ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
                 _logger.LogError(ex, "Unexpected error processing transaction {TransactionId}", consumeResult.transactionEvent.TransactionId);
                 linkedCts.Cancel();
-                await SendToDltAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Unexpected error: {ex.Message}").ConfigureAwait(false);
+                await SendToDltTableAsync(JsonConvert.SerializeObject(consumeResult.transactionEvent), $"Unexpected error: {ex.Message}").ConfigureAwait(false);
             }
         }
 
@@ -389,18 +424,15 @@ namespace fraud_poc_project.Kafka.Consumer
                     {
                         await HandleTransactionAsync(msg, linkedToken).ConfigureAwait(false);
                     }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
                     catch (Exception ex)
                     {
-                        if (msg.transactionEvent != null)
-                        {
-                            _logger.LogError(ex, "Failed to consume the following Transaction data={data}", JsonConvert.SerializeObject(msg));
-                            await SendToDltAsync(JsonConvert.SerializeObject(msg.transactionEvent), ex.Message).ConfigureAwait(false);
-                        }
-                        else
-                            _logger.LogError(ex, "Failed to consume the following Transaction data - see error object details");
-
-                        linkedCts.Cancel();
-                        throw;
+                        // Dead-letter only this message. Do not cancel or rethrow, so the rest of the batch is processed.
+                        _logger.LogError(ex, "Failed to process TransactionId={TransactionId}", msg.transactionEvent.TransactionId);
+                        await SendToDltTableAsync(JsonConvert.SerializeObject(msg.transactionEvent), ex.Message).ConfigureAwait(false);
                     }
                 }
             }
@@ -436,37 +468,53 @@ namespace fraud_poc_project.Kafka.Consumer
                     if (msg.transactionEvent == null) return;
                     await HandleTransactionAsync(msg, cancellationToken).ConfigureAwait(false);
                 }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
                 catch (Exception ex)
                 {
-                    if (msg.transactionEvent != null)
-                    {
-                        _logger.LogError(ex, "Failed to consume the following Transaction data={data}", JsonConvert.SerializeObject(msg));
-                        await SendToDltAsync(JsonConvert.SerializeObject(msg.transactionEvent), ex.Message).ConfigureAwait(false);
-                    }
-                    else
-                        _logger.LogError(ex, "Failed to consume the following Transaction data - see error object details");
-
-                    linkedCts.Cancel();
-                    throw;
+                    // Dead-letter only this message. Do not cancel or rethrow, so the rest of the batch is processed.
+                    _logger.LogError(ex, "Failed to process TransactionId={TransactionId}", msg.transactionEvent.TransactionId);
+                    await SendToDltTableAsync(JsonConvert.SerializeObject(msg.transactionEvent), ex.Message).ConfigureAwait(false);
                 }
             }).ConfigureAwait(false);
         }
 
-        private async Task SendToDltAsync(string messageData, string error)
+
+        private async Task SendToDltTableAsync(string messageData, string error)
         {
+            var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
             try
             {
-                var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
                 await pipeLineRetry.ExecuteAsync(async _ =>
                 {
-                    await _fraudRepository.SavedltErrorAsync(_topic, messageData, error).ConfigureAwait(false);
+                    await _fraudRepository.SaveDBDltErrorAsync(_topic, messageData, error).ConfigureAwait(false);
                 }).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to write message to DLT for topic {Topic}", _topic);
+                _logger.LogCritical(ex, "Failed to write message to DLT for topic {Topic}. The batch will not be committed and will be retried.", _topic);
+                throw;
             }
         }
 
+        private async Task SendToDltAsync(TransactionEvent @event, CancellationToken cts)
+        {
+            var pipeLineRetry = _resilienceProvider.GetPipeline("exception");
+            try
+            {
+                await pipeLineRetry.ExecuteAsync(async _ =>
+                {
+                    await _producer.ProduceDltAsync(@event, cts).ConfigureAwait(false);
+                }, cts).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Failed to write message to DLT for topic {Topic}. The batch will not be committed and will be retried.", _topic);
+                await SendToDltTableAsync(JsonConvert.SerializeObject(@event), $"DLT error: {ex.Message}").ConfigureAwait(false);
+                throw;
+            }
+        }
     }
 }

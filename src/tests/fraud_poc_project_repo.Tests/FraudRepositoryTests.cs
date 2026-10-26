@@ -69,14 +69,14 @@ namespace fraud_poc_project_repo.Tests
             const string error = "Failed to process message";
 
             _mockRepository
-                .Setup(r => r.SavedltErrorAsync(topic, messageData, error))
+                .Setup(r => r.SaveDBDltErrorAsync(topic, messageData, error))
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _mockRepository.Object.SavedltErrorAsync(topic, messageData, error);
+            await _mockRepository.Object.SaveDBDltErrorAsync(topic, messageData, error);
 
             // Assert
-            _mockRepository.Verify(r => r.SavedltErrorAsync(topic, messageData, error), Times.Once);
+            _mockRepository.Verify(r => r.SaveDBDltErrorAsync(topic, messageData, error), Times.Once);
         }
 
         [Fact]

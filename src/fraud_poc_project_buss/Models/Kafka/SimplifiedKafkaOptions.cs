@@ -41,7 +41,8 @@ namespace fraud_poc_project_buss.Models.Kafka
         public int SessionTimeoutMs { get; set; } = 45000; // 45 seconds
         public int Concurrency { get; set; } = 1;
         public bool SequentialProcessing { get; set; } = true;
-        public int StartWorkerRetry { get; set; } = 5;
+        // Number of retries after a worker fails (batch-level or fatal error) before the consumer stops.
+        public int StartWorkerRetry { get; set; } = 2;
 
         // Batch processing settings
         public int BatchSize { get; set; } = 100; // Process 100 messages at once

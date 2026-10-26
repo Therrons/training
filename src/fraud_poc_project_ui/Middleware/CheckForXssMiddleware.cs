@@ -91,7 +91,7 @@ namespace fraud_poc_project.Middleware
         {
             KeyValuePair<string, StringValues> _xss = new KeyValuePair<string, StringValues>("XXSValidation", "Failed - Potential XSS attack");
             if (!context.Response.Headers.Contains(_xss))
-                context.Response.Headers.Add(_xss.Key, _xss.Value);
+                context.Response.Headers.Append(_xss.Key, _xss.Value);
 
             context.Response.StatusCode = _statusCode;
         }

@@ -1,9 +1,11 @@
 ﻿using fraud_poc_project.Controllers;
+using fraud_poc_project.Interfaces;
 using fraud_poc_project.Kafka.Consumer;
 using fraud_poc_project.Services;
 using fraud_poc_project.Settings;
 using fraud_poc_project_buss;
 using fraud_poc_project_buss.Helper;
+using fraud_poc_project_buss.Interfaces;
 using fraud_poc_project_buss.Models.Database;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
@@ -143,6 +145,9 @@ namespace fraud_poc_project.Configuration
         private static void RegisterAuthentication(WebApplicationBuilder builder)
         {
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+            builder.Services.Configure<LoginSecuritySettings>(builder.Configuration.GetSection("LoginSecuritySettings"));
+            builder.Services.AddSingleton<ILoginAttemptTracker, LoginAttemptTracker>();
         }
 
         private static void RegisterJwt(WebApplicationBuilder builder)

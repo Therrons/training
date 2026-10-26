@@ -4,6 +4,7 @@ using fraud_poc_project.Utilities;
 using HealthChecks.Kubernetes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -11,6 +12,7 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 public class Program
@@ -36,6 +38,21 @@ public class Program
         builder.AddServices_AddDI();
         builder.AddCorsConfiguration();
 
+        // Trust X-Forwarded-For / X-Forwarded-Proto only from configured proxies (e.g. Traefik).
+        // With no KnownProxies configured, forwarded headers are ignored and the socket address is used.
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+
+            foreach (var proxy in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").GetChildren())
+            {
+                if (IPAddress.TryParse(proxy.Value, out var proxyAddress))
+                    options.KnownProxies.Add(proxyAddress);
+            }
+        });
+
         if (args != null && args.Length > 0)
             builder.Configuration.AddCommandLine(args);
 
@@ -56,23 +73,6 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddHealthChecks();
 
-        // Register FluentValidation
-        //builder.Services.AddFluentValidationAutoValidation();
-        //builder.Services.AddFluentValidationClientsideAdapters();
-        //builder.Services.AddValidatorsFromAssemblies(
-        //    typeof(Program).Assembly,
-        //    typeof(fraud_poc_project_buss.FraudRules).Assembly);
-
-        builder.Services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(policy =>
-            {
-                policy.AllowAnyOrigin()
-                      .AllowAnyHeader()
-                      .AllowAnyMethod();
-            });
-        });
-
         builder.Services.Configure<HostFilteringOptions>(options =>
         {
             options.AllowedHosts = new[] { "*" };
@@ -80,11 +80,12 @@ public class Program
 
         // Validate idempotent producer config before startup (see KafkaIdempotence.cs)
         var kafKaProducerIdemPotence = builder.Configuration["KafkaSettings:ProducerSettings:EnableIdempotence"]?.ToLowerInvariant();
-        if (kafKaProducerIdemPotence == "true") builder.AddKafkaProducerIdempotence();
+        if (kafKaProducerIdemPotence == "true") await builder.AddKafkaProducerIdempotence().ConfigureAwait(false);
 
         builder.ConfigureSwagger();
         var app = builder.Build();
 
+        app.UseForwardedHeaders();
         app.UseRouting();
         app.UseCors();
 

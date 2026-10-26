@@ -1,6 +1,7 @@
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Connection;
+using fraud_poc_project_repo.Exceptions;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,6 @@ namespace fraud_poc_project_repo
         private readonly string _connectionString;
         private readonly string _schema;
         private readonly ILogger<FraudRepository> _logger;
-        private readonly IDBConnection _dbConnection;
 
         public FraudRepository(IConfiguration configuration,
             ILogger<FraudRepository> logger,
@@ -24,7 +24,6 @@ namespace fraud_poc_project_repo
                 ?? throw new InvalidOperationException("ConnectionStrings:PostgreSQL is not configured.");
             _schema = configuration["Database:DBSchema"] ?? "public";
             _logger = logger;
-            _dbConnection = dbConnection;
         }
 
         public async Task<long> SaveFraudEvaluationAsync(FraudEventRecord result)
@@ -89,15 +88,17 @@ namespace fraud_poc_project_repo
                 await tx.CommitAsync().ConfigureAwait(false);
                 return fraudEventId;
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Correlation ID: {correlationID} - Failed to write Fraud data to Database for Model={model}", result?.Event?.CorrelationId ?? Guid.NewGuid(), JsonConvert.SerializeObject(result));
+                string errMsg = $"Correlation ID: {result?.Event?.CorrelationId ?? Guid.NewGuid()} - Failed to write Fraud data to Database for Model={JsonConvert.SerializeObject(result)}, error={ex.Message}";
+
+                _logger.LogError(errMsg);
                 await tx.RollbackAsync().ConfigureAwait(false);
-                throw;
+                throw new FraudRepositoryException(errMsg);
             }
         }
 
-        public async Task SavedltErrorAsync(string topic, string messageData, string error)
+        public async Task SaveDBDltErrorAsync(string topic, string messageData, string error)
         {
             try
             {
@@ -235,5 +236,6 @@ namespace fraud_poc_project_repo
             FraudScore = r.GetDecimal(r.GetOrdinal("fraud_score")),
             FlaggedReason = r.DBNullString("flagged_reason")
         };
+
     }
 }

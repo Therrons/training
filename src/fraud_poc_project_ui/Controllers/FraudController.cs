@@ -1,6 +1,6 @@
 using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Exceptions;
-using fraud_poc_project.Services;
+using fraud_poc_project.Interfaces;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Interfaces;
@@ -22,22 +22,22 @@ namespace fraud_poc_project.Controllers
         private readonly IJwtService _jwtService;
         private readonly IMetricsService _metricsService;
         private readonly ILogger<FraudController> _logger;
+        private readonly ILoginAttemptTracker _loginTracker;
 
         public FraudController(
             IFraudRepository repository,
             IJwtService jwtService,
             IMetricsService metricsService,
-            ILogger<FraudController> logger)
+            ILogger<FraudController> logger,
+            ILoginAttemptTracker loginTracker)
         {
             _repository = repository;
             _jwtService = jwtService;
             _metricsService = metricsService;
             _logger = logger;
+            _loginTracker = loginTracker;
         }
 
-        /// <summary>
-        /// Authenticate with username and password. Returns JWT token for use in Authorization header.
-        /// </summary>
         [HttpPost("login")]
         [AllowAnonymous]
         public IActionResult Login([FromBody] LoginRequest request)
@@ -51,15 +51,29 @@ namespace fraud_poc_project.Controllers
                     return BadRequest(new { error = "Username and password required" });
                 }
 
+                if (_loginTracker.IsLockedOut(request.Username, out var lockedUntil))
+                {
+                    var retryAfterSeconds = Math.Max(1, (int)Math.Ceiling((lockedUntil - DateTimeOffset.UtcNow).TotalSeconds));
+
+                    retryAfterSeconds = retryAfterSeconds > 60 ? retryAfterSeconds : 60; // Ensure a minimum of 60 seconds  
+
+                    Response.Headers["Retry-After"] = retryAfterSeconds.ToString();
+                    _logger.LogWarning("Login blocked, account temporarily locked for username: {Username}", request.Username);
+                    _metricsService.RecordAuthenticationAttempt(false);
+                    return StatusCode(429, new { error = $"Account temporarily locked due to repeated failed logins. Try again after {retryAfterSeconds / 60} minute/s." });
+                }
+
                 var token = _jwtService.GenerateToken(request.Username, request.Password);
 
                 if (token == null)
                 {
+                    _loginTracker.RecordFailure(request.Username);
                     _logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
                     _metricsService.RecordAuthenticationAttempt(false);
                     return Unauthorized(new { error = "Invalid credentials" });
                 }
 
+                _loginTracker.RecordSuccess(request.Username);
                 _logger.LogInformationOnly("Successful login for username: {Username}", request.Username);
                 _metricsService.RecordAuthenticationAttempt(true);
                 return Ok(new
@@ -67,7 +81,7 @@ namespace fraud_poc_project.Controllers
                     token.Value.token,
                     validFrom = token.Value.validFrom.ToShortTimeString(),
                     validTo = token.Value.validTo.ToShortTimeString(),
-                    expiresIn = string.Concat(3600 / 60, " minutes"),
+                    expiresIn = string.Concat(_jwtService.ExpirationMinutes, " minutes"),
                     tokenType = "Bearer"
                 });
             }
@@ -84,23 +98,16 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        /// <summary>
-        /// Query fraud events by date range and filters. Date format: yyyy-MM-dd HH:mm:ss
-        /// </summary>
-
         [HttpGet("events")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         public async Task<ActionResult<IEnumerable<FraudEventRecord>>> QueryEvents([FromQuery] FraudQueryDto query)
         {
             var records = await _repository.QueryFraudEventsAsync(query, false).ConfigureAwait(false);
             return Ok(records);
         }
 
-        /// <summary>
-        /// Get all rule results for a fraud event.
-        /// </summary>
         [HttpGet("events/{fraudEventId:long}/rules")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         public async Task<ActionResult<IEnumerable<FraudRuleSetRecord>>> GetRuleResults(long fraudEventId)
         {
             var records = await _repository.GetRuleResultsForEventAsync(fraudEventId).ConfigureAwait(false);

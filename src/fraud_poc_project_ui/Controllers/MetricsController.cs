@@ -1,4 +1,5 @@
 using fraud_poc_project.CustomAttributes;
+using fraud_poc_project.Interfaces;
 using fraud_poc_project.Services;
 using fraud_poc_project_buss.Helper;
 using Microsoft.AspNetCore.Authorization;
@@ -10,12 +11,6 @@ using System.Linq;
 
 namespace fraud_poc_project.Controllers
 {
-    /// <summary>
-    /// Metrics API Controller
-    /// Exposes fraud detection system metrics and monitoring endpoints
-    ///
-    /// Requires: Bearer token authentication (same as other protected endpoints)
-    /// </summary>
     [ApiController]
     [ValidateXss]
     [Route("api/metrics")]
@@ -32,11 +27,9 @@ namespace fraud_poc_project.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Get metrics snapshot (transactions, performance, rules, auth, database, Kafka).
-        /// </summary>
+
         [HttpGet("snapshot")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(typeof(MetricsSnapshot), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetMetricsSnapshot()
@@ -56,11 +49,8 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        /// <summary>
-        /// Get metrics as plain text (for monitoring dashboards).
-        /// </summary>
         [HttpGet("summary")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetMetricsSummary()
@@ -80,11 +70,8 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        /// <summary>
-        /// Get transaction volume metrics.
-        /// </summary>
         [HttpGet("transactions")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetTransactionMetrics()
@@ -111,11 +98,8 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        /// <summary>
-        /// Get performance metrics (avg, min, max, P95, P99).
-        /// </summary>
         [HttpGet("performance")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetPerformanceMetrics()
@@ -146,11 +130,8 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        /// <summary>
-        /// Get fraud rule execution metrics (per-rule stats).
-        /// </summary>
         [HttpGet("rules")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetRuleMetrics()
@@ -181,11 +162,8 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        /// <summary>
-        /// Get authentication metrics (login attempts and success rate).
-        /// </summary>
         [HttpGet("authentication")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetAuthenticationMetrics()
@@ -211,11 +189,8 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        /// <summary>
-        /// Get database operation metrics (counts and timings).
-        /// </summary>
         [HttpGet("database")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetDatabaseMetrics()
@@ -245,11 +220,8 @@ namespace fraud_poc_project.Controllers
             }
         }
 
-        /// <summary>
-        /// Get Kafka operation metrics (produce/consume timings).
-        /// </summary>
         [HttpGet("kafka")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetKafkaMetrics()
@@ -283,7 +255,7 @@ namespace fraud_poc_project.Controllers
         /// Reset all metrics (testing only).
         /// </summary>
         [HttpPost("reset")]
-        [Authorize]
+        [Authorize(Roles = "Analyst")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult ResetMetrics()

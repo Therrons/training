@@ -4,21 +4,6 @@
         <name>fraud_poc_project</name>
     </assembly>
     <members>
-        <member name="M:fraud_poc_project.Controllers.FraudController.Login(fraud_poc_project.Controllers.LoginRequest)">
-            <summary>
-            Authenticate with username and password. Returns JWT token for use in Authorization header.
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.FraudController.QueryEvents(fraud_poc_project_buss.Dto.FraudQueryDto)">
-            <summary>
-            Query fraud events by date range and filters. Date format: yyyy-MM-dd HH:mm:ss
-            </summary>
-        </member>
-        <member name="M:fraud_poc_project.Controllers.FraudController.GetRuleResults(System.Int64)">
-            <summary>
-            Get all rule results for a fraud event.
-            </summary>
-        </member>
         <member name="T:fraud_poc_project.Controllers.LoadSimulatorController">
             <summary>
             Produces synthetic transaction events to Kafka to simulate load.

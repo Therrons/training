@@ -1,6 +1,6 @@
 using FluentAssertions;
 using fraud_poc_project.Controllers;
-using fraud_poc_project.Services;
+using fraud_poc_project.Interfaces;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Tests;
 using fraud_poc_project_repo.Interfaces;
@@ -21,6 +21,7 @@ namespace fraud_poc_project.Tests.Controllers
         private readonly Mock<IJwtService> _mockJwtService;
         private readonly Mock<IMetricsService> _mockMetricsService;
         private readonly Mock<ILogger<FraudController>> _mockLogger;
+        private readonly Mock<ILoginAttemptTracker> _mockLoginTracker;
         private readonly FraudController _controller;
 
         public FraudControllerTests()
@@ -29,12 +30,15 @@ namespace fraud_poc_project.Tests.Controllers
             _mockJwtService = new Mock<IJwtService>();
             _mockMetricsService = new Mock<IMetricsService>();
             _mockLogger = new Mock<ILogger<FraudController>>();
+            _mockLoginTracker = new Mock<ILoginAttemptTracker>();
+
 
             _controller = new FraudController(
                 _mockRepository.Object,
                 _mockJwtService.Object,
                 _mockMetricsService.Object,
-                _mockLogger.Object);
+                _mockLogger.Object,
+                _mockLoginTracker.Object);
         }
 
         [Fact]
