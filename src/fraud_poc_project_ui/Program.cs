@@ -2,6 +2,7 @@ using fraud_poc_project.Configuration;
 using fraud_poc_project.Middleware;
 using fraud_poc_project.Utilities;
 using HealthChecks.Kubernetes;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.HttpOverrides;

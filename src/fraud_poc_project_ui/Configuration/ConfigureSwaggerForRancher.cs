@@ -1,7 +1,11 @@
-﻿using fraud_poc_project.Utilities;
+﻿using Amazon.RDS.Model;
+using fraud_poc_project.Utilities;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi;
+using System;
 using System.Collections.Generic;
 
 namespace fraud_poc_project.Configuration
@@ -12,7 +16,7 @@ namespace fraud_poc_project.Configuration
         {
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "Fraud Detection API",
                     Version = "v1",
@@ -40,29 +44,10 @@ namespace fraud_poc_project.Configuration
                 });
 
                 // Apply JWT security requirement to all endpoints
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
                 {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new List<string>()
-                    }
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
                 });
-
-                // Set the comments path for the Swagger JSON and UI.
-                // Uses PathUtility for cross-platform path management
-                var assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
-                var xmlPath = PathUtility.GetXmlDocumentationPath(assemblyName);
-                if (!string.IsNullOrEmpty(xmlPath))
-                {
-                    c.IncludeXmlComments(xmlPath);
-                }
             });
         }
     }

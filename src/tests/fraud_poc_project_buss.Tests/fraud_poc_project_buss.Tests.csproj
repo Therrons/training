@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <IsTestProject>true</IsTestProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -10,18 +10,19 @@
 
     <ItemGroup>
         <PackageReference Include="Castle.Core" Version="5.2.1" />
-        <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
+        <PackageReference Include="Confluent.Kafka" Version="2.16.0" />
         <PackageReference Include="FluentAssertions" Version="8.11.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
         <PackageReference Include="Moq" Version="4.21.0" />
-        <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.0" />
-        <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.4.0" />
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.14" />
+        <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.14" />
         <PackageReference Include="xunit" Version="2.9.3" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
+
 
     <ItemGroup>
       <ProjectReference Include="..\..\fraud_poc_project_buss\fraud_poc_project_buss.csproj" />
