@@ -1,11 +1,6 @@
-﻿using Amazon.RDS.Model;
-using fraud_poc_project.Utilities;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
-using System;
 using System.Collections.Generic;
 
 namespace fraud_poc_project.Configuration

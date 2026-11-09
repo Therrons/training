@@ -4,8 +4,12 @@ Setup Instructions
 1. Install Desktop Rancher and pgAdmin 4 to use for postgreSql
 2. Download source code from Github
 3. In C# ensure the 'fraud_poc_project' is set as 'Start up'
-4. Run the following script with docker command to install Traefik and postgreSql
+4. Install Traefik and postgreSql:
    docker-compose -f docker-compose.traefik.postgresql.yml up -d
+   
+   Remove Traefik and postgreSql:
+   docker-compose -f docker-compose.traefik.postgresql.yml down -v 
+   
 5. Check the 'Testing_deployed_App.docx' for the urls for the
    postgreSql and Traefik to ensure they have an user interface
 6. Run C# solution locally to ensure it can connect and do local testing
