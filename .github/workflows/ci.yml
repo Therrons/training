@@ -1,0 +1,35 @@
+name: CI - Docker + Helm Validation
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+  push:
+    branches: [ "main", "Docker", "K8s" ]
+
+env:
+  IMAGE_NAME: fraud-poc-api
+  IMAGE_TAG: ci
+  CHART_PATH: charts
+  NAMESPACE: fraud-poc-api
+
+jobs:
+  ci-pr:
+    if: github.event_name == 'pull_request'
+    name: PR Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: CI validation
+        run: echo "Run PR checks here"
+
+  ci-main:
+    if: github.event_name == 'push'
+    name: Branch CI Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: CI validation
+        run: echo "Run branch CI checks here"
