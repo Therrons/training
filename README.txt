@@ -25,8 +25,9 @@ Setup Instructions
    the output format = json
    
    NOTE: .\deploy-https.ps1 only installs the docker image from Docker Hub to Rancher Desktop
-         It DOES NOT upload the latest docker image from your PC to Docker Hub, this is done
-         by kicking off a workflow or checking in the code.
+         It DOES NOT upload the latest docker image from your PC to Docker Hub.
+
+         Uploading the docker image to docker hub is done when merging the code into the 'develop' or 'K8S' branch in github.
          
          So if you have made code changes but not uploaded it to Docker Hub then this script
          will just pull the old code (last updated Docker Image) from Docker Hub
@@ -37,6 +38,7 @@ Setup Instructions
    Password = 'SecurePass123!'
    
    Press 'Authorize' and paste generated token
+   
 10.When running Unit Test in C# ensure PostgreSQL and Kafka is running   
 
 
