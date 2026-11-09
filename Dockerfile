@@ -5,7 +5,7 @@
 ARG APP_DLL=fraud_poc_project.dll
 
 # pass default value for argument to avoid build-time errors, can be overridden at runtime
-ARG APP_PORT=8083
+ARG APP_PORT=8080
 
 ############################################################
 # 1. Base runtime image
