@@ -4,7 +4,6 @@ using fraud_poc_project_repo.Exceptions;
 using fraud_poc_project_repo.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Npgsql;
 
 namespace fraud_poc_project_repo

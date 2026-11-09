@@ -3,7 +3,6 @@ using fraud_poc_project_buss.Helper;
 using fraud_poc_project_buss.Interfaces;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
-using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
