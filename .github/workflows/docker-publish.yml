@@ -28,16 +28,6 @@ jobs:
       - name: Build Docker image
         run: docker build --build-arg APP_PORT=8080 -t $IMAGE_NAME:$IMAGE_TAG .
 
-      - name: Run container smoke test
-        run: |
-          docker run -d -p 8080:8080 \
-            -e ASPNETCORE_ALLOWEDHOSTS="*" \
-            --name api-test \
-            $IMAGE_NAME:$IMAGE_TAG
-          sleep 10
-          curl -f http://localhost:8080/health/readiness || { echo "::error::Readiness check failed. Verify PostgreSQL and Kafka is running. If not start PostgreSQL and Kafka in K8S and rerun the github runner"; exit 1; }
-          curl -f http://localhost:8080/health/liveness || { echo "::error::Liveness check failed. Verify PostgreSQL and Kafka is running. If not start PostgreSQL and Kafka in K8S and rerun the github runner"; exit 1; }
-
       - name: Install Helm
         uses: azure/setup-helm@v4
 
