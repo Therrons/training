@@ -226,7 +226,6 @@ Around 143 `[Fact]`/`[Theory]` attributes exist across the three projects.
 - **Local:** `docker-compose.traefik.postgresql.yml` brings up Traefik and PostgreSQL. Run the `fraud_poc_project` project with the `loc` environment.
 - **Container:** `Dockerfile` builds the image. The `docker-publish.yml` workflow publishes it. `deploy-https.ps1` installs it into a local Kubernetes cluster (Rancher Desktop) over HTTPS.
 - **Cloud/infra:** `Terraform Template/` and `charts/` (Helm). `deploy.yml` is the deployment workflow.
-- **CI:** `ci.yml` runs the build and tests.
 
 ---
 
