@@ -20,7 +20,7 @@ ARG APP_PORT
 
 # Create non-root user (K8s best practice)
 RUN useradd \
-    --uid 1000 \
+    --uid 10001 \
     --create-home \
     --shell /sbin/nologin \
     appuser
