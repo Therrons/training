@@ -4,6 +4,10 @@ Setup Instructions
 1. Install Desktop Rancher and pgAdmin 4 to use for postgreSql
 2. Download source code from Github
 3. In C# ensure the 'fraud_poc_project' is set as 'Start up'
+
+   otherwise you will get an ERROR:
+   "A project with an Output Type of Class Library cannot be started directly."
+
 4. Install Traefik and postgreSql:
    docker-compose -f docker-compose.traefik.postgresql.yml up -d
    
@@ -27,13 +31,13 @@ Setup Instructions
          So if you have made code changes but not uploaded it to Docker Hub then this script
          will just pull the old code (last updated Docker Image) from Docker Hub
    
-8. When the C# app is installed in Rancher Desktop run 'https://localhost/swagger' in your browser
+8. When the C# app is installed in Rancher Desktop run 'https://localhost/swagger/index.html' in your browser
 9. For the Fraud Login endpoint the
    Username = 'fraud-analyst'
    Password = 'SecurePass123!'
    
    Press 'Authorize' and paste generated token
-   
+10.When running Unit Test in C# ensure PostgreSQL and Kafka is running   
 
 
 
