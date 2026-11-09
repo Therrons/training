@@ -2,10 +2,10 @@ using fraud_poc_project_buss.Dto;
 
 namespace fraud_poc_project_buss.Helper
 {
-    
+
     // Structural validation for inbound transaction events, applied before fraud evaluation.
     // Events that fail validation are dead-lettered rather than scored or persisted.
-    
+
     public static class TransactionEventValidator
     {
         // Largest amount the fraud_event.amount column (NUMERIC(18,2)) can hold, with headroom.
@@ -18,10 +18,10 @@ namespace fraud_poc_project_buss.Helper
         // Tolerance for clock skew between the producer and this service.
         private static readonly TimeSpan FutureTimeTolerance = TimeSpan.FromMinutes(5);
 
-        
+
         // Treats a timestamp with no offset (Kind = Unspecified) as UTC. Npgsql rejects Unspecified
         // values for timestamp with time zone columns, so this must run before persisting.
-        
+
         public static void NormalizeTransactionTime(TransactionEvent transactionEvent)
         {
             if (transactionEvent.TransactionTime.Kind == DateTimeKind.Unspecified)
@@ -30,9 +30,9 @@ namespace fraud_poc_project_buss.Helper
             }
         }
 
-        
+
         // Returns every validation failure found. An empty list means the event is valid.
-        
+
         public static IReadOnlyList<string> Validate(TransactionEvent e, DateTime? utcNow = null)
         {
             var errors = new List<string>();
