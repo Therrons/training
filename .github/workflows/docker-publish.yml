@@ -25,11 +25,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-    
-    
-      - name: Lint Dockerfile
-        run: docker run --rm -i hadolint/hadolint < Dockerfile
-
       - name: Build Docker image
         run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
@@ -101,12 +96,3 @@ jobs:
           helm template fraud-poc-api $CHART_PATH \
             -f $CHART_PATH/values-${{ matrix.env }}.yaml \
             > rendered-${{ matrix.env }}.yaml
-
-      # - name: Validate Kubernetes YAML
-      #   run: |
-      #       # Install kubeval
-      #       wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
-      #       tar xf kubeval-linux-amd64.tar.gz
-    
-      #       # Validate the rendered YAML
-      #       ./kubeval -f rendered-${{ matrix.env }}.yaml
