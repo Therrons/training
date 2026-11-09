@@ -10,7 +10,7 @@ ARG APP_PORT=8083
 ############################################################
 # 1. Base runtime image
 ############################################################
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 
 # ARG is scope based and must therefore be re-declared in this stage
 # if not redeclared, build will fail with "APP_PORT not found" error since it's only defined in the build stage
