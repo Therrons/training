@@ -27,7 +27,7 @@ Setup Instructions
    NOTE: .\deploy-https.ps1 only installs the docker image from Docker Hub to Rancher Desktop
          It DOES NOT upload the latest docker image from your PC to Docker Hub.
 
-         Uploading the docker image to docker hub is done when merging the code into the 'develop' or 'K8S' branch in github.
+         Uploading the docker image to docker hub is done when merging the code into the 'develop' branch in github.
          
          So if you have made code changes but not uploaded it to Docker Hub then this script
          will just pull the old code (last updated Docker Image) from Docker Hub
