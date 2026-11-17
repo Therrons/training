@@ -16,6 +16,7 @@ namespace fraud_poc_project.Controllers
 {
     [ValidateXss]
     [ApiController]
+
     [Route("api/fraud")]
     public class FraudController : ControllerBase
     {

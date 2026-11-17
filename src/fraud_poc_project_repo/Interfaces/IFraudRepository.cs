@@ -14,5 +14,9 @@ namespace fraud_poc_project_repo.Interfaces
         Task<IEnumerable<FraudEventRecord>> QueryFlaggedOnlyFraudEventsAsync(FraudQueryDto query);
 
         Task<IEnumerable<FraudRuleSetRecord>> GetRuleResultsForEventAsync(long fraudEventId);
+
+        Task<IEnumerable<Roles>> GetRoleResultsAsync();
+
+        Task<IEnumerable<Logins>> GetUsersResultsAsync();
     }
 }

@@ -42,12 +42,12 @@ namespace fraud_poc_project.Settings
 
             else // secrets are obtained from github secrets and variables
             {
-                DBUsername = Environment.GetEnvironmentVariable("DB_USERNAME");
-                DBPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
-                KAFKAUSER = Environment.GetEnvironmentVariable("KAFKA_USER");
-                KAFKAPASSWORD = Environment.GetEnvironmentVariable("KAFKA_PASSWORD");
-                APIUSERNAME = Environment.GetEnvironmentVariable("API_USERNAME");
-                APIPASSWORD = Environment.GetEnvironmentVariable("API_PASSWORD");
+                DBUsername = Environment.GetEnvironmentVariable("DB_USERNAME")??"";
+                DBPassword = Environment.GetEnvironmentVariable("DB_PASSWORD")??"";
+                KAFKAUSER = Environment.GetEnvironmentVariable("KAFKA_USER")??"";
+                KAFKAPASSWORD = Environment.GetEnvironmentVariable("KAFKA_PASSWORD")??"";
+                APIUSERNAME = Environment.GetEnvironmentVariable("API_USERNAME")??"";
+                APIPASSWORD = Environment.GetEnvironmentVariable("API_PASSWORD")??""    ;
             }
 
             DBHost = Environment.GetEnvironmentVariable("DB_HOST")

@@ -13,6 +13,7 @@ namespace fraud_poc_project.Controllers
 {
     [ApiController]
     [ValidateXss]
+    [Authorize(Roles = "Admin")]
     [Route("api/metrics")]
     public class MetricsController : ControllerBase
     {

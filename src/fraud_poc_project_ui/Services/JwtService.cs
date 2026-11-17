@@ -64,8 +64,9 @@ namespace fraud_poc_project.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, username),
                 new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, "Admin"),
                 new Claim(ClaimTypes.Role, "Analyst"),
-                new Claim(ClaimTypes.Role, "Admin")
+                new Claim(ClaimTypes.Role, "Tester" )
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor

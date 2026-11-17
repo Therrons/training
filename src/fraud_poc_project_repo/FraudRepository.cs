@@ -1,3 +1,4 @@
+using Amazon.RDS.Model;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Exceptions;
@@ -5,6 +6,7 @@ using fraud_poc_project_repo.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using System.Data;
 
 namespace fraud_poc_project_repo
 {
@@ -207,6 +209,73 @@ namespace fraud_poc_project_repo
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to retrieve rule results for fraud event={FraudEventId}", fraudEventId);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Roles>> GetRoleResultsAsync()
+        {
+            try
+            {
+                var results = new List<Roles>();
+
+                await using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync().ConfigureAwait(false);
+
+                await using var cmd = new NpgsqlCommand(
+                    $"SELECT id, roleid, rolename " +
+                    $"FROM \"{_schema}\".role", conn);
+
+                await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                while (await reader.ReadAsync().ConfigureAwait(false))
+                {
+                    var role = new Roles
+                    {
+                        id = reader.GetInt64(reader.GetOrdinal("id")),
+                        RoleName = reader.DBNullString("rolename") ?? string.Empty,
+                        RoleId = reader.GetInt32("roleid")
+                    };
+                    results.Add(role);
+                }
+                return results;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to retrieve roles results");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Logins>> GetUsersResultsAsync()
+        {
+            try
+            {
+                var results = new List<Logins>();
+
+                await using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync().ConfigureAwait(false);
+
+                await using var cmd = new NpgsqlCommand(
+                    $"SELECT id, username, password, roleid " +
+                    $"FROM \"{_schema}\".login", conn);
+
+                await using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                while (await reader.ReadAsync().ConfigureAwait(false))
+                {
+                    var login = new Logins
+                    {
+                        id = reader.GetInt64(reader.GetOrdinal("id")),
+                        UserserName = reader.DBNullString("username") ?? string.Empty,
+                        PassWord = reader.DBNullString("password") ?? string.Empty,
+                        RoleId = reader.GetInt32("roleid")
+                    };
+                    results.Add(login);
+                }
+                return results;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to retrieve Logins");
                 throw;
             }
         }

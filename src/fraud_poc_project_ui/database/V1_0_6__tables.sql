@@ -79,3 +79,52 @@ CREATE INDEX IF NOT EXISTS idx_fraud_rule_result_event_id
 
 CREATE INDEX IF NOT EXISTS idx_fraud_rule_result_rule_code
     ON "${Schema}".fraud_rule_result (rule_code);
+
+
+/**================================**=================================================================**/
+-- Table: role - application roles, referenced by login
+/**================================**=================================================================**/
+CREATE TABLE IF NOT EXISTS "${Schema}".role (
+    id          BIGINT       NOT NULL DEFAULT nextval('"${Schema}".role_id_seq'::regclass),
+    RoleId      INTEGER      NOT NULL,
+    RoleName    VARCHAR(50)  NOT NULL,
+    CONSTRAINT role_pkey PRIMARY KEY (id),
+    CONSTRAINT role_roleid_uq UNIQUE (RoleId),
+    CONSTRAINT role_rolename_uq UNIQUE (RoleName)
+) TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS "${Schema}".role
+    OWNER TO "${db_user}";
+
+INSERT INTO "${Schema}".role (RoleId, RoleName)
+VALUES (1, 'Admin'),
+       (2, 'Analyst'),
+       (3, 'Tester')
+ON CONFLICT DO NOTHING;
+
+
+/**================================**=================================================================**/
+-- Table: login - application user credentials and assigned role
+/**================================**=================================================================**/
+CREATE TABLE IF NOT EXISTS "${Schema}".login (
+    id          BIGINT       NOT NULL DEFAULT nextval('"${Schema}".login_id_seq'::regclass),
+    username    VARCHAR(100) NOT NULL,
+    password    VARCHAR(255) NOT NULL,   -- store a salted hash, never plain text
+    RoleId      INTEGER      NOT NULL,
+    CONSTRAINT login_pkey PRIMARY KEY (id),
+    CONSTRAINT login_username_uq UNIQUE (username),
+    CONSTRAINT fk_login_role
+        FOREIGN KEY (RoleId) REFERENCES "${Schema}".role (RoleId)
+) TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS "${Schema}".login
+    OWNER TO "${db_user}";
+
+CREATE INDEX IF NOT EXISTS idx_login_roleid
+    ON "${Schema}".login (RoleId);
+
+INSERT INTO "${Schema}".login (username, password, RoleId)
+VALUES ('fraud-admin', 'AdminPasswordHash', 1),
+       ('fraud-analyst', 'SecurePass123!', 2),
+       ('fraud-tester', 'TesterPasswordHash', 3)
+ON CONFLICT DO NOTHING;

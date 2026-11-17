@@ -33,3 +33,4 @@ terraform.tfvars
 /Traefik Kakfa Installation/run traefik kafka ui.txt
 /Deployment_Flow.docx
 /.gitignore
+/src/tests/.claude-flow

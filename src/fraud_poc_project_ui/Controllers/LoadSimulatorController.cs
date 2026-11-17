@@ -21,6 +21,7 @@ namespace fraud_poc_project.Controllers
     /// Produces synthetic transaction events to Kafka to simulate load.
     /// </summary>
     [ApiController]
+    [Authorize(Roles = "Admin")]
     [ValidateXss]
     [Route("api/load")]
     public class LoadSimulatorController : ControllerBase
@@ -52,7 +53,7 @@ namespace fraud_poc_project.Controllers
 
         // Produce a batch of synthetic transaction events to the fraud topic.
         [HttpPost("simulate")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Analyst")]
         public async Task<ActionResult<LoadSimulationResult>> Simulate(
             [FromQuery] int count = 50,
             [FromQuery] double highFraudRatio = 0.2,
