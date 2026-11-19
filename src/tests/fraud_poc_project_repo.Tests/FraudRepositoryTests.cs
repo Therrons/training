@@ -1,7 +1,7 @@
 using FluentAssertions;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Tests;
-using fraud_poc_project_repo.Interfaces;
+using fraud_poc_project_buss.Interfaces;
 using Moq;
 using Xunit;
 

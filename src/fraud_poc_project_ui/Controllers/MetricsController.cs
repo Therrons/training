@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using fraud_poc_project_buss.Models;
 
 namespace fraud_poc_project.Controllers
 {
@@ -30,7 +31,7 @@ namespace fraud_poc_project.Controllers
 
 
         [HttpGet("snapshot")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(typeof(MetricsSnapshot), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetMetricsSnapshot()
@@ -51,7 +52,7 @@ namespace fraud_poc_project.Controllers
         }
 
         [HttpGet("summary")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetMetricsSummary()
@@ -72,7 +73,7 @@ namespace fraud_poc_project.Controllers
         }
 
         [HttpGet("transactions")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetTransactionMetrics()
@@ -100,7 +101,7 @@ namespace fraud_poc_project.Controllers
         }
 
         [HttpGet("performance")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetPerformanceMetrics()
@@ -132,7 +133,7 @@ namespace fraud_poc_project.Controllers
         }
 
         [HttpGet("rules")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetRuleMetrics()
@@ -164,7 +165,7 @@ namespace fraud_poc_project.Controllers
         }
 
         [HttpGet("authentication")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetAuthenticationMetrics()
@@ -191,7 +192,7 @@ namespace fraud_poc_project.Controllers
         }
 
         [HttpGet("database")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetDatabaseMetrics()
@@ -222,7 +223,7 @@ namespace fraud_poc_project.Controllers
         }
 
         [HttpGet("kafka")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetKafkaMetrics()
@@ -256,7 +257,7 @@ namespace fraud_poc_project.Controllers
         /// Reset all metrics (testing only).
         /// </summary>
         [HttpPost("reset")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Tester)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult ResetMetrics()

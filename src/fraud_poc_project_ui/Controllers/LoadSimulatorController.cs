@@ -14,6 +14,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using fraud_poc_project_buss.Models;
 
 namespace fraud_poc_project.Controllers
 {
@@ -53,7 +54,8 @@ namespace fraud_poc_project.Controllers
 
         // Produce a batch of synthetic transaction events to the fraud topic.
         [HttpPost("simulate")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Admin)}")]
+        [Authorize(Roles = nameof(AuthenticationRoles.Admin))]
         public async Task<ActionResult<LoadSimulationResult>> Simulate(
             [FromQuery] int count = 50,
             [FromQuery] double highFraudRatio = 0.2,

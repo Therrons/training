@@ -2,7 +2,7 @@ using Amazon.RDS.Model;
 using fraud_poc_project_buss.Dto;
 using fraud_poc_project_buss.Helper;
 using fraud_poc_project_repo.Exceptions;
-using fraud_poc_project_repo.Interfaces;
+using fraud_poc_project_buss.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;

@@ -7,7 +7,6 @@ using fraud_poc_project_buss.Interfaces;
 using fraud_poc_project_buss.Models.Kafka;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_repo.Exceptions;
-using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -347,7 +346,7 @@ namespace fraud_poc_project.Kafka.Consumer
                 if (linkedToken.IsCancellationRequested) { return; }
 
                 var evaluationStopwatch = Stopwatch.StartNew();
-                var result = _evaluationService.Evaluate(consumeResult.transactionEvent);
+                var result = await _evaluationService.EvaluateAsync(consumeResult.transactionEvent).ConfigureAwait(false);
                 evaluationStopwatch.Stop();
 
                 if (result != null)

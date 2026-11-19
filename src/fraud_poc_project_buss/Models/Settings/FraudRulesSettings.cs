@@ -32,6 +32,16 @@ namespace fraud_poc_project_buss.Models.Settings
         public HighRiskMerchantCategoryRuleSettings HighRiskMerchantCategory { get; set; } = new();
 
 
+        // Settings for the VelocityRule - flags customers with too many transactions in a short window
+        [Required]
+        public VelocityRuleSettings VelocityRule { get; set; } = new();
+
+
+        // Settings for the AmountDeviationRule - flags amounts far above the customer's own average
+        [Required]
+        public AmountDeviationRuleSettings AmountDeviationRule { get; set; } = new();
+
+
         // Overall fraud scoring threshold - transactions with score >= this are flagged
         [Range(0, 100)]
         public decimal FlagThreshold { get; set; } = 40m;
@@ -118,6 +128,59 @@ namespace fraud_poc_project_buss.Models.Settings
         // Score contribution when rule is triggered
         [Range(0, 100)]
         public decimal ScoreContribution { get; set; } = 10m;
+
+
+        // Whether this rule is enabled
+        public bool Enabled { get; set; } = true;
+    }
+
+
+    // Velocity Rule Configuration
+    public class VelocityRuleSettings
+    {
+
+        // Flagged when the customer makes more than this many transactions inside the window
+        [Range(1, 1000)]
+        public int MaxTransactions { get; set; } = 5;
+
+
+        // Length of the velocity window in minutes
+        [Range(1, 10080)]
+        public int WindowMinutes { get; set; } = 10;
+
+
+        // Score contribution when rule is triggered
+        [Range(0, 100)]
+        public decimal ScoreContribution { get; set; } = 30m;
+
+
+        // Whether this rule is enabled
+        public bool Enabled { get; set; } = true;
+    }
+
+
+    // Amount Deviation Rule Configuration
+    public class AmountDeviationRuleSettings
+    {
+
+        // Flagged when the amount is more than this multiple of the customer's average
+        [Range(1, 1000)]
+        public decimal Multiplier { get; set; } = 5m;
+
+
+        // How many days of history form the customer's baseline
+        [Range(1, 365)]
+        public int LookbackDays { get; set; } = 30;
+
+
+        // Minimum number of earlier transactions before the baseline is trusted
+        [Range(1, 10000)]
+        public int MinimumBaselineCount { get; set; } = 10;
+
+
+        // Score contribution when rule is triggered
+        [Range(0, 100)]
+        public decimal ScoreContribution { get; set; } = 30m;
 
 
         // Whether this rule is enabled

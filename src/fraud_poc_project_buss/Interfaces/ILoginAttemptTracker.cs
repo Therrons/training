@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace fraud_poc_project.Interfaces
+namespace fraud_poc_project_buss.Interfaces
 {
     public interface ILoginAttemptTracker
     {

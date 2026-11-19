@@ -15,6 +15,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Interfaces\IJwtService.cs" />
+      <Compile Remove="Interfaces\ILoginAttemptTracker.cs" />
       <Compile Remove="Services\KubernetesPodDiscoveryService.cs" />
       <Compile Remove="Services\MetricsAggregatorService.cs" />
       <Compile Remove="Services\PodIdentityService.cs" />

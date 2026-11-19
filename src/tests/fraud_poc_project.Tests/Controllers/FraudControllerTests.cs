@@ -1,9 +1,9 @@
 using FluentAssertions;
 using fraud_poc_project.Controllers;
-using fraud_poc_project.Interfaces;
 using fraud_poc_project_buss.Dto;
+using fraud_poc_project_buss.Interfaces;
 using fraud_poc_project_buss.Tests;
-using fraud_poc_project_repo.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -13,32 +13,29 @@ namespace fraud_poc_project.Tests.Controllers
 {
     /// <summary>
     /// Tests for FraudController - API endpoint tests.
-    /// Verifies controller logic, response handling, and integration with repository.
+    /// The controller only translates service results into HTTP responses, so these tests mock the services.
     /// </summary>
     public class FraudControllerTests
     {
-        private readonly Mock<IFraudRepository> _mockRepository;
-        private readonly Mock<IJwtService> _mockJwtService;
-        private readonly Mock<IMetricsService> _mockMetricsService;
+        private readonly Mock<IFraudQueryService> _mockQueryService;
+        private readonly Mock<ILoginService> _mockLoginService;
         private readonly Mock<ILogger<FraudController>> _mockLogger;
-        private readonly Mock<ILoginAttemptTracker> _mockLoginTracker;
         private readonly FraudController _controller;
 
         public FraudControllerTests()
         {
-            _mockRepository = new Mock<IFraudRepository>();
-            _mockJwtService = new Mock<IJwtService>();
-            _mockMetricsService = new Mock<IMetricsService>();
+            _mockQueryService = new Mock<IFraudQueryService>();
+            _mockLoginService = new Mock<ILoginService>();
             _mockLogger = new Mock<ILogger<FraudController>>();
-            _mockLoginTracker = new Mock<ILoginAttemptTracker>();
-
 
             _controller = new FraudController(
-                _mockRepository.Object,
-                _mockJwtService.Object,
-                _mockMetricsService.Object,
-                _mockLogger.Object,
-                _mockLoginTracker.Object);
+                _mockLoginService.Object,
+                _mockQueryService.Object,
+                _mockLogger.Object)
+            {
+                // Gives the controller a Response object so headers can be set in tests
+                ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+            };
         }
 
         [Fact]
@@ -66,8 +63,8 @@ namespace fraud_poc_project.Tests.Controllers
                     .Build()
             };
 
-            _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query, false))
+            _mockQueryService
+                .Setup(s => s.QueryEventsAsync(query))
                 .ReturnsAsync(expectedRecords);
 
             // Act
@@ -77,7 +74,7 @@ namespace fraud_poc_project.Tests.Controllers
             result.Result.Should().BeOfType<OkObjectResult>();
             var okResult = result.Result as OkObjectResult;
             okResult?.Value.Should().Be(expectedRecords);
-            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query, false), Times.Once);
+            _mockQueryService.Verify(s => s.QueryEventsAsync(query), Times.Once);
         }
 
         [Fact]
@@ -91,11 +88,9 @@ namespace fraud_poc_project.Tests.Controllers
                 CustomerId = "NON-EXISTENT"
             };
 
-            var emptyRecords = new List<FraudEventRecord>();
-
-            _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query, false))
-                .ReturnsAsync(emptyRecords);
+            _mockQueryService
+                .Setup(s => s.QueryEventsAsync(query))
+                .ReturnsAsync(new List<FraudEventRecord>());
 
             // Act
             var result = await _controller.QueryEvents(query);
@@ -108,7 +103,7 @@ namespace fraud_poc_project.Tests.Controllers
         }
 
         [Fact]
-        public async Task QueryEvents_CallsRepositoryWithProvidedQuery()
+        public async Task QueryEvents_CallsServiceWithProvidedQuery()
         {
             // Arrange
             var query = new FraudQueryDto
@@ -118,15 +113,15 @@ namespace fraud_poc_project.Tests.Controllers
                 IsFlaggedOnly = true
             };
 
-            _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query, false))
+            _mockQueryService
+                .Setup(s => s.QueryEventsAsync(query))
                 .ReturnsAsync(new List<FraudEventRecord>());
 
             // Act
             await _controller.QueryEvents(query);
 
             // Assert
-            _mockRepository.Verify(r => r.QueryFraudEventsAsync(query, false), Times.Once);
+            _mockQueryService.Verify(s => s.QueryEventsAsync(query), Times.Once);
         }
 
         [Fact]
@@ -155,8 +150,8 @@ namespace fraud_poc_project.Tests.Controllers
                 }
             };
 
-            _mockRepository
-                .Setup(r => r.GetRuleResultsForEventAsync(fraudEventId))
+            _mockQueryService
+                .Setup(s => s.GetRuleResultsAsync(fraudEventId))
                 .ReturnsAsync(expectedRuleResults);
 
             // Act
@@ -166,83 +161,24 @@ namespace fraud_poc_project.Tests.Controllers
             result.Result.Should().BeOfType<OkObjectResult>();
             var okResult = result.Result as OkObjectResult;
             okResult?.Value.Should().BeEquivalentTo(expectedRuleResults);
-            _mockRepository.Verify(r => r.GetRuleResultsForEventAsync(fraudEventId), Times.Once);
+            _mockQueryService.Verify(s => s.GetRuleResultsAsync(fraudEventId), Times.Once);
         }
 
         [Fact]
-        public async Task GetRuleResults_WithNoRuleResults_ReturnsNotFound()
+        public async Task GetRuleResults_WhenServiceReturnsNull_ReturnsNotFound()
         {
-            // Arrange: no rule results means the fraud event does not exist
+            // Arrange: the service returns null when the fraud event does not exist
             const long fraudEventId = 999;
-            var emptyResults = new List<FraudRuleSetRecord>();
 
-            _mockRepository
-                .Setup(r => r.GetRuleResultsForEventAsync(fraudEventId))
-                .ReturnsAsync(emptyResults);
+            _mockQueryService
+                .Setup(s => s.GetRuleResultsAsync(fraudEventId))
+                .ReturnsAsync((IReadOnlyList<FraudRuleSetRecord>?)null);
 
             // Act
             var result = await _controller.GetRuleResults(fraudEventId);
 
             // Assert
             result.Result.Should().BeOfType<NotFoundObjectResult>();
-        }
-
-        [Fact]
-        public async Task GetRuleResults_CallsRepositoryWithProvidedEventId()
-        {
-            // Arrange
-            const long fraudEventId = 456;
-
-            _mockRepository
-                .Setup(r => r.GetRuleResultsForEventAsync(fraudEventId))
-                .ReturnsAsync(new List<FraudRuleSetRecord>());
-
-            // Act
-            await _controller.GetRuleResults(fraudEventId);
-
-            // Assert
-            _mockRepository.Verify(r => r.GetRuleResultsForEventAsync(fraudEventId), Times.Once);
-        }
-
-        [Fact]
-        public async Task QueryEvents_WithMultipleFilters_ReturnsFilteredResults()
-        {
-            // Arrange
-            var query = new FraudQueryDto
-            {
-                DateFrom = "2024-01-01 00:00:00",
-                DateTo = "2024-01-31 23:59:59",
-                CustomerId = "CUST-001",
-                TransactionType = "CNP",
-                MinFraudScore = 40m,
-                IsFlaggedOnly = true
-            };
-
-            var filteredRecords = new List<FraudEventRecord>
-            {
-                new FraudEventRecordBuilder()
-                    .WithEvent(new TransactionEventBuilder()
-                        .WithCustomerId("CUST-001")
-                        .WithTransactionType("CNP")
-                        .Build())
-                    .WithIsFlagged(true)
-                    .WithFraudScore(50m)
-                    .Build()
-            };
-
-            _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query, false))
-                .ReturnsAsync(filteredRecords);
-
-            // Act
-            var result = await _controller.QueryEvents(query);
-
-            // Assert
-            result.Result.Should().BeOfType<OkObjectResult>();
-            var okResult = result.Result as OkObjectResult;
-            var returnedList = okResult?.Value as IEnumerable<FraudEventRecord>;
-            returnedList.Should().HaveCount(1);
-            returnedList?.First().IsFlagged.Should().BeTrue();
         }
 
         [Fact]
@@ -253,31 +189,13 @@ namespace fraud_poc_project.Tests.Controllers
 
             var ruleResults = new List<FraudRuleSetRecord>
             {
-                new FraudRuleSetRecord
-                {
-                    FraudEventId = fraudEventId,
-                    RuleCode = "HIGH_AMOUNT",
-                    IsTriggered = true,
-                    ScoreContribution = 40m
-                },
-                new FraudRuleSetRecord
-                {
-                    FraudEventId = fraudEventId,
-                    RuleCode = "ATM_WITHDRAWAL_LIMIT",
-                    IsTriggered = false,
-                    ScoreContribution = 0m
-                },
-                new FraudRuleSetRecord
-                {
-                    FraudEventId = fraudEventId,
-                    RuleCode = "FOREIGN_CNP",
-                    IsTriggered = true,
-                    ScoreContribution = 35m
-                }
+                new FraudRuleSetRecord { FraudEventId = fraudEventId, RuleCode = "HIGH_AMOUNT", IsTriggered = true, ScoreContribution = 40m },
+                new FraudRuleSetRecord { FraudEventId = fraudEventId, RuleCode = "ATM_WITHDRAWAL_LIMIT", IsTriggered = false, ScoreContribution = 0m },
+                new FraudRuleSetRecord { FraudEventId = fraudEventId, RuleCode = "FOREIGN_CNP", IsTriggered = true, ScoreContribution = 35m }
             };
 
-            _mockRepository
-                .Setup(r => r.GetRuleResultsForEventAsync(fraudEventId))
+            _mockQueryService
+                .Setup(s => s.GetRuleResultsAsync(fraudEventId))
                 .ReturnsAsync(ruleResults);
 
             // Act
@@ -316,8 +234,8 @@ namespace fraud_poc_project.Tests.Controllers
                     .Build()
             };
 
-            _mockRepository
-                .Setup(r => r.QueryFraudEventsAsync(query, false))
+            _mockQueryService
+                .Setup(s => s.QueryEventsAsync(query))
                 .ReturnsAsync(records);
 
             // Act
@@ -330,6 +248,66 @@ namespace fraud_poc_project.Tests.Controllers
             firstRecord?.Event.CustomerId.Should().Be(customerId);
             firstRecord?.Event.AccountId.Should().Be(accountId);
             firstRecord?.Event.Amount.Should().Be(amount);
+        }
+
+        [Fact]
+        public void Login_WhenServiceReportsMissingCredentials_ReturnsBadRequest()
+        {
+            _mockLoginService
+                .Setup(s => s.Login(null, null))
+                .Returns(new LoginResult { Outcome = LoginOutcome.MissingCredentials });
+
+            var result = _controller.Login(new LoginRequest());
+
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public void Login_WhenInvalidCredentials_ReturnsUnauthorized()
+        {
+            _mockLoginService
+                .Setup(s => s.Login("user", "wrong"))
+                .Returns(new LoginResult { Outcome = LoginOutcome.InvalidCredentials });
+
+            var result = _controller.Login(new LoginRequest { Username = "user", Password = "wrong" });
+
+            result.Should().BeOfType<UnauthorizedObjectResult>();
+        }
+
+        [Fact]
+        public void Login_WhenLockedOut_ReturnsTooManyRequestsWithRetryAfter()
+        {
+            _mockLoginService
+                .Setup(s => s.Login("user", "pw"))
+                .Returns(new LoginResult { Outcome = LoginOutcome.LockedOut, RetryAfterSeconds = 120 });
+
+            var result = _controller.Login(new LoginRequest { Username = "user", Password = "pw" });
+
+            var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+            objectResult.StatusCode.Should().Be(429);
+            _controller.Response.Headers["Retry-After"].ToString().Should().Be("120");
+        }
+
+        [Fact]
+        public void Login_WhenSucceeded_ReturnsOkWithToken()
+        {
+            var validFrom = new DateTime(2026, 11, 18, 10, 0, 0, DateTimeKind.Local);
+            _mockLoginService
+                .Setup(s => s.Login("user", "pw"))
+                .Returns(new LoginResult
+                {
+                    Outcome = LoginOutcome.Succeeded,
+                    Token = "token-value",
+                    ValidFrom = validFrom,
+                    ValidTo = validFrom.AddMinutes(60),
+                    ExpirationMinutes = 60
+                });
+
+            var result = _controller.Login(new LoginRequest { Username = "user", Password = "pw" });
+
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            okResult.Value.Should().NotBeNull();
+            okResult.Value!.ToString().Should().Contain("token-value");
         }
     }
 }

@@ -1,5 +1,6 @@
 
 using fraud_poc_project.Interfaces;
+using fraud_poc_project_buss.Interfaces;
 using fraud_poc_project_buss.Helper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -15,6 +17,7 @@ namespace fraud_poc_project.Services
     public class JwtService : IJwtService
     {
         private readonly IAuthenticationService _authService;
+        private readonly ReferenceDataCache _referenceData;
         private readonly IConfiguration _configuration;
         private readonly ILogger<JwtService> _logger;
         private readonly string _secret;
@@ -27,10 +30,12 @@ namespace fraud_poc_project.Services
         public JwtService(
             IConfiguration configuration,
             IAuthenticationService authService,
+            ReferenceDataCache referenceData,
             ILogger<JwtService> logger)
         {
             _configuration = configuration;
             _authService = authService;
+            _referenceData = referenceData;
             _logger = logger;
 
             var jwtSettings = _configuration.GetSection("JwtSettings");
@@ -50,24 +55,39 @@ namespace fraud_poc_project.Services
                 return null;
             }
 
-            var token = GenerateToken(username);
+            var token = GenerateToken(username, ResolveRoles(username));
             _logger.LogInformationOnly("JWT token generated successfully for username: {Username}", username);
             return token;
         }
 
-        private (string token, DateTime validFrom, DateTime validTo) GenerateToken(string username)
+        // Database logins get the role linked to them in the database.
+        // Configured credentials (used when the database logins are unavailable) get the Analyst role.
+        private IEnumerable<string> ResolveRoles(string username)
+        {
+            if (!_referenceData.LoginsLoadedFromDatabase)
+            {
+                return new[] { "Analyst" };
+            }
+
+            var roles = _referenceData.GetRoleNamesForUsername(username);
+            if (roles.Count == 0)
+            {
+                _logger.LogWarning("No role found in the database for username {Username}", username);
+            }
+            return roles;
+        }
+
+        private (string token, DateTime validFrom, DateTime validTo) GenerateToken(string username, IEnumerable<string> roles)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_secret);
+            var key = Encoding.UTF8.GetBytes(_secret);
 
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, username),
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, "Admin"),
-                new Claim(ClaimTypes.Role, "Analyst"),
-                new Claim(ClaimTypes.Role, "Tester" )
+                new Claim(ClaimTypes.Name, username)
             };
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

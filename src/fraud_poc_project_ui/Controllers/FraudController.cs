@@ -1,15 +1,13 @@
 using fraud_poc_project.CustomAttributes;
 using fraud_poc_project.Exceptions;
-using fraud_poc_project.Interfaces;
 using fraud_poc_project_buss.Dto;
-using fraud_poc_project_buss.Helper;
-using fraud_poc_project_repo.Interfaces;
+using fraud_poc_project_buss.Interfaces;
+using fraud_poc_project_buss.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace fraud_poc_project.Controllers
@@ -20,24 +18,18 @@ namespace fraud_poc_project.Controllers
     [Route("api/fraud")]
     public class FraudController : ControllerBase
     {
-        private readonly IFraudRepository _repository;
-        private readonly IJwtService _jwtService;
-        private readonly IMetricsService _metricsService;
+        private readonly ILoginService _loginService;
+        private readonly IFraudQueryService _queryService;
         private readonly ILogger<FraudController> _logger;
-        private readonly ILoginAttemptTracker _loginTracker;
 
         public FraudController(
-            IFraudRepository repository,
-            IJwtService jwtService,
-            IMetricsService metricsService,
-            ILogger<FraudController> logger,
-            ILoginAttemptTracker loginTracker)
+            ILoginService loginService,
+            IFraudQueryService queryService,
+            ILogger<FraudController> logger)
         {
-            _repository = repository;
-            _jwtService = jwtService;
-            _metricsService = metricsService;
+            _loginService = loginService;
+            _queryService = queryService;
             _logger = logger;
-            _loginTracker = loginTracker;
         }
 
         [HttpPost("login")]
@@ -46,51 +38,34 @@ namespace fraud_poc_project.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(request?.Username) || string.IsNullOrWhiteSpace(request?.Password))
+                var result = _loginService.Login(request?.Username, request?.Password);
+
+                switch (result.Outcome)
                 {
-                    _logger.LogWarning("Login attempt with missing credentials");
-                    _metricsService.RecordAuthenticationAttempt(false);
-                    return BadRequest(new { error = "Username and password required" });
+                    case LoginOutcome.MissingCredentials:
+                        return BadRequest(new { error = "Username and password required" });
+
+                    case LoginOutcome.LockedOut:
+                        Response.Headers["Retry-After"] = result.RetryAfterSeconds.ToString();
+                        return StatusCode(429, new { error = $"Account temporarily locked due to repeated failed logins. Try again after {result.RetryAfterSeconds / 60} minute/s." });
+
+                    case LoginOutcome.InvalidCredentials:
+                        return Unauthorized(new { error = "Invalid credentials" });
+
+                    default:
+                        return Ok(new
+                        {
+                            token = result.Token,
+                            validFrom = result.ValidFrom.ToUniversalTime(),
+                            validTo = result.ValidTo.ToUniversalTime(),
+                            expiresIn = string.Concat(result.ExpirationMinutes, " minutes"),
+                            tokenType = "Bearer"
+                        });
                 }
-
-                if (_loginTracker.IsLockedOut(request.Username, out var lockedUntil))
-                {
-                    var retryAfterSeconds = Math.Max(1, (int)Math.Ceiling((lockedUntil - DateTimeOffset.UtcNow).TotalSeconds));
-
-                    retryAfterSeconds = retryAfterSeconds > 60 ? retryAfterSeconds : 60; // Ensure a minimum of 60 seconds  
-
-                    Response.Headers["Retry-After"] = retryAfterSeconds.ToString();
-                    _logger.LogWarning("Login blocked, account temporarily locked for username: {Username}", request.Username);
-                    _metricsService.RecordAuthenticationAttempt(false);
-                    return StatusCode(429, new { error = $"Account temporarily locked due to repeated failed logins. Try again after {retryAfterSeconds / 60} minute/s." });
-                }
-
-                var token = _jwtService.GenerateToken(request.Username, request.Password);
-
-                if (token == null)
-                {
-                    _loginTracker.RecordFailure(request.Username);
-                    _logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
-                    _metricsService.RecordAuthenticationAttempt(false);
-                    return Unauthorized(new { error = "Invalid credentials" });
-                }
-
-                _loginTracker.RecordSuccess(request.Username);
-                _logger.LogInformationOnly("Successful login for username: {Username}", request.Username);
-                _metricsService.RecordAuthenticationAttempt(true);
-                return Ok(new
-                {
-                    token.Value.token,
-                    validFrom = token.Value.validFrom.ToShortTimeString(),
-                    validTo = token.Value.validTo.ToShortTimeString(),
-                    expiresIn = string.Concat(_jwtService.ExpirationMinutes, " minutes"),
-                    tokenType = "Bearer"
-                });
             }
             catch (AuthenticationException ex)
             {
                 _logger.LogError(ex, "Authentication error for username: {Username}", request?.Username);
-                _metricsService.RecordAuthenticationAttempt(false);
                 return Unauthorized(new { error = "Authentication failed", detail = ex.Message });
             }
             catch (Exception ex)
@@ -101,20 +76,19 @@ namespace fraud_poc_project.Controllers
         }
 
         [HttpGet("events")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Admin)}")]
         public async Task<ActionResult<IEnumerable<FraudEventRecord>>> QueryEvents([FromQuery] FraudQueryDto query)
         {
-            var records = await _repository.QueryFraudEventsAsync(query, false).ConfigureAwait(false);
+            var records = await _queryService.QueryEventsAsync(query).ConfigureAwait(false);
             return Ok(records);
         }
 
         [HttpGet("events/{fraudEventId:long}/rules")]
-        [Authorize(Roles = "Analyst")]
+        [Authorize(Roles = $"{nameof(AuthenticationRoles.Analyst)},{nameof(AuthenticationRoles.Admin)}")]
         public async Task<ActionResult<IEnumerable<FraudRuleSetRecord>>> GetRuleResults(long fraudEventId)
         {
-            // Every stored fraud event has one result per rule, so an empty list means the event does not exist.
-            var records = (await _repository.GetRuleResultsForEventAsync(fraudEventId).ConfigureAwait(false)).ToList();
-            if (records.Count == 0)
+            var records = await _queryService.GetRuleResultsAsync(fraudEventId).ConfigureAwait(false);
+            if (records == null)
                 return NotFound(new { error = $"No fraud event found with id {fraudEventId}." });
 
             return Ok(records);

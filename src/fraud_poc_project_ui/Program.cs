@@ -85,6 +85,14 @@ public class Program
         builder.ConfigureSwagger();
         var app = builder.Build();
 
+        // Load roles and logins from the database; if this fails the configured credentials are used
+        using (var scope = app.Services.CreateScope())
+        {
+            var repository = scope.ServiceProvider.GetRequiredService<fraud_poc_project_buss.Interfaces.IFraudRepository>();
+            var referenceData = app.Services.GetRequiredService<fraud_poc_project.Services.ReferenceDataCache>();
+            await referenceData.LoadAsync(repository).ConfigureAwait(false);
+        }
+
         app.UseForwardedHeaders();
         app.UseRouting();
         app.UseCors();

@@ -10,7 +10,6 @@ using fraud_poc_project_buss.Models.Database;
 using fraud_poc_project_buss.Models.Settings;
 using fraud_poc_project_buss.Service;
 using fraud_poc_project_repo;
-using fraud_poc_project_repo.Interfaces;
 using fraud_poc_project_repo.Kafka;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -99,6 +98,13 @@ namespace fraud_poc_project.Configuration
         private static void RegisterDatabaseAccess(WebApplicationBuilder builder, string connectionString)
         {
             builder.Services.AddScoped<IFraudRepository, FraudRepository>();
+
+            // Customer history is read in a singleton evaluation service, so it is registered as a singleton
+            var historySchema = builder.Configuration["Database:DBSchema"] ?? "fr";
+            builder.Services.AddSingleton<ICustomerHistoryProvider>(sp =>
+                new CustomerHistoryProvider(connectionString, historySchema,
+                    sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CustomerHistoryProvider>>()));
+            builder.Services.AddSingleton<ReferenceDataCache>();
             builder.Services.AddScoped<IConfiguration>(p => builder.Configuration);
         }
 
@@ -123,6 +129,11 @@ namespace fraud_poc_project.Configuration
                 .AddSingleton<IFraudRule, HighRiskMerchantCategoryRule>()
                 .AddSingleton<IFraudRule, RoundAmountRule>();
 
+            // Rules that also look at the customer's history
+            builder.Services
+                .AddSingleton<IHistoricalFraudRule, VelocityRule>()
+                .AddSingleton<IHistoricalFraudRule, AmountDeviationRule>();
+
             // Register the fraud evaluation service
             builder.Services
                 .AddSingleton<IFraudEvaluationService, FraudEvaluationService>();
@@ -144,6 +155,11 @@ namespace fraud_poc_project.Configuration
 
             builder.Services.Configure<LoginSecuritySettings>(builder.Configuration.GetSection("LoginSecuritySettings"));
             builder.Services.AddSingleton<ILoginAttemptTracker, LoginAttemptTracker>();
+
+            // Login and query logic live in the buss project; the controller only translates results to HTTP
+            builder.Services.AddScoped<ILoginService, LoginService>();
+            builder.Services.AddScoped<IFraudQueryService, FraudQueryService>();
+            builder.Services.AddSingleton<IAuthenticationMetrics>(sp => sp.GetRequiredService<IMetricsService>());
         }
 
         private static void RegisterJwt(WebApplicationBuilder builder)
@@ -151,8 +167,15 @@ namespace fraud_poc_project.Configuration
             builder.Services.AddScoped<IJwtService, JwtService>();
 
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-            var secret = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
-            var key = System.Text.Encoding.ASCII.GetBytes(secret);
+            // The secret is never stored in appsettings. It comes from JwtSettings__Secret (environment variable)
+            // or, locally, from secrets.json. HS256 needs a key of at least 256 bits (32 bytes).
+            var secret = jwtSettings["Secret"];
+            if (string.IsNullOrWhiteSpace(secret))
+                throw new InvalidOperationException("JWT secret is not configured. Set JwtSettings__Secret (environment variable) or JwtSettings:Secret in secrets.json.");
+
+            var key = System.Text.Encoding.UTF8.GetBytes(secret);
+            if (key.Length < 32)
+                throw new InvalidOperationException("JWT secret must be at least 32 bytes long.");
 
             builder.Services.AddAuthentication(options =>
             {

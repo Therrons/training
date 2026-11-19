@@ -124,7 +124,7 @@ CREATE INDEX IF NOT EXISTS idx_login_roleid
     ON "${Schema}".login (RoleId);
 
 INSERT INTO "${Schema}".login (username, password, RoleId)
-VALUES ('fraud-admin', 'AdminPasswordHash', 1),
-       ('fraud-analyst', 'SecurePass123!', 2),
-       ('fraud-tester', 'TesterPasswordHash', 3)
+VALUES ('fraud-admin', 'PBKDF2-SHA256$310000$qfRQOdFN5EPU1gonIfWsNg==$eBWsnggQTcSzTFFSCzGMHWtKSn+Au3yYnPT8SWOQQKI=', 1),
+       ('fraud-analyst', 'PBKDF2-SHA256$310000$pmhQKTTnLPO9/DvGVO6ujw==$u1xKLn4jtSCRb2iuxTmRqNSr+5NS9vobZ2tdmiBhpCI=', 2),
+       ('fraud-tester', 'PBKDF2-SHA256$310000$sNaQu++5HKGBcGtKHbbD5w==$zE9OdjvsYEDqh7yl6atpkMIr2sb9zthUFUDq16zDhwE=', 3)
 ON CONFLICT DO NOTHING;
